@@ -7,11 +7,13 @@ import { useMsal } from "@azure/msal-react";
 import { InteractionRequiredAuthError } from "@azure/msal-browser";
 import { LoginSocialFacebook } from "reactjs-social-login";
 import Input from "../components/ui/Input";
+import Checkbox from "../components/ui/Checkbox";
+import Button from "../components/ui/Button";
 import PasswordInput from "../components/ui/PasswordInput";
 import SignUpBanner from "../components/auth/SignUpBanner";
 import SocialAuthButtons from "../components/auth/SocialAuthButtons";
 
-export default function SignUp() {
+export default function Welcome() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [emailError, setEmailError] = useState(false);
@@ -21,6 +23,23 @@ export default function SignUp() {
   const { instance } = useMsal();
   const [provider, setProvider] = useState("");
   const [profile, setProfile] = useState();
+
+  const isValidEmail = (value) => {
+    const pattern =/^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/;
+    return pattern.test(value);
+  };
+
+  const handleSignIn = () => {
+    const validEmail = email.trim() !== "" && isValidEmail(email);
+    const validPassword = password.trim() !== "";
+
+    setEmailError(!validEmail);
+    setPasswordError(!validPassword);
+
+    if (validEmail && validPassword) {
+      console.log("Sign In Successful!");
+    }
+  };
 
   const onLoginStart = useCallback(() => {
     // Optional: Do something before Facebook login starts
@@ -108,46 +127,55 @@ export default function SignUp() {
     <div className="flex max-lg:gap-10 gap-36 justify-end max-sm:block h-screen w-full bg-white">
       <div className="flex items-center justify-center max-sm:block">
         <div className="lg:min-w-[620px] sm:w-full max-sm:w-full p-8">
-          <h2 className="text-3xl font-bold text-[#0D0C22] max-lg:mt-10 max-sm:mt-[102px] mb-3">
-            Get Started
-          </h2>
-          <p className="text-[#475467] font-medium">
-            Welcome to Lyncit AI - Let’s create your account
-          </p>
-          <div className="mt-8">
-            <div className="mb-5">
-              <label className="text-sm font-medium text-[#0D0C22]">
-                Company Email
-              </label>
-              <Input
-                type="email"
-                placeholder="Email ..."
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className={emailError ? "border-red-500" : ""}
-              />
-            </div>
-            <div className="mb-8">
-              <label className="text-sm font-medium text-[#0D0C22]">
-                Password
-              </label>
-              <PasswordInput
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="..."
-                className={passwordError ? "border-red-500" : ""}
-              />
-            </div>
-          </div>
-          <p className="mt-8 text-[#637083] max-sm:text-center mb-8">
-            Already have an account?
-            <a
-              href="/login"
-              className="text-[#825C9A] ml-1 underline underline-offset-2"
+        <h2 className="text-3xl font-bold text-[#0D0C22] max-lg:mt-10 max-sm:mt-[102px]">Welcome back</h2>
+      <p className="text-[#475467] font-medium">
+        Welcome back! to <span className="text-[#825C9A]">Lyncit AI</span>
+      </p>
+      <div className="mt-8">
+        <div className="mb-5">
+          <label className="text-sm font-medium text-[#0D0C22]">Email</label>
+          <Input
+            type="email"
+            placeholder="Email ..."
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className={emailError ? "border-red-500" : ""}
+          />
+        </div>
+        <div className="mb-8">
+          <label className="text-sm font-medium text-[#0D0C22]">Password</label>
+          <PasswordInput
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="..."
+            className={passwordError ? "border-red-500" : ""}
+          />
+        </div>
+        <div className="flex items-center justify-between text-sm max-lg:text-xs">
+          <div className="flex items-center space-x-2">
+            <Checkbox id="remember" />
+            <label
+              htmlFor="remember"
+              className="text-[#637083] font-semibold"
             >
-              Login
-            </a>
-          </p>
+              Remember for 30 days
+            </label>
+          </div>
+          <a
+            href="/forget"
+            className="text-[#825C9A] font-semibold underline underline-offset-2"
+          >
+            Forgot Password?
+          </a>
+        </div>
+        <Button
+          onClick={handleSignIn}
+          className="w-full bg-[#825C9A] text-white rounded-[8px] hover:bg-purple-700 mt-8"
+        >
+          Sign In
+        </Button>
+      </div>
+      <div className="my-3 text-center text-xs text-[#637083]">or</div>
           <SocialAuthButtons
             googleLogin={googleLogin}
             loading={loading}
@@ -158,6 +186,15 @@ export default function SignUp() {
             setProfile={setProfile}
             LoginSocialFacebook={LoginSocialFacebook}
           />
+          <p className="mt-8 text-[#637083] max-sm:text-center">
+            Don’t have an account?
+            <a
+              href="/sign-up"
+              className="text-[#825C9A] ml-1 underline underline-offset-2"
+            >
+              Signup
+            </a>
+          </p>
         </div>
       </div>
       <SignUpBanner Nurse={Nurse} />

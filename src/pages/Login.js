@@ -8,10 +8,11 @@ import { InteractionRequiredAuthError } from "@azure/msal-browser";
 import { LoginSocialFacebook } from "reactjs-social-login";
 import Input from "../components/ui/Input";
 import PasswordInput from "../components/ui/PasswordInput";
+import Checkbox from "../components/ui/Checkbox";
 import SignUpBanner from "../components/auth/SignUpBanner";
 import SocialAuthButtons from "../components/auth/SocialAuthButtons";
 
-export default function SignUp() {
+export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [emailError, setEmailError] = useState(false);
@@ -108,16 +109,23 @@ export default function SignUp() {
     <div className="flex max-lg:gap-10 gap-36 justify-end max-sm:block h-screen w-full bg-white">
       <div className="flex items-center justify-center max-sm:block">
         <div className="lg:min-w-[620px] sm:w-full max-sm:w-full p-8">
-          <h2 className="text-3xl font-bold text-[#0D0C22] max-lg:mt-10 max-sm:mt-[102px] mb-3">
-            Get Started
+          <h2 className="text-3xl font-bold text-[#0D0C22] max-lg:mt-10 max-sm:mt-[102px] mb-8">
+            Sign in to Lyncit AI
           </h2>
-          <p className="text-[#475467] font-medium">
-            Welcome to Lyncit AI - Let’s create your account
-          </p>
+          <SocialAuthButtons
+            googleLogin={googleLogin}
+            loading={loading}
+            handleMicrosoftLogin={handleMicrosoftLogin}
+            onLoginStart={onLoginStart}
+            onLogoutSuccess={onLogoutSuccess}
+            setProvider={setProvider}
+            setProfile={setProfile}
+            LoginSocialFacebook={LoginSocialFacebook}
+          />
           <div className="mt-8">
             <div className="mb-5">
               <label className="text-sm font-medium text-[#0D0C22]">
-                Company Email
+                Email
               </label>
               <Input
                 type="email"
@@ -138,26 +146,33 @@ export default function SignUp() {
                 className={passwordError ? "border-red-500" : ""}
               />
             </div>
+            <div className="flex items-center justify-between text-sm max-lg:text-xs">
+              <div className="flex items-center space-x-2">
+                <Checkbox id="remember" />
+                <label
+                  htmlFor="remember"
+                  className="text-[#637083] font-semibold"
+                >
+                  Remember for 30 days
+                </label>
+              </div>
+              <a
+                href="/forget"
+                className="text-[#825C9A] font-semibold underline underline-offset-2"
+              >
+                Forgot Password?
+              </a>
+            </div>
           </div>
-          <p className="mt-8 text-[#637083] max-sm:text-center mb-8">
-            Already have an account?
+          <p className="mt-8 text-[#637083] max-sm:text-center">
+            Don’t have an account?
             <a
-              href="/login"
+              href="/sign-up"
               className="text-[#825C9A] ml-1 underline underline-offset-2"
             >
-              Login
+              Signup
             </a>
           </p>
-          <SocialAuthButtons
-            googleLogin={googleLogin}
-            loading={loading}
-            handleMicrosoftLogin={handleMicrosoftLogin}
-            onLoginStart={onLoginStart}
-            onLogoutSuccess={onLogoutSuccess}
-            setProvider={setProvider}
-            setProfile={setProfile}
-            LoginSocialFacebook={LoginSocialFacebook}
-          />
         </div>
       </div>
       <SignUpBanner Nurse={Nurse} />
