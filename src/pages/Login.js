@@ -31,12 +31,12 @@ export default function Login() {
   const onLogoutSuccess = useCallback(() => {
     setProfile(null);
     setProvider("");
-    navigate("/recruiter-dashboard");
+    navigate("/app");
   }, [navigate]);
 
   const handleAuthSuccess = (response) => {
     console.log("Authentication successful:", response);
-    navigate("/recruiter-dashboard");
+    navigate("/app");
   };
 
   const handleAuthError = (error) => {
@@ -53,7 +53,7 @@ export default function Login() {
           },
         });
         console.log("User Info:", userInfo.data);
-        navigate("/recruiter-dashboard");
+        navigate("/app");
       } catch (error) {
         console.error("Error fetching user info:", error);
       } finally {

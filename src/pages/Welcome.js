@@ -73,7 +73,7 @@ export default function Welcome() {
           }
         );
         console.log("User Info:", userInfo.data);
-        navigate("/recruiter-dashboard");
+        navigate("/app");
       } catch (error) {
         console.error("Error fetching user info:", error);
       } finally {

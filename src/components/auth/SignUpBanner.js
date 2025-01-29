@@ -10,7 +10,7 @@ export default function SignUpBanner({ Nurse }) {
           can’t imagine working without it.”
         </p>
         <div className="flex max-lg:flex-col px-10 justify-between items-end max-lg:items-start mt-[52px]">
-          <div className="text-3xl">Olivia Rhye</div>
+          <div className="text-3xl font-sora">Olivia Rhye</div>
           <div className="text-lg font-semibold">
             <p>Lead Recruiter, Layers</p>
             <p>Web Development Agency</p>
