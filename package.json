@@ -35,8 +35,15 @@
     ]
   },
   "devDependencies": {
+    "@eslint/js": "^9.19.0",
     "autoprefixer": "^10.4.20",
+    "eslint": "^9.19.0",
+    "eslint-config-prettier": "^10.0.1",
+    "eslint-plugin-prettier": "^5.2.3",
+    "eslint-plugin-react": "^7.37.4",
+    "globals": "^15.14.0",
     "postcss": "^8.5.1",
+    "prettier": "^3.4.2",
     "tailwindcss": "3"
   }
 }
