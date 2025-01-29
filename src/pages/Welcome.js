@@ -127,7 +127,7 @@ export default function Welcome() {
     <div className="flex max-lg:gap-10 gap-36 justify-end max-sm:block h-screen w-full bg-white">
       <div className="flex items-center justify-center max-sm:block">
         <div className="lg:min-w-[620px] sm:w-full max-sm:w-full p-8">
-          <h2 className="text-3xl font-bold text-secondary max-lg:mt-10 max-sm:mt-[102px]">
+          <h2 className="text-3xl font-sora font-bold text-secondary max-lg:mt-10 max-sm:mt-[102px]">
             Welcome back
           </h2>
           <p className="text-muted font-medium">

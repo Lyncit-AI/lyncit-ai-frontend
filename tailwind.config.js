@@ -5,6 +5,9 @@ module.exports = {
     ],
     theme: {
       extend: {
+        fontFamily: {
+          'sora': ['Sora', 'sans-serif']
+        },
         colors: {
           primary: "#825C9A", // Main brand color (used for buttons, links, etc.)
           secondary: "#0D0C22", // Dark text color
