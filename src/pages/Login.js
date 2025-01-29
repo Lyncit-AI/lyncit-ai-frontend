@@ -7,6 +7,7 @@ import { useMsal } from "@azure/msal-react";
 import { InteractionRequiredAuthError } from "@azure/msal-browser";
 import { LoginSocialFacebook } from "reactjs-social-login";
 import Input from "../components/ui/Input";
+import Button from "../components/ui/Button";
 import PasswordInput from "../components/ui/PasswordInput";
 import Checkbox from "../components/ui/Checkbox";
 import SignUpBanner from "../components/auth/SignUpBanner";
@@ -46,14 +47,11 @@ export default function Login() {
     onSuccess: async (codeResponse) => {
       setLoading(true);
       try {
-        const userInfo = await axios.get(
-          "https://www.googleapis.com/oauth2/v3/userinfo",
-          {
-            headers: {
-              Authorization: `Bearer ${codeResponse.access_token}`,
-            },
+        const userInfo = await axios.get("https://www.googleapis.com/oauth2/v3/userinfo", {
+          headers: {
+            Authorization: `Bearer ${codeResponse.access_token}`,
           },
-        );
+        });
         console.log("User Info:", userInfo.data);
         navigate("/recruiter-dashboard");
       } catch (error) {
@@ -109,7 +107,7 @@ export default function Login() {
     <div className="flex max-lg:gap-10 gap-36 justify-end max-sm:block h-screen w-full bg-white">
       <div className="flex items-center justify-center max-sm:block">
         <div className="lg:min-w-[620px] sm:w-full max-sm:w-full p-8">
-          <h2 className="text-3xl font-bold text-[#0D0C22] max-lg:mt-10 max-sm:mt-[102px] mb-8">
+          <h2 className="text-3xl font-bold text-secondary max-lg:mt-10 max-sm:mt-[102px] mb-8">
             Sign in to Lyncit AI
           </h2>
           <SocialAuthButtons
@@ -124,7 +122,7 @@ export default function Login() {
           />
           <div className="mt-8">
             <div className="mb-5">
-              <label className="text-sm font-medium text-[#0D0C22]">
+              <label className="text-sm font-medium text-secondary">
                 Email
               </label>
               <Input
@@ -132,44 +130,40 @@ export default function Login() {
                 placeholder="Email ..."
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className={emailError ? "border-red-500" : ""}
+                className={emailError ? "border-danger" : ""}
               />
             </div>
             <div className="mb-8">
-              <label className="text-sm font-medium text-[#0D0C22]">
+              <label className="text-sm font-medium text-secondary">
                 Password
               </label>
               <PasswordInput
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="..."
-                className={passwordError ? "border-red-500" : ""}
+                className={passwordError ? "border-danger" : ""}
               />
             </div>
             <div className="flex items-center justify-between text-sm max-lg:text-xs">
               <div className="flex items-center space-x-2">
                 <Checkbox id="remember" />
-                <label
-                  htmlFor="remember"
-                  className="text-[#637083] font-semibold"
-                >
+                <label htmlFor="remember" className="text-accent font-semibold">
                   Remember for 30 days
                 </label>
               </div>
-              <a
-                href="/forget"
-                className="text-[#825C9A] font-semibold underline underline-offset-2"
-              >
+              <a href="/forget" className="text-primary font-semibold underline underline-offset-2">
                 Forgot Password?
               </a>
             </div>
-          </div>
-          <p className="mt-8 text-[#637083] max-sm:text-center">
-            Don’t have an account?
-            <a
-              href="/sign-up"
-              className="text-[#825C9A] ml-1 underline underline-offset-2"
+            <Button
+              className="w-full bg-primary text-white rounded-lg hover:bg-purple-700 mt-8"
             >
+              Sign in
+            </Button>
+          </div>
+          <p className="mt-8 text-accent max-sm:text-center">
+            Don’t have an account?
+            <a href="/sign-up" className="text-primary ml-1 underline underline-offset-2">
               Signup
             </a>
           </p>

@@ -7,6 +7,7 @@ import { useMsal } from "@azure/msal-react";
 import { InteractionRequiredAuthError } from "@azure/msal-browser";
 import { LoginSocialFacebook } from "reactjs-social-login";
 import Input from "../components/ui/Input";
+import Button from "../components/ui/Button";
 import PasswordInput from "../components/ui/PasswordInput";
 import SignUpBanner from "../components/auth/SignUpBanner";
 import SocialAuthButtons from "../components/auth/SocialAuthButtons";
@@ -51,7 +52,7 @@ export default function SignUp() {
             headers: {
               Authorization: `Bearer ${codeResponse.access_token}`,
             },
-          },
+          }
         );
         console.log("User Info:", userInfo.data);
         navigate("/recruiter-dashboard");
@@ -108,15 +109,15 @@ export default function SignUp() {
     <div className="flex max-lg:gap-10 gap-36 justify-end max-sm:block h-screen w-full bg-white">
       <div className="flex items-center justify-center max-sm:block">
         <div className="lg:min-w-[620px] sm:w-full max-sm:w-full p-8">
-          <h2 className="text-3xl font-bold text-[#0D0C22] max-lg:mt-10 max-sm:mt-[102px] mb-3">
+          <h2 className="text-3xl font-bold text-secondary max-lg:mt-10 max-sm:mt-[102px] mb-3">
             Get Started
           </h2>
-          <p className="text-[#475467] font-medium">
+          <p className="text-muted font-medium">
             Welcome to Lyncit AI - Let’s create your account
           </p>
           <div className="mt-8">
             <div className="mb-5">
-              <label className="text-sm font-medium text-[#0D0C22]">
+              <label className="text-sm font-medium text-secondary">
                 Company Email
               </label>
               <Input
@@ -124,26 +125,31 @@ export default function SignUp() {
                 placeholder="Email ..."
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className={emailError ? "border-red-500" : ""}
+                className={emailError ? "border-danger" : ""}
               />
             </div>
             <div className="mb-8">
-              <label className="text-sm font-medium text-[#0D0C22]">
+              <label className="text-sm font-medium text-secondary">
                 Password
               </label>
               <PasswordInput
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="..."
-                className={passwordError ? "border-red-500" : ""}
+                className={passwordError ? "border-danger" : ""}
               />
             </div>
+            <Button
+              className="w-full bg-primary text-white rounded-lg hover:bg-purple-700 mt-8"
+            >
+              Sign Up
+            </Button>
           </div>
-          <p className="mt-8 text-[#637083] max-sm:text-center mb-8">
+          <p className="mt-8 text-accent max-sm:text-center mb-8">
             Already have an account?
             <a
               href="/login"
-              className="text-[#825C9A] ml-1 underline underline-offset-2"
+              className="text-primary ml-1 underline underline-offset-2"
             >
               Login
             </a>

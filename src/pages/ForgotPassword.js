@@ -8,15 +8,14 @@ export default function ForgotPassword() {
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState(false);
 
-
   return (
     <div className="flex max-lg:gap-10 gap-36 justify-end max-sm:block h-screen w-full bg-white">
       <div className="flex items-center justify-center max-sm:block">
         <div className="lg:max-w-[620px] sm:w-full max-sm:w-full p-8">
-          <h2 className="text-3xl font-bold text-[#0D0C22] max-lg:mt-10 max-sm:mt-[102px] mb-3">
+          <h2 className="text-3xl font-bold text-secondary max-lg:mt-10 max-sm:mt-[102px] mb-3">
             Get Started
           </h2>
-          <p className="text-[#475467] font-medium">
+          <p className="text-muted font-medium">
             Enter the email address you used when you joined and we’ll send you
             instructions to reset your password.
             <br />
@@ -25,7 +24,7 @@ export default function ForgotPassword() {
           </p>
           <div className="mt-8">
             <div className="mb-8">
-              <label className="text-sm font-medium text-[#0D0C22]">
+              <label className="text-sm font-medium text-secondary">
                 Company Email
               </label>
               <Input
@@ -33,13 +32,13 @@ export default function ForgotPassword() {
                 placeholder="Email ..."
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className={emailError ? "border-red-500" : ""}
+                className={emailError ? "border-danger" : ""}
               />
             </div>
             <Button
-              className="w-full bg-[#825C9A] text-white rounded-[8px] hover:bg-purple-700 mt-8"
+              className="w-full bg-primary text-white rounded-lg hover:bg-purple-700 mt-8"
             >
-              Sign In
+              Send Instructions
             </Button>
           </div>
         </div>

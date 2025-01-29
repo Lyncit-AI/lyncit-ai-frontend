@@ -25,7 +25,7 @@ export default function Welcome() {
   const [profile, setProfile] = useState();
 
   const isValidEmail = (value) => {
-    const pattern =/^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/;
+    const pattern = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/;
     return pattern.test(value);
   };
 
@@ -70,7 +70,7 @@ export default function Welcome() {
             headers: {
               Authorization: `Bearer ${codeResponse.access_token}`,
             },
-          },
+          }
         );
         console.log("User Info:", userInfo.data);
         navigate("/recruiter-dashboard");
@@ -127,55 +127,61 @@ export default function Welcome() {
     <div className="flex max-lg:gap-10 gap-36 justify-end max-sm:block h-screen w-full bg-white">
       <div className="flex items-center justify-center max-sm:block">
         <div className="lg:min-w-[620px] sm:w-full max-sm:w-full p-8">
-        <h2 className="text-3xl font-bold text-[#0D0C22] max-lg:mt-10 max-sm:mt-[102px]">Welcome back</h2>
-      <p className="text-[#475467] font-medium">
-        Welcome back! to <span className="text-[#825C9A]">Lyncit AI</span>
-      </p>
-      <div className="mt-8">
-        <div className="mb-5">
-          <label className="text-sm font-medium text-[#0D0C22]">Email</label>
-          <Input
-            type="email"
-            placeholder="Email ..."
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className={emailError ? "border-red-500" : ""}
-          />
-        </div>
-        <div className="mb-8">
-          <label className="text-sm font-medium text-[#0D0C22]">Password</label>
-          <PasswordInput
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="..."
-            className={passwordError ? "border-red-500" : ""}
-          />
-        </div>
-        <div className="flex items-center justify-between text-sm max-lg:text-xs">
-          <div className="flex items-center space-x-2">
-            <Checkbox id="remember" />
-            <label
-              htmlFor="remember"
-              className="text-[#637083] font-semibold"
+          <h2 className="text-3xl font-bold text-secondary max-lg:mt-10 max-sm:mt-[102px]">
+            Welcome back
+          </h2>
+          <p className="text-muted font-medium">
+            Welcome back! to <span className="text-primary">Lyncit AI</span>
+          </p>
+          <div className="mt-8">
+            <div className="mb-5">
+              <label className="text-sm font-medium text-secondary">
+                Email
+              </label>
+              <Input
+                type="email"
+                placeholder="Email ..."
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className={emailError ? "border-danger" : ""}
+              />
+            </div>
+            <div className="mb-8">
+              <label className="text-sm font-medium text-secondary">
+                Password
+              </label>
+              <PasswordInput
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="..."
+                className={passwordError ? "border-danger" : ""}
+              />
+            </div>
+            <div className="flex items-center justify-between text-sm max-lg:text-xs">
+              <div className="flex items-center space-x-2">
+                <Checkbox id="remember" />
+                <label
+                  htmlFor="remember"
+                  className="text-accent font-semibold"
+                >
+                  Remember for 30 days
+                </label>
+              </div>
+              <a
+                href="/forget"
+                className="text-primary font-semibold underline underline-offset-2"
+              >
+                Forgot Password?
+              </a>
+            </div>
+            <Button
+              onClick={handleSignIn}
+              className="w-full bg-primary text-white rounded-lg hover:bg-purple-700 mt-8"
             >
-              Remember for 30 days
-            </label>
+              Sign In
+            </Button>
           </div>
-          <a
-            href="/forget"
-            className="text-[#825C9A] font-semibold underline underline-offset-2"
-          >
-            Forgot Password?
-          </a>
-        </div>
-        <Button
-          onClick={handleSignIn}
-          className="w-full bg-[#825C9A] text-white rounded-[8px] hover:bg-purple-700 mt-8"
-        >
-          Sign In
-        </Button>
-      </div>
-      <div className="my-3 text-center text-xs text-[#637083]">or</div>
+          <div className="my-3 text-center text-xs text-accent">or</div>
           <SocialAuthButtons
             googleLogin={googleLogin}
             loading={loading}
@@ -186,11 +192,11 @@ export default function Welcome() {
             setProfile={setProfile}
             LoginSocialFacebook={LoginSocialFacebook}
           />
-          <p className="mt-8 text-[#637083] max-sm:text-center">
+          <p className="mt-8 text-accent max-sm:text-center">
             Don’t have an account?
             <a
               href="/sign-up"
-              className="text-[#825C9A] ml-1 underline underline-offset-2"
+              className="text-primary ml-1 underline underline-offset-2"
             >
               Signup
             </a>
