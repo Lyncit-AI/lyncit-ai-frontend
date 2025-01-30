@@ -6,6 +6,7 @@ import SignUp from './pages/SignUp';
 import ForgotPassword from './pages/ForgotPassword';
 import RecruiterDashboard from './pages/RecruiterDashboard';
 import CandidateDashboard from './pages/CandidateDashboard';
+import CandidateQuestionnaire from './pages/CandidateQuestionnaire';
 import NotFound from './pages/NotFound';
 
 const App = () => {
@@ -18,6 +19,7 @@ const App = () => {
         <Route path="/forget" element={<ForgotPassword />} />
         <Route path="/app" element={<RecruiterDashboard />} />
         <Route path="/candidate-dashboard" element={<CandidateDashboard />} />
+        <Route path="/candidate/:campaignId" element={<CandidateQuestionnaire />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
