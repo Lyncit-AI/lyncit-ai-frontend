@@ -48,12 +48,12 @@ export default function Welcome() {
   const onLogoutSuccess = useCallback(() => {
     setProfile(null);
     setProvider("");
-    navigate("/recruiter-dashboard");
+    navigate("/app");
   }, [navigate]);
 
   const handleAuthSuccess = (response) => {
     console.log("Authentication successful:", response);
-    navigate("/recruiter-dashboard");
+    navigate("/app");
   };
 
   const handleAuthError = (error) => {
