@@ -34,12 +34,12 @@ export default function SignUp() {
   }, [navigate]);
 
   const handleAuthSuccess = (response) => {
-    console.log("Authentication successful:", response);
+    // console.log("Authentication successful:", response);
     navigate("/app");
   };
 
   const handleAuthError = (error) => {
-    console.error("Authentication failed:", error);
+    // console.error("Authentication failed:", error);
   };
 
   const googleLogin = useGoogleLogin({
@@ -54,16 +54,16 @@ export default function SignUp() {
             },
           }
         );
-        console.log("User Info:", userInfo.data);
+        // console.log("User Info:", userInfo.data);
         navigate("/recruiter-dashboard");
       } catch (error) {
-        console.error("Error fetching user info:", error);
+        // console.error("Error fetching user info:", error);
       } finally {
         setLoading(false);
       }
     },
     onError: (error) => {
-      console.error("Login Failed:", error);
+      // console.error("Login Failed:", error);
       setLoading(false);
     },
     scope: "email profile",
@@ -90,7 +90,7 @@ export default function SignUp() {
         });
       }
     } catch (error) {
-      console.error("Login failed", error);
+      // console.error("Login failed", error);
       if (error instanceof InteractionRequiredAuthError) {
         try {
           await instance.acquireTokenPopup({
@@ -106,14 +106,14 @@ export default function SignUp() {
   };
 
   return (
-    <div className="flex max-lg:gap-10 gap-36 justify-end max-sm:block h-screen w-full bg-white">
-      <div className="flex items-center justify-center max-sm:block">
-        <div className="lg:min-w-[620px] sm:w-full max-sm:w-full p-8">
-          <h2 className="text-3xl font-sora font-bold text-secondary max-lg:mt-10 max-sm:mt-[102px] mb-3">
+    <div className="flex max-lg:gap-10 max-xl:gap-10 gap-36 justify-end max-sm:block max-lg:min-h-full h-screen w-full bg-white min-ultra-wide:h-fit min-ultra-wide:w-[1440px] min-ultra-wide:mx-auto min-[2000px]:h-fit min-[2000px]:w-[1440px] min-[2000px]:mx-auto">
+      <div className="flex items-center justify-center max-sm:block max-lg:h-full">
+        <div className="lg:w-custom sm:w-full max-sm:w-full p-8">
+          <h2 className="text-3xl font-sora font-bold text-secondary max-lg:mt-10 max-sm:mt-custom-sm mb-3">
             Get Started
           </h2>
           <p className="text-muted font-medium">
-            Welcome to Lyncit AI - Let’s create your account
+            Welcome to Lyncit AI - Let's create your account
           </p>
           <div className="mt-8">
             <div className="mb-5">
@@ -139,9 +139,7 @@ export default function SignUp() {
                 className={passwordError ? "border-danger" : ""}
               />
             </div>
-            <Button
-              className="w-full bg-primary text-white rounded-lg hover:bg-purple-700 mt-8"
-            >
+            <Button className="w-full bg-primary text-white rounded-lg mt-8">
               Sign Up
             </Button>
           </div>

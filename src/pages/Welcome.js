@@ -37,7 +37,7 @@ export default function Welcome() {
     setPasswordError(!validPassword);
 
     if (validEmail && validPassword) {
-      console.log("Sign In Successful!");
+      // console.log("Sign In Successful!");
     }
   };
 
@@ -52,12 +52,12 @@ export default function Welcome() {
   }, [navigate]);
 
   const handleAuthSuccess = (response) => {
-    console.log("Authentication successful:", response);
+    // console.log("Authentication successful:", response);
     navigate("/recruiter-dashboard");
   };
 
   const handleAuthError = (error) => {
-    console.error("Authentication failed:", error);
+    // console.error("Authentication failed:", error);
   };
 
   const googleLogin = useGoogleLogin({
@@ -72,16 +72,16 @@ export default function Welcome() {
             },
           }
         );
-        console.log("User Info:", userInfo.data);
+        // console.log("User Info:", userInfo.data);
         navigate("/app");
       } catch (error) {
-        console.error("Error fetching user info:", error);
+        // console.error("Error fetching user info:", error);
       } finally {
         setLoading(false);
       }
     },
     onError: (error) => {
-      console.error("Login Failed:", error);
+      // console.error("Login Failed:", error);
       setLoading(false);
     },
     scope: "email profile",
@@ -108,7 +108,7 @@ export default function Welcome() {
         });
       }
     } catch (error) {
-      console.error("Login failed", error);
+      // console.error("Login failed", error);
       if (error instanceof InteractionRequiredAuthError) {
         try {
           await instance.acquireTokenPopup({
@@ -124,10 +124,10 @@ export default function Welcome() {
   };
 
   return (
-    <div className="flex max-lg:gap-10 gap-36 justify-end max-sm:block h-screen w-full bg-white">
-      <div className="flex items-center justify-center max-sm:block">
-        <div className="lg:min-w-[620px] sm:w-full max-sm:w-full p-8">
-          <h2 className="text-3xl font-sora font-bold text-secondary max-lg:mt-10 max-sm:mt-[102px]">
+    <div className="flex max-lg:gap-10 max-xl:gap-10 gap-36 justify-end max-sm:block max-lg:min-h-full h-screen w-full bg-white min-ultra-wide:h-fit min-ultra-wide:w-[1440px] min-ultra-wide:mx-auto min-[2000px]:h-fit min-[2000px]:w-[1440px] min-[2000px]:mx-auto">
+      <div className="flex items-center justify-center max-sm:block max-lg:h-full">
+        <div className="lg:w-custom sm:w-full max-sm:w-full p-8">
+          <h2 className="text-3xl font-sora font-bold text-secondary max-lg:mt-10 max-sm:mt-custom-sm">
             Welcome back
           </h2>
           <p className="text-muted font-medium">
@@ -160,10 +160,7 @@ export default function Welcome() {
             <div className="flex items-center justify-between text-sm max-lg:text-xs">
               <div className="flex items-center space-x-2">
                 <Checkbox id="remember" />
-                <label
-                  htmlFor="remember"
-                  className="text-accent font-semibold"
-                >
+                <label htmlFor="remember" className="text-accent font-semibold">
                   Remember for 30 days
                 </label>
               </div>
@@ -176,7 +173,7 @@ export default function Welcome() {
             </div>
             <Button
               onClick={handleSignIn}
-              className="w-full bg-primary text-white rounded-lg hover:bg-purple-700 mt-8"
+              className="w-full bg-primary text-white rounded-lg mt-8"
             >
               Sign In
             </Button>
@@ -193,7 +190,7 @@ export default function Welcome() {
             LoginSocialFacebook={LoginSocialFacebook}
           />
           <p className="mt-8 text-accent max-sm:text-center">
-            Don’t have an account?
+            Don't have an account?
             <a
               href="/sign-up"
               className="text-primary ml-1 underline underline-offset-2"

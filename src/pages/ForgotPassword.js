@@ -9,14 +9,14 @@ export default function ForgotPassword() {
   const [emailError, setEmailError] = useState(false);
 
   return (
-    <div className="flex max-lg:gap-10 gap-36 justify-end max-sm:block h-screen w-full bg-white">
-      <div className="flex items-center justify-center max-sm:block">
-        <div className="lg:max-w-[620px] sm:w-full max-sm:w-full p-8">
-          <h2 className="text-3xl font-sora font-bold text-secondary max-lg:mt-10 max-sm:mt-[102px] mb-3">
+    <div className="flex max-lg:gap-10 max-xl:gap-10 gap-36 justify-end max-sm:block max-lg:min-h-full h-screen w-full bg-white min-ultra-wide:h-fit min-ultra-wide:w-[1440px] min-ultra-wide:mx-auto min-[2000px]:h-fit min-[2000px]:w-[1440px] min-[2000px]:mx-auto">
+      <div className="flex items-center justify-center max-sm:block max-lg:h-full">
+        <div className="lg:w-custom sm:w-full max-sm:w-full p-8">
+          <h2 className="text-3xl font-sora font-bold text-secondary max-lg:mt-10 max-sm:mt-custom-sm">
             Get Started
           </h2>
-          <p className="text-muted font-medium">
-            Enter the email address you used when you joined and we’ll send you
+          <p className="text-muted text-lg mt-3 w-fit">
+            Enter the email address you used when you joined and we'll send you
             instructions to reset your password.
             <br />
             For security reasons, we do NOT store your password. So rest assured
@@ -25,7 +25,7 @@ export default function ForgotPassword() {
           <div className="mt-8">
             <div className="mb-8">
               <label className="text-sm font-medium text-secondary">
-                Company Email
+                Enter your registered email
               </label>
               <Input
                 type="email"
@@ -35,9 +35,7 @@ export default function ForgotPassword() {
                 className={emailError ? "border-danger" : ""}
               />
             </div>
-            <Button
-              className="w-full bg-primary text-white rounded-lg hover:bg-purple-700 mt-8"
-            >
+            <Button className="w-full bg-primary text-white rounded-lg mt-8">
               Send Instructions
             </Button>
           </div>

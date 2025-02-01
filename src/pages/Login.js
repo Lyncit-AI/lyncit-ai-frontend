@@ -47,11 +47,14 @@ export default function Login() {
     onSuccess: async (codeResponse) => {
       setLoading(true);
       try {
-        const userInfo = await axios.get("https://www.googleapis.com/oauth2/v3/userinfo", {
-          headers: {
-            Authorization: `Bearer ${codeResponse.access_token}`,
-          },
-        });
+        const userInfo = await axios.get(
+          "https://www.googleapis.com/oauth2/v3/userinfo",
+          {
+            headers: {
+              Authorization: `Bearer ${codeResponse.access_token}`,
+            },
+          }
+        );
         console.log("User Info:", userInfo.data);
         navigate("/app");
       } catch (error) {
@@ -104,10 +107,10 @@ export default function Login() {
   };
 
   return (
-    <div className="flex max-lg:gap-10 gap-36 justify-end max-sm:block h-screen w-full bg-white">
-      <div className="flex items-center justify-center max-sm:block">
-        <div className="lg:min-w-[620px] sm:w-full max-sm:w-full p-8">
-          <h2 className="text-3xl font-bold text-secondary max-lg:mt-10 max-sm:mt-[102px] mb-8">
+    <div className="flex max-lg:gap-10 max-xl:gap-10 gap-36 justify-end max-sm:block max-lg:min-h-full h-screen w-full bg-white min-ultra-wide:h-fit min-ultra-wide:w-[1440px] min-ultra-wide:mx-auto min-[2000px]:h-fit min-[2000px]:w-[1440px] min-[2000px]:mx-auto">
+      <div className="flex items-center justify-center max-sm:block max-lg:h-full">
+        <div className="lg:w-custom sm:w-full max-sm:w-full p-8">
+          <h2 className="text-3xl font-bold text-secondary max-lg:mt-10 max-sm:mt-custom-sm mb-8">
             Sign in to Lyncit AI
           </h2>
           <SocialAuthButtons
@@ -151,19 +154,23 @@ export default function Login() {
                   Remember for 30 days
                 </label>
               </div>
-              <a href="/forget" className="text-primary font-semibold underline underline-offset-2">
+              <a
+                href="/forget"
+                className="text-primary font-semibold underline underline-offset-2"
+              >
                 Forgot Password?
               </a>
             </div>
-            <Button
-              className="w-full bg-primary text-white rounded-lg hover:bg-purple-700 mt-8"
-            >
+            <Button className="w-full bg-primary text-white rounded-lg mt-8">
               Sign in
             </Button>
           </div>
           <p className="mt-8 text-accent max-sm:text-center">
-            Don’t have an account?
-            <a href="/sign-up" className="text-primary ml-1 underline underline-offset-2">
+            Don't have an account?
+            <a
+              href="/sign-up"
+              className="text-primary ml-1 underline underline-offset-2"
+            >
               Signup
             </a>
           </p>
