@@ -87,6 +87,11 @@ export default function Welcome() {
     scope: "email profile",
   });
 
+  const handleLogin = () => {
+    // Redirect to Keycloak SSO URL for login
+    window.location.href = 'http://54.174.196.179:8080/realms/master/protocol/saml'; // Keycloak SSO URL
+  };
+
   const handleMicrosoftLogin = async () => {
     try {
       const loginRequest = {
@@ -172,7 +177,7 @@ export default function Welcome() {
               </a>
             </div>
             <Button
-              onClick={handleSignIn}
+              onClick={handleLogin}
               className="w-full bg-primary text-white rounded-lg mt-8"
             >
               Sign In
