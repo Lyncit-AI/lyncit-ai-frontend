@@ -12,6 +12,7 @@ import Button from "../components/ui/Button";
 import PasswordInput from "../components/ui/PasswordInput";
 import SignUpBanner from "../components/auth/SignUpBanner";
 import SocialAuthButtons from "../components/auth/SocialAuthButtons";
+import keycloak from "../keycloak";
 
 export default function Welcome() {
   const [email, setEmail] = useState("");
@@ -88,8 +89,13 @@ export default function Welcome() {
   });
 
   const handleLogin = () => {
-    // Redirect to Keycloak SSO URL for login
-    window.location.href = 'http://54.174.196.179:8080/realms/master/protocol/saml'; // Keycloak SSO URL
+    keycloak.init({ onLoad: 'login-required' }).then((authenticated) => {
+      if (authenticated) {
+          console.log('User is authenticated');
+      } else {
+          console.log('User is not authenticated');
+      }
+  });
   };
 
   const handleMicrosoftLogin = async () => {
