@@ -12,7 +12,7 @@ import Button from "../components/ui/Button";
 import PasswordInput from "../components/ui/PasswordInput";
 import SignUpBanner from "../components/auth/SignUpBanner";
 import SocialAuthButtons from "../components/auth/SocialAuthButtons";
-import keycloak, { initKeycloak }  from "../keycloak";
+import keycloak  from "../keycloak";
 
 export default function Welcome() {
   const [email, setEmail] = useState("");
@@ -88,20 +88,13 @@ export default function Welcome() {
     scope: "email profile",
   });
 
-  useEffect(() => {
-    initKeycloak(); // Initialize Keycloak on component mount
-  }, []);
 
   const handleLogin = () => {
-    keycloak
-      .login()
-      .then(() => {
-        console.log("User logged in");
-        console.log("Token:", keycloak.token); // This may be undefined in SAML
-
-        navigate("/app"); // Redirect to app
-      })
-      .catch((err) => console.error("Login failed:", err));
+    const samlLoginUrl = `https://idp.lyncit.com:8443/realms/master/protocol/saml/SSO?client_id=recruiter&RelayState=${encodeURIComponent(
+      "https://lyncit-ai-frontend.vercel.app/app"
+    )}`;
+    
+    window.location.href = samlLoginUrl;
   };
 
   const handleMicrosoftLogin = async () => {
