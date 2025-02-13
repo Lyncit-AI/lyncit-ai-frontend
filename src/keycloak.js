@@ -11,6 +11,7 @@ export const initKeycloak = () =>
     .init({
       onLoad: "check-sso", // Does not force login, only checks session
       checkLoginIframe: false, // Avoid iframe timeout issues
+      redirectUri: "https://lyncit-ai-frontend.vercel.app/app",
     })
     .then((authenticated) => {
       if (authenticated) {
