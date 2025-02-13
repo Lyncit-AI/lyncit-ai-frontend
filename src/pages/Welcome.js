@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState,useEffect, useCallback } from "react";
 import axios from "axios";
 import Nurse from "../assets/images/Section.webp";
 import { useNavigate } from "react-router-dom";
@@ -12,7 +12,7 @@ import Button from "../components/ui/Button";
 import PasswordInput from "../components/ui/PasswordInput";
 import SignUpBanner from "../components/auth/SignUpBanner";
 import SocialAuthButtons from "../components/auth/SocialAuthButtons";
-import keycloak from "../keycloak";
+import keycloak, { initKeycloak }  from "../keycloak";
 
 export default function Welcome() {
   const [email, setEmail] = useState("");
@@ -88,14 +88,20 @@ export default function Welcome() {
     scope: "email profile",
   });
 
+  useEffect(() => {
+    initKeycloak(); // Initialize Keycloak on component mount
+  }, []);
+
   const handleLogin = () => {
-    keycloak.init({ onLoad: 'login-required' }).then((authenticated) => {
-      if (authenticated) {
-          console.log('User is authenticated');
-      } else {
-          console.log('User is not authenticated');
-      }
-  });
+    keycloak
+      .login()
+      .then(() => {
+        console.log("User logged in");
+        console.log("Token:", keycloak.token); // This may be undefined in SAML
+
+        navigate("/app"); // Redirect to app
+      })
+      .catch((err) => console.error("Login failed:", err));
   };
 
   const handleMicrosoftLogin = async () => {
