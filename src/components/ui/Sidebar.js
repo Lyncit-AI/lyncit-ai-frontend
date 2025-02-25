@@ -1,83 +1,132 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import {
-  User,
   Home,
   MessageCircle,
-  BarChart2,
-  Compass,
+  User,
+  TrendingUp,
   Briefcase,
   Folder,
-  CreditCard,
+  Wallet,
+  Compass
 } from "lucide-react";
-import Person from "../../assets/images/person.webp"
+import Person from "../../assets/images/person.webp";
 
-export default function Sidebar() {
-  const [isOpen, setIsOpen] = useState(false);
-
-  const menuItems = [
-    { icon: User, label: "Community" },
-    { icon: Home, label: "Dashboard" },
-    { icon: MessageCircle, label: "Messages" },
-    { icon: User, label: "Profile", category: "Identity" },
-    { icon: BarChart2, label: "Analytics", category: "Identity" },
-    { icon: Compass, label: "Discover", category: "Lead" },
-    { icon: Briefcase, label: "Jobs", category: "Lead" },
-    { icon: Folder, label: "Project & Invoices", category: "Lead" },
-    { icon: CreditCard, label: "Wallet", category: "Lead" },
-  ];
+const Sidebar = () => {
+  const [expanded, setExpanded] = useState(false);
 
   return (
-    <div className="w-[60px]">
-      <motion.div
-        onMouseEnter={() => setIsOpen(true)}
-        onMouseLeave={() => setIsOpen(false)}
-        className="fixed top-0 left-0 bottom-0 bg-white shadow-lg flex flex-col overflow-hidden"
-        animate={{ width: isOpen ? 250 : 60 }}
-        transition={{ duration: 0.2 }}
-      >
-        <div className={`flex items-center py-4 border-b whitespace-nowrap ${
-                    isOpen ? "px-4" : "justify-center"
-                  }`}>
-          <motion.img
+    <motion.div
+      className="fixed top-0 left-0 h-screen px-4 bg-white shadow-md z-50 overflow-hidden flex flex-col"
+      initial={{ minWidth: "90px" }}
+      animate={{
+        minWidth: expanded ? "285px" : "90px",
+        maxWidth: expanded ? "285px" : "90px"
+      }}
+      transition={{ duration: 0.5, ease: "easeInOut" }}
+      onMouseEnter={() => setExpanded(true)}
+      onMouseLeave={() => setExpanded(false)}
+    >
+      <div className="flex flex-col py-4">
+        <div
+          className={`flex items-center gap-3 px-2 py-2 cursor-pointer rounded-lg ${
+            expanded ? "border-gray-300 border" : "border-transparent border"
+          }`}
+        >
+          <img
             src={Person}
-            alt="User"
-            className="rounded-full w-10 h-10"
-            animate={{ opacity: isOpen ? 1 : 1 }}
+            alt="Profile"
+            className="rounded-full w-[38px] h-[38px] shrink-0"
           />
-          {isOpen && (
-            <motion.div
-              className="ml-3"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-            >
-              <h4 className="text-sm font-semibold">Independent</h4>
-              <p className="text-xs text-gray-500">Emilia</p>
-            </motion.div>
-          )}
+          <motion.div
+            className={`flex-1 min-w-0 truncate transition-opacity ${expanded ? "visible opacity-100" : "invisible opacity-0"}`}
+          >
+            <p className="font-medium text-sm">Independent Workspace</p>
+            <p className="text-sm text-gray-500">Emilia</p>
+          </motion.div>
         </div>
-        <div className="flex-1 overflow-y-auto">
-          {menuItems.map((item, index) => (
-            <div key={index}>
-              {item.category && (
-                <motion.div
-                  className={`text-sm px-4 py-2 whitespace-nowrap ${
-                    isOpen ? "text-gray-500" : "text-white"
-                  }`}
-                >
-                  <p>{item.category}</p>
-                </motion.div>
-              )}
-              <div className="flex items-center px-4 py-3 hover:bg-gray-100 cursor-pointer whitespace-nowrap">
-                <item.icon className="w-5 h-5 text-gray-600" />
-                {isOpen && (
-                  <p className="ml-3 text-sm font-medium">{item.label}</p>
-                )}
-              </div>
+
+        <nav className="w-full mt-6">
+          {[
+            { icon: User, label: "Community" },
+            { icon: Home, label: "Dashboard" },
+            { icon: MessageCircle, label: "Messages" }
+          ].map(({ icon: Icon, label }) => (
+            <div
+              key={label}
+              className="flex items-center gap-6 px-3 py-4 cursor-pointer rounded-lg transition-all duration-300 delay-100 hover:bg-[#F1EAF6]"
+            >
+              <Icon className="w-5 h-5 shrink-0" strokeWidth={1.2} />
+              <span
+                className={`flex-1 min-w-0 text-sm truncate transition-opacity ${expanded ? "visible opacity-100" : "invisible opacity-0"}`}
+              >
+                {label}
+              </span>
             </div>
           ))}
+        </nav>
+
+        <div className="relative flex h-8 items-center px-3 mt-6">
+          <span
+            className={`text-gray-500 text-xs uppercase transition-opacity ${expanded ? "visible opacity-100" : "invisible hidden opacity-0"}`}
+          >
+            Identity
+          </span>
+          <div
+            className={`flex-1 border-t border-gray-300 ${expanded ? "ml-2 w-16" : "w-full"}`}
+          ></div>
         </div>
-      </motion.div>
+        <nav className="w-full mt-2">
+          {[
+            { icon: User, label: "Profile" },
+            { icon: TrendingUp, label: "Analytics" }
+          ].map(({ icon: Icon, label }) => (
+            <div
+              key={label}
+              className="flex items-center gap-6 px-3 py-4 cursor-pointer rounded-lg transition-all duration-300 delay-100 hover:bg-[#F1EAF6]"
+            >
+              <Icon className="w-5 h-5 shrink-0" strokeWidth={1.2} />
+              <span
+                className={`flex-1 min-w-0 text-sm truncate transition-opacity ${expanded ? "visible opacity-100" : "invisible opacity-0"}`}
+              >
+                {label}
+              </span>
+            </div>
+          ))}
+        </nav>
+        <div className="relative flex items-center h-8 px-3 mt-6">
+          <span
+            className={`text-gray-500 text-xs uppercase transition-opacity ${expanded ? "visible opacity-100" : "invisible hidden opacity-0"}`}
+          >
+            Lead
+          </span>
+          <div
+            className={`flex-1 border-t border-gray-300 ${expanded ? "ml-2 w-16" : "w-full"}`}
+          ></div>
+        </div>
+        <nav className="w-full mt-2">
+          {[
+            { icon: Compass, label: "Discover" },
+            { icon: Briefcase, label: "Jobs" },
+            { icon: Folder, label: "Project & Invoices" },
+            { icon: Wallet, label: "Wallet" }
+          ].map(({ icon: Icon, label }) => (
+            <div
+              key={label}
+              className="flex items-center gap-6 px-3 py-4 cursor-pointer rounded-lg transition-all duration-300 delay-100 hover:bg-[#F1EAF6]"
+            >
+              <Icon className="w-5 h-5 shrink-0" strokeWidth={1.2} />
+              <span
+                className={`flex-1 min-w-0 text-sm truncate transition-opacity ${expanded ? "visible opacity-100" : "invisible opacity-0"}`}
+              >
+                {label}
+              </span>
+            </div>
+          ))}
+        </nav>
       </div>
+    </motion.div>
   );
-}
+};
+
+export default Sidebar;
