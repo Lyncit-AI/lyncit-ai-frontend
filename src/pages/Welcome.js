@@ -65,8 +65,6 @@ export default function Welcome() {
     onSuccess: async (codeResponse) => {
       setLoading(true);
       try {
-        console.log("Access Token:", codeResponse.access_token);
-  
         const userInfo = await axios.get(
           "https://www.googleapis.com/oauth2/v3/userinfo",
           {
@@ -75,24 +73,16 @@ export default function Welcome() {
             },
           }
         );
-  
         console.log("User Info:", userInfo.data);
-  
-        // Navigate to /app with state containing accessToken and userInfo
-        navigate("/app", {
-          state: {
-            accessToken: codeResponse.access_token,
-            userInfo: userInfo.data
-          }
-        });
+        navigate("/app");
       } catch (error) {
-        console.error("Error fetching user info:", error);
+        // console.error("Error fetching user info:", error);
       } finally {
         setLoading(false);
       }
     },
     onError: (error) => {
-      console.error("Login Failed:", error);
+      // console.error("Login Failed:", error);
       setLoading(false);
     },
     scope: "email profile",
