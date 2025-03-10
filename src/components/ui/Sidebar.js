@@ -12,12 +12,13 @@ import {
 } from "lucide-react";
 import Person from "../../assets/images/person.webp";
 
-const Sidebar = () => {
+const Sidebar = ({ name, picture }) => {
   const [expanded, setExpanded] = useState(false);
 
   return (
+    <div className="w-[90px] max-sm:hidden">
     <motion.div
-      className="fixed top-0 left-0 h-screen px-4 bg-white shadow-md z-50 overflow-hidden flex flex-col"
+      className="fixed top-0 left-0 h-screen px-4 bg-white shadow-md z-50 overflow-hidden flex-col"
       initial={{ minWidth: "90px" }}
       animate={{
         minWidth: expanded ? "285px" : "90px",
@@ -34,7 +35,7 @@ const Sidebar = () => {
           }`}
         >
           <img
-            src={Person}
+            src={picture}
             alt="Profile"
             className="rounded-full w-[38px] h-[38px] shrink-0"
           />
@@ -42,7 +43,7 @@ const Sidebar = () => {
             className={`flex-1 min-w-0 truncate transition-opacity ${expanded ? "visible opacity-100" : "invisible opacity-0"}`}
           >
             <p className="font-medium text-sm">Independent Workspace</p>
-            <p className="text-sm text-gray-500">Emilia</p>
+            <p className="text-sm text-gray-500">{name}</p>
           </motion.div>
         </div>
 
@@ -126,6 +127,7 @@ const Sidebar = () => {
         </nav>
       </div>
     </motion.div>
+    </div>
   );
 };
 
