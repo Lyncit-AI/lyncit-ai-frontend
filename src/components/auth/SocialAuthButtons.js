@@ -40,26 +40,24 @@ export default function SocialAuthButtons({
         fieldsProfile="id,first_name,last_name,middle_name,name,name_format,picture,short_name,email,gender"
         onLoginStart={onLoginStart}
         onLogoutSuccess={onLogoutSuccess}
-        redirect_uri="http://localhost:3000/sign-up"
+        redirect_uri={
+          process.env.NODE_ENV === "development" 
+            ? "http://localhost:3000"
+            : "https://lyncit-ai-frontend.vercel.app"
+        }
         onResolve={({ provider, data }) => {
-          // Log the received data for debugging
           console.log("Facebook login successful:", data);
 
-          // Extract user info in a consistent format
           const userInfo = {
             name: data.name,
             email: data.email,
-            picture: data.picture?.data?.url, // Facebook nests picture URL in picture.data.url
+            picture: data.picture?.data?.url,
             sub: data.id
           };
-
-          // You can also store provider name if needed for provider-specific logic
           const providerName = "facebook";
 
-          // Extract an access token if available
           const accessToken = data.accessToken || "";
 
-          // Navigate to RecruiterDashboard with standardized data
           navigate("/app", {
             state: {
               accessToken: accessToken,
@@ -68,7 +66,6 @@ export default function SocialAuthButtons({
             }
           });
 
-          // If you still need to set these states for other components
           setProvider(provider);
           setProfile(data);
         }}

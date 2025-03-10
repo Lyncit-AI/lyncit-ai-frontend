@@ -5,10 +5,8 @@ import Sidebar from "../components/ui/Sidebar";
 const RecruiterDashboard = () => {
   const location = useLocation();
   
-  // Get the state passed from navigation
   const { accessToken, userInfo } = location.state || {};
   
-  // Extract user details in a standardized way regardless of auth provider
   const userName = userInfo?.name || "";
   const userEmail = userInfo?.email || "";
   const userPicture = userInfo?.picture || "";
@@ -16,12 +14,10 @@ const RecruiterDashboard = () => {
 
   return (
     <div className="flex h-screen w-full bg-gray-100">
-      {/* Pass standardized user data to Sidebar */}
       <Sidebar name={userName} picture={userPicture} />
       <div className="flex-1 w-full p-6">
         <h1 className="text-2xl font-bold mb-4">Recruiter Dashboard</h1>
         
-        {/* Display User Info */}
         {userInfo ? (
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h2 className="text-lg font-semibold mb-2">User Information</h2>
@@ -45,7 +41,6 @@ const RecruiterDashboard = () => {
           <p className="text-gray-500">No user information available</p>
         )}
 
-        {/* Display Access Token */}
         {accessToken ? (
           <div className="bg-white p-4 rounded-lg shadow">
             <h2 className="text-lg font-semibold mb-2">Access Token</h2>

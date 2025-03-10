@@ -78,8 +78,6 @@ export default function Welcome() {
 
         console.log("User Info:", userInfo.data);
 
-        // Navigate to /app with state containing accessToken and userInfo
-        // This already has the right format with userInfo object
         navigate("/app", {
           state: {
             accessToken: codeResponse.access_token,
@@ -109,10 +107,14 @@ export default function Welcome() {
 
   const handleMicrosoftLogin = async () => {
     try {
+      const redirectUri = process.env.NODE_ENV === "development"
+      ? "http://localhost:3000"
+      : "https://lyncit-ai-frontend.vercel.app";
+
       const loginRequest = {
         scopes: ["user.read", "openid", "profile", "email"],
         prompt: "select_account",
-        redirectUri: "http://localhost:3000"
+        redirectUri: redirectUri
       };
 
       const response = await instance.loginPopup(loginRequest);
@@ -123,7 +125,6 @@ export default function Welcome() {
           account: response.account
         });
 
-        // Get user's profile picture from Microsoft Graph API
         let pictureUrl = null;
         try {
           const graphResponse = await axios.get(
@@ -144,15 +145,13 @@ export default function Welcome() {
           console.log("Could not retrieve profile photo", photoError);
         }
 
-        // Extract user info in a consistent format
         const userInfo = {
           name: response.account.name,
           email: response.account.username,
-          picture: pictureUrl, // Use the retrieved photo or null if not available
+          picture: pictureUrl,
           sub: response.account.localAccountId || response.account.homeAccountId
         };
 
-        // Navigate to RecruiterDashboard with consistent data structure
         navigate("/app", {
           state: {
             accessToken: tokenResponse.accessToken,
