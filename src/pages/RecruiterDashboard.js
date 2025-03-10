@@ -7,10 +7,17 @@ const RecruiterDashboard = () => {
   
   // Get the state passed from navigation
   const { accessToken, userInfo } = location.state || {};
+  
+  // Extract user details in a standardized way regardless of auth provider
+  const userName = userInfo?.name || "";
+  const userEmail = userInfo?.email || "";
+  const userPicture = userInfo?.picture || "";
+  const userId = userInfo?.sub || "";
 
   return (
     <div className="flex h-screen w-full bg-gray-100">
-      <Sidebar name={userInfo.name} picture={userInfo.picture} />
+      {/* Pass standardized user data to Sidebar */}
+      <Sidebar name={userName} picture={userPicture} />
       <div className="flex-1 w-full p-6">
         <h1 className="text-2xl font-bold mb-4">Recruiter Dashboard</h1>
         
@@ -19,16 +26,14 @@ const RecruiterDashboard = () => {
           <div className="bg-white p-4 rounded-lg shadow mb-4">
             <h2 className="text-lg font-semibold mb-2">User Information</h2>
             <div className="space-y-2">
-              <p><span className="font-medium">ID:</span> {userInfo.sub}</p>
-              <p><span className="font-medium">Name:</span> {userInfo.name}</p>
-              <p><span className="font-medium">Given Name:</span> {userInfo.given_name}</p>
-              <p><span className="font-medium">Email:</span> {userInfo.email}</p>
-              <p><span className="font-medium">Email Verified:</span> {userInfo.email_verified ? 'Yes' : 'No'}</p>
-              {userInfo.picture && (
+              <p><span className="font-medium">ID:</span> {userId}</p>
+              <p><span className="font-medium">Name:</span> {userName}</p>
+              <p><span className="font-medium">Email:</span> {userEmail}</p>
+              {userPicture && (
                 <div>
                   <span className="font-medium">Profile Picture:</span>
                   <img 
-                    src={userInfo.picture} 
+                    src={userPicture} 
                     alt="Profile" 
                     className="w-16 h-16 rounded-full mt-2" 
                   />

@@ -35,7 +35,7 @@ const Sidebar = ({ name, picture }) => {
           }`}
         >
           <img
-            src={picture}
+            src={picture?(picture):(Person)}
             alt="Profile"
             className="rounded-full w-[38px] h-[38px] shrink-0"
           />
@@ -43,7 +43,7 @@ const Sidebar = ({ name, picture }) => {
             className={`flex-1 min-w-0 truncate transition-opacity ${expanded ? "visible opacity-100" : "invisible opacity-0"}`}
           >
             <p className="font-medium text-sm">Independent Workspace</p>
-            <p className="text-sm text-gray-500">{name}</p>
+            <p className="text-sm text-gray-500">{name ? (name):("Emilia")}</p>
           </motion.div>
         </div>
 

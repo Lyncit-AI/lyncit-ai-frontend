@@ -1,4 +1,4 @@
-import React, { useState,useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import Nurse from "../assets/images/Section.webp";
 import { useNavigate } from "react-router-dom";
@@ -12,7 +12,7 @@ import Button from "../components/ui/Button";
 import PasswordInput from "../components/ui/PasswordInput";
 import SignUpBanner from "../components/auth/SignUpBanner";
 import SocialAuthButtons from "../components/auth/SocialAuthButtons";
-import keycloak  from "../keycloak";
+import keycloak from "../keycloak";
 
 export default function Welcome() {
   const [email, setEmail] = useState("");
@@ -66,19 +66,20 @@ export default function Welcome() {
       setLoading(true);
       try {
         console.log("Access Token:", codeResponse.access_token);
-  
+
         const userInfo = await axios.get(
           "https://www.googleapis.com/oauth2/v3/userinfo",
           {
             headers: {
-              Authorization: `Bearer ${codeResponse.access_token}`,
-            },
+              Authorization: `Bearer ${codeResponse.access_token}`
+            }
           }
         );
-  
+
         console.log("User Info:", userInfo.data);
-  
+
         // Navigate to /app with state containing accessToken and userInfo
+        // This already has the right format with userInfo object
         navigate("/app", {
           state: {
             accessToken: codeResponse.access_token,
@@ -95,14 +96,14 @@ export default function Welcome() {
       console.error("Login Failed:", error);
       setLoading(false);
     },
-    scope: "email profile",
+    scope: "email profile"
   });
 
   const handleLogin = () => {
     const samlLoginUrl = `https://idp.lyncit.com:8443/realms/master/protocol/saml/SSO?client_id=recruiter&RelayState=${encodeURIComponent(
       "https://lyncit-ai-frontend.vercel.app/app"
     )}`;
-    
+
     window.location.href = samlLoginUrl;
   };
 
@@ -111,7 +112,7 @@ export default function Welcome() {
       const loginRequest = {
         scopes: ["user.read", "openid", "profile", "email"],
         prompt: "select_account",
-        redirectUri: "http://localhost:3000",
+        redirectUri: "http://localhost:3000"
       };
 
       const response = await instance.loginPopup(loginRequest);
@@ -119,19 +120,51 @@ export default function Welcome() {
         console.log("Login successful", response);
         const tokenResponse = await instance.acquireTokenSilent({
           ...loginRequest,
-          account: response.account,
+          account: response.account
         });
-        handleAuthSuccess({
-          token: tokenResponse.accessToken,
-          user: response.account,
+
+        // Get user's profile picture from Microsoft Graph API
+        let pictureUrl = null;
+        try {
+          const graphResponse = await axios.get(
+            "https://graph.microsoft.com/v1.0/me/photo/$value",
+            {
+              responseType: "blob",
+              headers: {
+                Authorization: `Bearer ${tokenResponse.accessToken}`
+              }
+            }
+          );
+
+          if (graphResponse.status === 200) {
+            const blob = graphResponse.data;
+            pictureUrl = URL.createObjectURL(blob);
+          }
+        } catch (photoError) {
+          console.log("Could not retrieve profile photo", photoError);
+        }
+
+        // Extract user info in a consistent format
+        const userInfo = {
+          name: response.account.name,
+          email: response.account.username,
+          picture: pictureUrl, // Use the retrieved photo or null if not available
+          sub: response.account.localAccountId || response.account.homeAccountId
+        };
+
+        // Navigate to RecruiterDashboard with consistent data structure
+        navigate("/app", {
+          state: {
+            accessToken: tokenResponse.accessToken,
+            userInfo: userInfo
+          }
         });
       }
     } catch (error) {
-      // console.error("Login failed", error);
       if (error instanceof InteractionRequiredAuthError) {
         try {
           await instance.acquireTokenPopup({
-            scopes: ["user.read", "openid", "profile", "email"],
+            scopes: ["user.read", "openid", "profile", "email"]
           });
         } catch (err) {
           handleAuthError(err);
