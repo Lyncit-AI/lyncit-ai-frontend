@@ -12,6 +12,7 @@ const msalConfig = {
     clientId: process.env.REACT_APP_MICROSOFT_CLIENT_ID,
     authority: 'https://login.microsoftonline.com/common',
     redirectUri: window.location.origin,
+    clientSecret: process.env.REACT_APP_MICROSOFT_CLIENT_SECRET 
   },
   cache: {
     cacheLocation: 'sessionStorage',
