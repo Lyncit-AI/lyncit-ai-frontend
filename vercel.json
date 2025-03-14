@@ -1,8 +1,15 @@
 {
-    "rewrites": [
+    "version": 2,
+    "builds": [
       {
-        "source": "/api/proxy/:path*",
-        "destination": "/api/proxy"
+        "src": "api/proxy.js",
+        "use": "@vercel/node"
+      }
+    ],
+    "routes": [
+      {
+        "src": "/api/proxy/(.*)",
+        "dest": "/api/proxy.js"
       }
     ]
   }

@@ -1,9 +1,8 @@
-// api/proxy.js
 module.exports = async (req, res) => {
     const { method, body, query, headers } = req;
     const urlPath = req.url.replace('/api/proxy', '');
     const url = `http://3.89.218.76:8006${urlPath}${query ? `?${new URLSearchParams(query).toString()}` : ''}`;
-    
+  
     try {
       const response = await fetch(url, {
         method,
@@ -14,7 +13,7 @@ module.exports = async (req, res) => {
         },
         body: method === "POST" ? body : undefined
       });
-      
+  
       const data = await response.json();
       res.status(response.status).json(data);
     } catch (error) {
