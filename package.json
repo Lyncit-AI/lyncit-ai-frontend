@@ -2,6 +2,7 @@
   "name": "lyncit",
   "version": "0.1.0",
   "private": true,
+  "proxy": "http://3.89.218.76:8006",
   "dependencies": {
     "@azure/msal-browser": "^4.0.2",
     "@azure/msal-react": "^3.0.2",

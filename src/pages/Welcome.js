@@ -24,7 +24,12 @@ export default function Welcome() {
   const [provider, setProvider] = useState("");
   const [profile, setProfile] = useState();
 
-  // Check for existing token on component mount
+  // Base URL for proxy based on environment
+  const proxyBaseUrl =
+    process.env.NODE_ENV === "development"
+      ? "/api/proxy"
+      : "https://lyncit-ai-frontend.vercel.app/api/proxy";
+
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
     if (token) {
@@ -35,13 +40,13 @@ export default function Welcome() {
   const handleSignIn = async () => {
     setLoading(true);
     try {
-      // First get authentication token
+      console.log("Fetching token from:", `${proxyBaseUrl}/authentication/token`);
       const tokenResponse = await axios.post(
-        "http://3.89.218.76:8006/authentication/token",
+        `${proxyBaseUrl}/authentication/token`,
         new URLSearchParams({
           grant_type: "",
-          username: "jsmith",
-          password: "password",
+          username: email, // Use form input
+          password: password, // Use form input
           scope: "",
           client_id: "",
           client_secret: ""
@@ -53,64 +58,57 @@ export default function Welcome() {
           }
         }
       );
-
+  
       const accessToken = tokenResponse.data.access_token;
-      // Store token in localStorage
       localStorage.setItem("accessToken", accessToken);
-
-      // Get user details with authorization header
+  
       const userResponse = await axios.get(
-        `http://3.89.218.76:8006/user/read?username=${email}`,
+        `${proxyBaseUrl}/user/read?username=${email}`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`
           }
         }
       );
-      
+  
       const userData = userResponse.data[0];
       if (!userData) {
         throw new Error("User not found");
       }
-
+  
       const userInfo = {
         name: userData.userName,
         email: userData.email,
         picture: null,
         sub: userData.id
       };
-
+  
       navigate("/app", {
         state: {
           accessToken: accessToken,
           userInfo: userInfo
         }
       });
-
     } catch (error) {
       console.error("Authentication failed:", error);
       setEmailError(true);
       setPasswordError(true);
-      localStorage.removeItem("accessToken"); // Clean up on failure
+      localStorage.removeItem("accessToken");
     } finally {
       setLoading(false);
     }
   };
 
-  const onLoginStart = useCallback(() => {
-    // Optional: Do something before Facebook login starts
-  }, []);
+  const onLoginStart = useCallback(() => {}, []);
 
   const onLogoutSuccess = useCallback(() => {
     setProfile(null);
     setProvider("");
-    localStorage.removeItem("accessToken"); // Clear token on logout
+    localStorage.removeItem("accessToken");
     navigate("/app");
   }, [navigate]);
 
-  const handleAuthError = (error) => {
-    // console.error("Authentication failed:", error);
-  };
+  const handleAuthError = (error) => {};
 
   const googleLogin = useGoogleLogin({
     onSuccess: async (codeResponse) => {
@@ -150,9 +148,10 @@ export default function Welcome() {
 
   const handleMicrosoftLogin = async () => {
     try {
-      const redirectUri = process.env.NODE_ENV === "development"
-        ? "http://localhost:3000"
-        : "https://lyncit-ai-frontend.vercel.app";
+      const redirectUri =
+        process.env.NODE_ENV === "development"
+          ? "http://localhost:3000"
+          : "https://lyncit-ai-frontend.vercel.app";
 
       const loginRequest = {
         scopes: ["user.read", "openid", "profile", "email"],

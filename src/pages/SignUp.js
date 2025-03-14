@@ -19,6 +19,11 @@ export default function SignUp() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  // Base URL for proxy based on environment
+  const proxyBaseUrl = process.env.NODE_ENV === "development"
+    ? "/api/proxy"
+    : "https://lyncit-ai-frontend.vercel.app/api/proxy";
+
   const handleSignUp = async () => {
     setLoading(true);
     setUserNameError(false);
@@ -26,13 +31,12 @@ export default function SignUp() {
     setPasswordError(false);
 
     try {
-      // Get admin token for authorization
       const tokenResponse = await axios.post(
-        "http://3.89.218.76:8006/authentication/token",
+        `${proxyBaseUrl}/authentication/token`,
         new URLSearchParams({
           grant_type: "",
-          username: "jsmith", // Static admin username
-          password: "password", // Static admin password
+          username: "jsmith",
+          password: "password",
           scope: "",
           client_id: "",
           client_secret: ""
@@ -47,9 +51,8 @@ export default function SignUp() {
 
       const accessToken = tokenResponse.data.access_token;
 
-      // Check if username already exists
       const userCheckResponse = await axios.get(
-        `http://3.89.218.76:8006/user/read?username=${userName}`,
+        `${proxyBaseUrl}/user/read?username=${userName}`,
         {
           headers: {
             Authorization: `Bearer ${accessToken}`
@@ -57,16 +60,13 @@ export default function SignUp() {
         }
       );
 
-      // If response is not an empty array, username exists
       if (Array.isArray(userCheckResponse.data) && userCheckResponse.data.length > 0) {
         setUserNameError(true);
         throw new Error("Username already exists");
       }
-      // If response is empty array [], username doesn't exist, proceed
 
-      // Create new user
       const userData = {
-        activeFrom: new Date().toISOString().split('T')[0], // Current date
+        activeFrom: new Date().toISOString().split('T')[0],
         activeTo: null,
         authType: "internal",
         created: {
@@ -75,7 +75,7 @@ export default function SignUp() {
         },
         email: email,
         firstName: firstName,
-        id: crypto.randomUUID(), // Generate a random GUID
+        id: crypto.randomUUID(),
         lastName: lastName,
         password: password,
         phone: "",
@@ -93,7 +93,7 @@ export default function SignUp() {
       };
 
       await axios.post(
-        "http://3.89.218.76:8006/user/",
+        `${proxyBaseUrl}/user/`,
         userData,
         {
           headers: {
@@ -103,13 +103,11 @@ export default function SignUp() {
         }
       );
 
-      // Redirect to login page after successful signup
       navigate("/");
 
     } catch (error) {
       console.error("Sign up failed:", error);
       if (!userNameError) {
-        // Only set these errors if not already set by username check
         setEmailError(true);
         setPasswordError(true);
       }
