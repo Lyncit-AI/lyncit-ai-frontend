@@ -27,8 +27,8 @@ export default function Welcome() {
   // Base URL for proxy based on environment
   const proxyBaseUrl =
     process.env.NODE_ENV === "development"
-      ? "/api/proxy"
-      : "https://lyncit-ai-frontend.vercel.app/api/proxy";
+      ? "/api"
+      : "/api";
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
@@ -45,8 +45,8 @@ export default function Welcome() {
         `${proxyBaseUrl}/authentication/token`,
         new URLSearchParams({
           grant_type: "",
-          username: email, // Use form input
-          password: password, // Use form input
+          username: "jsmith", // Use form input
+          password: "password", // Use form input
           scope: "",
           client_id: "",
           client_secret: ""

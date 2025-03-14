@@ -21,8 +21,8 @@ export default function SignUp() {
 
   // Base URL for proxy based on environment
   const proxyBaseUrl = process.env.NODE_ENV === "development"
-    ? "/api/proxy"
-    : "https://lyncit-ai-frontend.vercel.app/api/proxy";
+    ? "/api"
+    : "/api";
 
   const handleSignUp = async () => {
     setLoading(true);
