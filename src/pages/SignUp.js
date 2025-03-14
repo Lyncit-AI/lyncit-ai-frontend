@@ -1,107 +1,120 @@
-import React, { useState, useCallback } from "react";
+import React, { useState } from "react";
 import axios from "axios";
 import Nurse from "../assets/images/Section.webp";
 import { useNavigate } from "react-router-dom";
-import { useGoogleLogin } from "@react-oauth/google";
-import { useMsal } from "@azure/msal-react";
-import { InteractionRequiredAuthError } from "@azure/msal-browser";
-import { LoginSocialFacebook } from "reactjs-social-login";
 import Input from "../components/ui/Input";
 import Button from "../components/ui/Button";
 import PasswordInput from "../components/ui/PasswordInput";
 import SignUpBanner from "../components/auth/SignUpBanner";
-import SocialAuthButtons from "../components/auth/SocialAuthButtons";
 
 export default function SignUp() {
+  const [userName, setUserName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [userNameError, setUserNameError] = useState(false);
   const [emailError, setEmailError] = useState(false);
   const [passwordError, setPasswordError] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { instance } = useMsal();
-  const [provider, setProvider] = useState("");
-  const [profile, setProfile] = useState();
 
-  const onLoginStart = useCallback(() => {
-    // Optional: Do something before Facebook login starts
-  }, []);
+  const handleSignUp = async () => {
+    setLoading(true);
+    setUserNameError(false);
+    setEmailError(false);
+    setPasswordError(false);
 
-  const onLogoutSuccess = useCallback(() => {
-    setProfile(null);
-    setProvider("");
-    navigate("/app");
-  }, [navigate]);
-
-  const handleAuthSuccess = (response) => {
-    // console.log("Authentication successful:", response);
-    navigate("/app");
-  };
-
-  const handleAuthError = (error) => {
-    // console.error("Authentication failed:", error);
-  };
-
-  const googleLogin = useGoogleLogin({
-    onSuccess: async (codeResponse) => {
-      setLoading(true);
-      try {
-        const userInfo = await axios.get(
-          "https://www.googleapis.com/oauth2/v3/userinfo",
-          {
-            headers: {
-              Authorization: `Bearer ${codeResponse.access_token}`,
-            },
-          }
-        );
-        console.log("User Info:", userInfo.data);
-        navigate("/app");
-      } catch (error) {
-        // console.error("Error fetching user info:", error);
-      } finally {
-        setLoading(false);
-      }
-    },
-    onError: (error) => {
-      // console.error("Login Failed:", error);
-      setLoading(false);
-    },
-    scope: "email profile",
-  });
-
-  const handleMicrosoftLogin = async () => {
     try {
-      const loginRequest = {
-        scopes: ["user.read", "openid", "profile", "email"],
-        prompt: "select_account",
-        redirectUri: "http://localhost:3000",
+      // Get admin token for authorization
+      const tokenResponse = await axios.post(
+        "http://3.89.218.76:8006/authentication/token",
+        new URLSearchParams({
+          grant_type: "",
+          username: "jsmith", // Static admin username
+          password: "password", // Static admin password
+          scope: "",
+          client_id: "",
+          client_secret: ""
+        }),
+        {
+          headers: {
+            "accept": "application/json",
+            "Content-Type": "application/x-www-form-urlencoded"
+          }
+        }
+      );
+
+      const accessToken = tokenResponse.data.access_token;
+
+      // Check if username already exists
+      const userCheckResponse = await axios.get(
+        `http://3.89.218.76:8006/user/read?username=${userName}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`
+          }
+        }
+      );
+
+      // If response is not an empty array, username exists
+      if (Array.isArray(userCheckResponse.data) && userCheckResponse.data.length > 0) {
+        setUserNameError(true);
+        throw new Error("Username already exists");
+      }
+      // If response is empty array [], username doesn't exist, proceed
+
+      // Create new user
+      const userData = {
+        activeFrom: new Date().toISOString().split('T')[0], // Current date
+        activeTo: null,
+        authType: "internal",
+        created: {
+          By: "system",
+          Timestamp: new Date().toISOString()
+        },
+        email: email,
+        firstName: firstName,
+        id: crypto.randomUUID(), // Generate a random GUID
+        lastName: lastName,
+        password: password,
+        phone: "",
+        roles: [{
+          departmentId: "",
+          orgId: "",
+          roleIDs: []
+        }],
+        status: "active",
+        updated: {
+          By: "system",
+          Timestamp: new Date().toISOString()
+        },
+        userName: userName
       };
 
-      const response = await instance.loginPopup(loginRequest);
-      if (response) {
-        console.log("Login successful", response);
-        const tokenResponse = await instance.acquireTokenSilent({
-          ...loginRequest,
-          account: response.account,
-        });
-        handleAuthSuccess({
-          token: tokenResponse.accessToken,
-          user: response.account,
-        });
-      }
-    } catch (error) {
-      // console.error("Login failed", error);
-      if (error instanceof InteractionRequiredAuthError) {
-        try {
-          await instance.acquireTokenPopup({
-            scopes: ["user.read", "openid", "profile", "email"],
-          });
-        } catch (err) {
-          handleAuthError(err);
+      await axios.post(
+        "http://3.89.218.76:8006/user/",
+        userData,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            "Content-Type": "application/json"
+          }
         }
-      } else {
-        handleAuthError(error);
+      );
+
+      // Redirect to login page after successful signup
+      navigate("/");
+
+    } catch (error) {
+      console.error("Sign up failed:", error);
+      if (!userNameError) {
+        // Only set these errors if not already set by username check
+        setEmailError(true);
+        setPasswordError(true);
       }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -116,6 +129,40 @@ export default function SignUp() {
             Welcome to Lyncit AI - Let's create your account
           </p>
           <div className="mt-8">
+            <div className="mb-5">
+              <label className="text-sm font-medium text-secondary">
+                Username
+              </label>
+              <Input
+                type="text"
+                placeholder="Username ..."
+                value={userName}
+                onChange={(e) => setUserName(e.target.value)}
+                className={userNameError ? "border-danger" : ""}
+              />
+            </div>
+            <div className="mb-5">
+              <label className="text-sm font-medium text-secondary">
+                First Name
+              </label>
+              <Input
+                type="text"
+                placeholder="First Name ..."
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+              />
+            </div>
+            <div className="mb-5">
+              <label className="text-sm font-medium text-secondary">
+                Last Name
+              </label>
+              <Input
+                type="text"
+                placeholder="Last Name ..."
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+              />
+            </div>
             <div className="mb-5">
               <label className="text-sm font-medium text-secondary">
                 Company Email
@@ -139,29 +186,23 @@ export default function SignUp() {
                 className={passwordError ? "border-danger" : ""}
               />
             </div>
-            <Button className="w-full bg-primary text-white rounded-lg mt-8">
-              Sign Up
+            <Button
+              onClick={handleSignUp}
+              className="w-full bg-primary text-white rounded-lg mt-8"
+              disabled={loading}
+            >
+              {loading ? "Signing Up..." : "Sign Up"}
             </Button>
           </div>
           <p className="mt-8 text-accent max-sm:text-center mb-8">
             Already have an account?
             <a
-              href="/login"
+              href="/"
               className="text-primary ml-1 underline underline-offset-2"
             >
               Login
             </a>
           </p>
-          <SocialAuthButtons
-            googleLogin={googleLogin}
-            loading={loading}
-            handleMicrosoftLogin={handleMicrosoftLogin}
-            onLoginStart={onLoginStart}
-            onLogoutSuccess={onLogoutSuccess}
-            setProvider={setProvider}
-            setProfile={setProfile}
-            LoginSocialFacebook={LoginSocialFacebook}
-          />
         </div>
       </div>
       <SignUpBanner Nurse={Nurse} />

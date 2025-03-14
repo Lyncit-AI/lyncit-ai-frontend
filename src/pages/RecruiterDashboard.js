@@ -1,9 +1,10 @@
 import React from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import Sidebar from "../components/ui/Sidebar";
 
 const RecruiterDashboard = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   
   const { accessToken, userInfo } = location.state || {};
   
@@ -11,6 +12,11 @@ const RecruiterDashboard = () => {
   const userEmail = userInfo?.email || "";
   const userPicture = userInfo?.picture || "";
   const userId = userInfo?.sub || "";
+
+  const handleLogout = () => {
+    localStorage.removeItem("accessToken");
+    navigate("/"); // Assuming "/" is your login route
+  };
 
   return (
     <div className="flex h-screen w-full bg-gray-100">
@@ -44,7 +50,13 @@ const RecruiterDashboard = () => {
         {accessToken ? (
           <div className="bg-white p-4 rounded-lg shadow">
             <h2 className="text-lg font-semibold mb-2">Access Token</h2>
-            <p className="break-all text-sm">{accessToken}</p>
+            <p className="break-all text-sm mb-4">{accessToken}</p>
+            <button
+              onClick={handleLogout}
+              className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded"
+            >
+              Logout
+            </button>
           </div>
         ) : (
           <p className="text-gray-500">No access token available</p>

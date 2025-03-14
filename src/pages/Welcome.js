@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import axios from "axios";
 import Nurse from "../assets/images/Section.webp";
 import { useNavigate } from "react-router-dom";
@@ -12,7 +12,6 @@ import Button from "../components/ui/Button";
 import PasswordInput from "../components/ui/PasswordInput";
 import SignUpBanner from "../components/auth/SignUpBanner";
 import SocialAuthButtons from "../components/auth/SocialAuthButtons";
-import keycloak from "../keycloak";
 
 export default function Welcome() {
   const [email, setEmail] = useState("");
@@ -25,20 +24,76 @@ export default function Welcome() {
   const [provider, setProvider] = useState("");
   const [profile, setProfile] = useState();
 
-  const isValidEmail = (value) => {
-    const pattern = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$/;
-    return pattern.test(value);
-  };
+  // Check for existing token on component mount
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+      navigate("/app");
+    }
+  }, [navigate]);
 
-  const handleSignIn = () => {
-    const validEmail = email.trim() !== "" && isValidEmail(email);
-    const validPassword = password.trim() !== "";
+  const handleSignIn = async () => {
+    setLoading(true);
+    try {
+      // First get authentication token
+      const tokenResponse = await axios.post(
+        "http://3.89.218.76:8006/authentication/token",
+        new URLSearchParams({
+          grant_type: "",
+          username: "jsmith",
+          password: "password",
+          scope: "",
+          client_id: "",
+          client_secret: ""
+        }),
+        {
+          headers: {
+            "accept": "application/json",
+            "Content-Type": "application/x-www-form-urlencoded"
+          }
+        }
+      );
 
-    setEmailError(!validEmail);
-    setPasswordError(!validPassword);
+      const accessToken = tokenResponse.data.access_token;
+      // Store token in localStorage
+      localStorage.setItem("accessToken", accessToken);
 
-    if (validEmail && validPassword) {
-      // console.log("Sign In Successful!");
+      // Get user details with authorization header
+      const userResponse = await axios.get(
+        `http://3.89.218.76:8006/user/read?username=${email}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`
+          }
+        }
+      );
+      
+      const userData = userResponse.data[0];
+      if (!userData) {
+        throw new Error("User not found");
+      }
+
+      const userInfo = {
+        name: userData.userName,
+        email: userData.email,
+        picture: null,
+        sub: userData.id
+      };
+
+      navigate("/app", {
+        state: {
+          accessToken: accessToken,
+          userInfo: userInfo
+        }
+      });
+
+    } catch (error) {
+      console.error("Authentication failed:", error);
+      setEmailError(true);
+      setPasswordError(true);
+      localStorage.removeItem("accessToken"); // Clean up on failure
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -49,13 +104,9 @@ export default function Welcome() {
   const onLogoutSuccess = useCallback(() => {
     setProfile(null);
     setProvider("");
+    localStorage.removeItem("accessToken"); // Clear token on logout
     navigate("/app");
   }, [navigate]);
-
-  const handleAuthSuccess = (response) => {
-    console.log("Authentication successful:", response);
-    navigate("/app");
-  };
 
   const handleAuthError = (error) => {
     // console.error("Authentication failed:", error);
@@ -65,27 +116,27 @@ export default function Welcome() {
     onSuccess: async (codeResponse) => {
       setLoading(true);
       try {
-        console.log("Access Token:", codeResponse.access_token);
+        const accessToken = codeResponse.access_token;
+        localStorage.setItem("accessToken", accessToken);
 
         const userInfo = await axios.get(
           "https://www.googleapis.com/oauth2/v3/userinfo",
           {
             headers: {
-              Authorization: `Bearer ${codeResponse.access_token}`
+              Authorization: `Bearer ${accessToken}`
             }
           }
         );
 
-        console.log("User Info:", userInfo.data);
-
         navigate("/app", {
           state: {
-            accessToken: codeResponse.access_token,
+            accessToken: accessToken,
             userInfo: userInfo.data
           }
         });
       } catch (error) {
         console.error("Error fetching user info:", error);
+        localStorage.removeItem("accessToken");
       } finally {
         setLoading(false);
       }
@@ -97,19 +148,11 @@ export default function Welcome() {
     scope: "email profile"
   });
 
-  const handleLogin = () => {
-    const samlLoginUrl = `https://idp.lyncit.com:8443/realms/master/protocol/saml/SSO?client_id=recruiter&RelayState=${encodeURIComponent(
-      "https://lyncit-ai-frontend.vercel.app/app"
-    )}`;
-
-    window.location.href = samlLoginUrl;
-  };
-
   const handleMicrosoftLogin = async () => {
     try {
       const redirectUri = process.env.NODE_ENV === "development"
-      ? "http://localhost:3000"
-      : "https://lyncit-ai-frontend.vercel.app";
+        ? "http://localhost:3000"
+        : "https://lyncit-ai-frontend.vercel.app";
 
       const loginRequest = {
         scopes: ["user.read", "openid", "profile", "email"],
@@ -119,11 +162,13 @@ export default function Welcome() {
 
       const response = await instance.loginPopup(loginRequest);
       if (response) {
-        console.log("Login successful", response);
         const tokenResponse = await instance.acquireTokenSilent({
           ...loginRequest,
           account: response.account
         });
+
+        const accessToken = tokenResponse.accessToken;
+        localStorage.setItem("accessToken", accessToken);
 
         let pictureUrl = null;
         try {
@@ -132,7 +177,7 @@ export default function Welcome() {
             {
               responseType: "blob",
               headers: {
-                Authorization: `Bearer ${tokenResponse.accessToken}`
+                Authorization: `Bearer ${accessToken}`
               }
             }
           );
@@ -154,7 +199,7 @@ export default function Welcome() {
 
         navigate("/app", {
           state: {
-            accessToken: tokenResponse.accessToken,
+            accessToken: accessToken,
             userInfo: userInfo
           }
         });
@@ -170,6 +215,7 @@ export default function Welcome() {
         }
       } else {
         handleAuthError(error);
+        localStorage.removeItem("accessToken");
       }
     }
   };
@@ -223,10 +269,11 @@ export default function Welcome() {
               </a>
             </div>
             <Button
-              onClick={handleLogin}
+              onClick={handleSignIn}
               className="w-full bg-primary text-white rounded-lg mt-8"
+              disabled={loading}
             >
-              Sign In
+              {loading ? "Signing In..." : "Sign In"}
             </Button>
           </div>
           <div className="my-3 text-center text-xs text-accent">or</div>
