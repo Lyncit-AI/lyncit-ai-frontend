@@ -18,13 +18,13 @@ const Sidebar = ({ name, picture }) => {
   return (
     <div className="w-[90px] max-sm:hidden">
     <motion.div
-      className="fixed top-0 left-0 h-screen px-4 bg-white shadow-md z-50 overflow-hidden flex-col"
+      className="fixed top-0 left-0 h-screen px-4 bg-white shadow-md overflow-hidden flex flex-col"
       initial={{ minWidth: "90px" }}
       animate={{
         minWidth: expanded ? "285px" : "90px",
         maxWidth: expanded ? "285px" : "90px"
       }}
-      transition={{ duration: 0.5, ease: "easeInOut" }}
+      transition={{ duration: 0.3, ease: "easeInOut" }}
       onMouseEnter={() => setExpanded(true)}
       onMouseLeave={() => setExpanded(false)}
     >
@@ -55,11 +55,11 @@ const Sidebar = ({ name, picture }) => {
           ].map(({ icon: Icon, label }) => (
             <div
               key={label}
-              className="flex items-center gap-6 px-3 py-4 cursor-pointer rounded-lg transition-all duration-300 delay-100 hover:bg-[#F1EAF6]"
+              className="flex items-center gap-2 px-3 py-4 cursor-pointer hover:bg-[#F1EAF6] rounded-lg"
             >
-              <Icon className="w-5 h-5 shrink-0" strokeWidth={1.2} />
+              <Icon className="w-5 h-5 shrink-0" strokeWidth={1.5} />
               <span
-                className={`flex-1 min-w-0 text-sm truncate transition-opacity ${expanded ? "visible opacity-100" : "invisible opacity-0"}`}
+                className={`flex-1 min-w-0 truncate transition-opacity ${expanded ? "visible opacity-100" : "invisible opacity-0"}`}
               >
                 {label}
               </span>
@@ -73,9 +73,9 @@ const Sidebar = ({ name, picture }) => {
           >
             Identity
           </span>
-          <div
+          <div 
             className={`flex-1 border-t border-gray-300 ${expanded ? "ml-2 w-16" : "w-full"}`}
-          ></div>
+            ></div>
         </div>
         <nav className="w-full mt-2">
           {[
@@ -84,11 +84,11 @@ const Sidebar = ({ name, picture }) => {
           ].map(({ icon: Icon, label }) => (
             <div
               key={label}
-              className="flex items-center gap-6 px-3 py-4 cursor-pointer rounded-lg transition-all duration-300 delay-100 hover:bg-[#F1EAF6]"
+              className="flex items-center gap-4 px-3 py-4 cursor-pointer hover:bg-[#F1EAF6] rounded-lg"
             >
-              <Icon className="w-5 h-5 shrink-0" strokeWidth={1.2} />
+              <Icon className="w-5 h-5 shrink-0" strokeWidth={1.5} />
               <span
-                className={`flex-1 min-w-0 text-sm truncate transition-opacity ${expanded ? "visible opacity-100" : "invisible opacity-0"}`}
+                className={`flex-1 min-w-0 truncate transition-opacity ${expanded ? "visible opacity-100" : "invisible opacity-0"}`}
               >
                 {label}
               </span>
@@ -97,13 +97,11 @@ const Sidebar = ({ name, picture }) => {
         </nav>
         <div className="relative flex items-center h-8 px-3 mt-6">
           <span
-            className={`text-gray-500 text-xs uppercase transition-opacity ${expanded ? "visible opacity-100" : "invisible hidden opacity-0"}`}
+             className={`text-gray-500 text-xs uppercase transition-opacity ${expanded ? "visible opacity-100" : "invisible hidden opacity-0"}`}
           >
             Lead
           </span>
-          <div
-            className={`flex-1 border-t border-gray-300 ${expanded ? "ml-2 w-16" : "w-full"}`}
-          ></div>
+          <div className={`flex-1 border-t border-gray-300 ${expanded ? "ml-2 w-16" : "w-full"}`}></div>
         </div>
         <nav className="w-full mt-2">
           {[
@@ -114,11 +112,11 @@ const Sidebar = ({ name, picture }) => {
           ].map(({ icon: Icon, label }) => (
             <div
               key={label}
-              className="flex items-center gap-6 px-3 py-4 cursor-pointer rounded-lg transition-all duration-300 delay-100 hover:bg-[#F1EAF6]"
+              className="flex items-center gap-4 px-3 py-4 cursor-pointer hover:bg-[#F1EAF6] rounded-lg"
             >
-              <Icon className="w-5 h-5 shrink-0" strokeWidth={1.2} />
+              <Icon className="w-5 h-5 shrink-0" strokeWidth={1.5} />
               <span
-                className={`flex-1 min-w-0 text-sm truncate transition-opacity ${expanded ? "visible opacity-100" : "invisible opacity-0"}`}
+                className={`flex-1 min-w-0 truncate transition-opacity ${expanded ? "visible opacity-100" : "invisible opacity-0"}`}
               >
                 {label}
               </span>
