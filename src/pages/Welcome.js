@@ -30,12 +30,12 @@ export default function Welcome() {
       ? "/api"
       : "/api";
 
-  useEffect(() => {
-    const token = localStorage.getItem("accessToken");
-    if (token) {
-      navigate("/app");
-    }
-  }, [navigate]);
+  // useEffect(() => {
+  //   const token = localStorage.getItem("accessToken");
+  //   if (token) {
+  //     navigate("/app");
+  //   }
+  // }, [navigate]);
 
   const handleSignIn = async () => {
     setLoading(true);
@@ -60,7 +60,7 @@ export default function Welcome() {
       );
   
       const accessToken = tokenResponse.data.access_token;
-      localStorage.setItem("accessToken", accessToken);
+      // localStorage.setItem("accessToken", accessToken);
   
       const userResponse = await axios.get(
         `${proxyBaseUrl}/user/read?username=${email}`,
@@ -115,7 +115,7 @@ export default function Welcome() {
       setLoading(true);
       try {
         const accessToken = codeResponse.access_token;
-        localStorage.setItem("accessToken", accessToken);
+        // localStorage.setItem("accessToken", accessToken);
 
         const userInfo = await axios.get(
           "https://www.googleapis.com/oauth2/v3/userinfo",
@@ -167,7 +167,7 @@ export default function Welcome() {
         });
 
         const accessToken = tokenResponse.accessToken;
-        localStorage.setItem("accessToken", accessToken);
+        // localStorage.setItem("accessToken", accessToken);
 
         let pictureUrl = null;
         try {
