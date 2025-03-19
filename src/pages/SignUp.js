@@ -20,9 +20,7 @@ export default function SignUp() {
   const navigate = useNavigate();
 
   // Base URL for proxy based on environment
-  const proxyBaseUrl = process.env.NODE_ENV === "development"
-    ? "/api"
-    : "/api";
+  const proxyBaseUrl = "https://lyncitapplications.xyz:8086";
 
   const handleSignUp = async () => {
     setLoading(true);
