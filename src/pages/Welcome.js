@@ -25,7 +25,7 @@ export default function Welcome() {
   const [profile, setProfile] = useState();
 
   // Base URL for proxy based on environment
-  const proxyBaseUrl = process.env.NODE_ENV === "development" ? "/api" : "/api";
+  const proxyBaseUrl = "https://lyncitapplications.xyz:8086";
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
