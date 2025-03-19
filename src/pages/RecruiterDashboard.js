@@ -1,16 +1,23 @@
-import React from "react";
-import { useLocation } from "react-router-dom";
+import React, { useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import Sidebar from "../components/ui/Sidebar";
 import Logo from "../assets/logo/logo";
 import JobPostingModal from "../components/ui/JobPostingModal";
 
 const RecruiterDashboard = () => {
   const location = useLocation();
-  // const navigate = useNavigate();
-  
+  const navigate = useNavigate();
+
   // const { accessToken, userInfo } = location.state || {};
   const { userInfo } = location.state || {};
-  
+
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) {
+      navigate("/");
+    }
+  }, [navigate]);
+
   const userName = userInfo?.name || "";
   // const userEmail = userInfo?.email || "";
   const userPicture = userInfo?.picture || "";

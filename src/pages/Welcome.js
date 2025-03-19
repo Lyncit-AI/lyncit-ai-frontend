@@ -25,22 +25,22 @@ export default function Welcome() {
   const [profile, setProfile] = useState();
 
   // Base URL for proxy based on environment
-  const proxyBaseUrl =
-    process.env.NODE_ENV === "development"
-      ? "/api"
-      : "/api";
+  const proxyBaseUrl = process.env.NODE_ENV === "development" ? "/api" : "/api";
 
-  // useEffect(() => {
-  //   const token = localStorage.getItem("accessToken");
-  //   if (token) {
-  //     navigate("/app");
-  //   }
-  // }, [navigate]);
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (token) {
+      navigate("/app");
+    }
+  }, [navigate]);
 
   const handleSignIn = async () => {
     setLoading(true);
     try {
-      console.log("Fetching token from:", `${proxyBaseUrl}/authentication/token`);
+      console.log(
+        "Fetching token from:",
+        `${proxyBaseUrl}/authentication/token`
+      );
       const tokenResponse = await axios.post(
         `${proxyBaseUrl}/authentication/token`,
         new URLSearchParams({
@@ -58,10 +58,10 @@ export default function Welcome() {
           }
         }
       );
-  
+
       const accessToken = tokenResponse.data.access_token;
-      // localStorage.setItem("accessToken", accessToken);
-  
+      localStorage.setItem("accessToken", accessToken);
+
       const userResponse = await axios.get(
         `${proxyBaseUrl}/user/read?username=${email}`,
         {
@@ -70,19 +70,19 @@ export default function Welcome() {
           }
         }
       );
-  
+
       const userData = userResponse.data[0];
       if (!userData) {
         throw new Error("User not found");
       }
-  
+
       const userInfo = {
         name: userData.userName,
         email: userData.email,
         picture: null,
         sub: userData.id
       };
-  
+
       navigate("/app", {
         state: {
           accessToken: accessToken,
@@ -115,7 +115,7 @@ export default function Welcome() {
       setLoading(true);
       try {
         const accessToken = codeResponse.access_token;
-        // localStorage.setItem("accessToken", accessToken);
+        localStorage.setItem("accessToken", accessToken);
 
         const userInfo = await axios.get(
           "https://www.googleapis.com/oauth2/v3/userinfo",
@@ -167,7 +167,7 @@ export default function Welcome() {
         });
 
         const accessToken = tokenResponse.accessToken;
-        // localStorage.setItem("accessToken", accessToken);
+        localStorage.setItem("accessToken", accessToken);
 
         let pictureUrl = null;
         try {

@@ -57,6 +57,7 @@ export default function SocialAuthButtons({
           const providerName = "facebook";
 
           const accessToken = data.accessToken || "";
+          localStorage.setItem("accessToken", accessToken);
 
           navigate("/app", {
             state: {
