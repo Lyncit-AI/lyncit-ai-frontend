@@ -83,6 +83,8 @@ export default function Welcome() {
         sub: userData.id
       };
 
+      localStorage.setItem("userInfo", JSON.stringify(userInfo));
+
       navigate("/app", {
         state: {
           accessToken: accessToken,
@@ -94,6 +96,7 @@ export default function Welcome() {
       setEmailError(true);
       setPasswordError(true);
       localStorage.removeItem("accessToken");
+      localStorage.removeItem("userInfo");
     } finally {
       setLoading(false);
     }
@@ -105,6 +108,7 @@ export default function Welcome() {
     setProfile(null);
     setProvider("");
     localStorage.removeItem("accessToken");
+    localStorage.removeItem("userInfo");
     navigate("/app");
   }, [navigate]);
 
@@ -126,6 +130,8 @@ export default function Welcome() {
           }
         );
 
+        localStorage.setItem("userInfo", JSON.stringify(userInfo.data));
+
         navigate("/app", {
           state: {
             accessToken: accessToken,
@@ -135,6 +141,7 @@ export default function Welcome() {
       } catch (error) {
         console.error("Error fetching user info:", error);
         localStorage.removeItem("accessToken");
+        localStorage.removeItem("userInfo");
       } finally {
         setLoading(false);
       }
@@ -196,6 +203,8 @@ export default function Welcome() {
           sub: response.account.localAccountId || response.account.homeAccountId
         };
 
+        localStorage.setItem("userInfo", JSON.stringify(userInfo));
+
         navigate("/app", {
           state: {
             accessToken: accessToken,
@@ -215,6 +224,7 @@ export default function Welcome() {
       } else {
         handleAuthError(error);
         localStorage.removeItem("accessToken");
+        localStorage.removeItem("userInfo");
       }
     }
   };

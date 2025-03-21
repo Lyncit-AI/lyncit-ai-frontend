@@ -58,6 +58,7 @@ export default function SocialAuthButtons({
 
           const accessToken = data.accessToken || "";
           localStorage.setItem("accessToken", accessToken);
+          localStorage.setItem("userInfo", JSON.stringify(userInfo));
 
           navigate("/app", {
             state: {
@@ -72,6 +73,7 @@ export default function SocialAuthButtons({
         }}
         onReject={(err) => {
           console.log(err);
+          localStorage.removeItem("userInfo");
         }}
       >
         <Button
