@@ -242,7 +242,7 @@ export default function Welcome() {
           <div className="mt-8">
             <div className="mb-5">
               <label className="text-sm font-medium text-secondary">
-                Email
+                Name
               </label>
               <Input
                 type="email"
