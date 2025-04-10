@@ -138,7 +138,7 @@ const Sidebar = ({ name, picture }) => {
         <nav className="w-full flex mb-2">
           <button
             onClick={handleLogout}
-            className={`flex items-center w-full ${expanded ? "bg-[#493455]" : "text-black"}  hover:bg-red-600 text-white gap-0 px-3 py-4 cursor-pointer rounded-lg`}
+            className={`flex items-center w-full ${expanded ? "bg-[#493455]" : "text-black"}  hover:bg-[] text-white gap-0 px-3 py-4 cursor-pointer rounded-lg`}
           >
             <LogOut className="w-5 h-5 shrink-0" strokeWidth={1.5} />
             <span
