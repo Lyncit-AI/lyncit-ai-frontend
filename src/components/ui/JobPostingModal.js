@@ -2,9 +2,11 @@
 
 import * as Dialog from "@radix-ui/react-dialog";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { X } from "lucide-react";
 
 export default function JobPostingModal() {
+  const navigate = useNavigate();
   const [jobUrl, setJobUrl] = useState("");
   const [step, setStep] = useState(1);
   const [selectedCategory, setSelectedCategory] = useState(
@@ -70,6 +72,7 @@ export default function JobPostingModal() {
   };
 
   const handleSubmit = () => {
+    navigate("/question")
     console.log("Selected Keywords:", selectedKeywords);
   };
 

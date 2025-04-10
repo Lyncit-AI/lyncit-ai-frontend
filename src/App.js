@@ -7,6 +7,7 @@ import ForgotPassword from './pages/ForgotPassword';
 import RecruiterDashboard from './pages/RecruiterDashboard';
 import CandidateDashboard from './pages/CandidateDashboard';
 import CandidateQuestionnaire from './pages/CandidateQuestionnaire';
+import Questionaire from './pages/Questionaire';
 import NotFound from './pages/NotFound';
 
 const App = () => {
@@ -18,6 +19,7 @@ const App = () => {
         <Route path="/sign-up" element={<SignUp />} />
         <Route path="/forget" element={<ForgotPassword />} />
         <Route path="/app" element={<RecruiterDashboard />} />
+        <Route path="/question" element={<Questionaire />} />
         <Route path="/candidate-dashboard" element={<CandidateDashboard />} />
         <Route path="/candidate/:campaignId" element={<CandidateQuestionnaire />} />
         <Route path="*" element={<NotFound />} />

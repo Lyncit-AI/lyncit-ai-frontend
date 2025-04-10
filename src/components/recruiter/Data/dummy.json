@@ -1,0 +1,668 @@
+{
+    "nodes": [
+      {
+        "id": "node_1",
+        "position": {
+          "x": 100,
+          "y": 50
+        },
+        "data": {
+          "type": "options",
+          "title": "Years of Software Development Experience",
+          "isFirstNode": true,
+          "options": [
+            {
+              "id": "opt1",
+              "text": "0-2 years (Junior Developer)"
+            },
+            {
+              "id": "opt2",
+              "text": "3-5 years (Mid-level Developer)"
+            },
+            {
+              "id": "opt3",
+              "text": "6+ years (Senior Developer)"
+            }
+          ]
+        }
+      },
+      {
+        "id": "node_2",
+        "position": {
+          "x": 494,
+          "y": 56
+        },
+        "data": {
+          "type": "options",
+          "title": "Primary Programming Languages (Junior)",
+          "isFirstNode": false,
+          "options": [
+            {
+              "id": "opt1",
+              "text": "JavaScript/TypeScript"
+            },
+            {
+              "id": "opt2",
+              "text": "Python/Ruby"
+            },
+            {
+              "id": "opt3",
+              "text": "Java/C#"
+            }
+          ]
+        }
+      },
+      {
+        "id": "node_3",
+        "position": {
+          "x": 512,
+          "y": 456
+        },
+        "data": {
+          "type": "options",
+          "title": "Primary Programming Languages (Mid-level)",
+          "isFirstNode": false,
+          "options": [
+            {
+              "id": "opt1",
+              "text": "JavaScript/TypeScript"
+            },
+            {
+              "id": "opt2",
+              "text": "Python/Ruby"
+            },
+            {
+              "id": "opt3",
+              "text": "Java/C#"
+            }
+          ]
+        }
+      },
+      {
+        "id": "node_4",
+        "position": {
+          "x": 465.8701225786051,
+          "y": 917.325255000897
+        },
+        "data": {
+          "type": "text",
+          "title": "Describe your systems architecture experience",
+          "isFirstNode": false,
+          "options": [
+            {
+              "id": "opt1",
+              "text": "Option 1"
+            }
+          ],
+          "answerText": ""
+        }
+      },
+      {
+        "id": "node_5",
+        "position": {
+          "x": 950,
+          "y": -12.799999999999955
+        },
+        "data": {
+          "type": "text",
+          "title": "Describe your experience with JavaScript frameworks",
+          "isFirstNode": false,
+          "options": [
+            {
+              "id": "opt1",
+              "text": "Option 1"
+            }
+          ],
+          "answerText": ""
+        }
+      },
+      {
+        "id": "node_6",
+        "position": {
+          "x": 972,
+          "y": 228
+        },
+        "data": {
+          "type": "text",
+          "title": "Describe your experience with Python libraries",
+          "isFirstNode": false,
+          "options": [
+            {
+              "id": "opt1",
+              "text": "Option 1"
+            }
+          ],
+          "answerText": ""
+        }
+      },
+      {
+        "id": "node_7",
+        "position": {
+          "x": 964,
+          "y": 482
+        },
+        "data": {
+          "type": "text",
+          "title": "Describe your experience with Java/C# enterprise applications",
+          "isFirstNode": false,
+          "options": [
+            {
+              "id": "opt1",
+              "text": "Option 1"
+            }
+          ],
+          "answerText": ""
+        }
+      },
+      {
+        "id": "node_8",
+        "position": {
+          "x": 906,
+          "y": 840
+        },
+        "data": {
+          "type": "options",
+          "title": "Team Leadership Experience",
+          "isFirstNode": false,
+          "options": [
+            {
+              "id": "opt1",
+              "text": "Led large teams (10+ people)"
+            },
+            {
+              "id": "opt2",
+              "text": "Led small teams (3-9 people)"
+            },
+            {
+              "id": "opt3",
+              "text": "Tech lead/mentor role"
+            }
+          ]
+        }
+      },
+      {
+        "id": "node_9",
+        "position": {
+          "x": 1378,
+          "y": -48
+        },
+        "data": {
+          "type": "options",
+          "title": "Frontend Experience Level",
+          "isFirstNode": false,
+          "options": [
+            {
+              "id": "opt1",
+              "text": "Beginner"
+            },
+            {
+              "id": "opt2",
+              "text": "Intermediate"
+            },
+            {
+              "id": "opt3",
+              "text": "Advanced"
+            }
+          ]
+        }
+      },
+      {
+        "id": "node_10",
+        "position": {
+          "x": 1368,
+          "y": 294
+        },
+        "data": {
+          "type": "options",
+          "title": "Data Science Experience",
+          "isFirstNode": false,
+          "options": [
+            {
+              "id": "opt1",
+              "text": "Beginner"
+            },
+            {
+              "id": "opt2",
+              "text": "Intermediate"
+            },
+            {
+              "id": "opt3",
+              "text": "Advanced"
+            }
+          ]
+        }
+      },
+      {
+        "id": "node_11",
+        "position": {
+          "x": 1376,
+          "y": 628
+        },
+        "data": {
+          "type": "options",
+          "title": "Backend Experience Level",
+          "isFirstNode": false,
+          "options": [
+            {
+              "id": "opt1",
+              "text": "Beginner"
+            },
+            {
+              "id": "opt2",
+              "text": "Intermediate"
+            },
+            {
+              "id": "opt3",
+              "text": "Advanced"
+            }
+          ]
+        }
+      },
+      {
+        "id": "node_12",
+        "position": {
+          "x": 1384,
+          "y": 1010
+        },
+        "data": {
+          "type": "options",
+          "title": "Expected Compensation (Senior)",
+          "isFirstNode": false,
+          "options": [
+            {
+              "id": "opt1",
+              "text": "$120,000 - $150,000"
+            },
+            {
+              "id": "opt2",
+              "text": "$150,000 - $180,000"
+            },
+            {
+              "id": "opt3",
+              "text": "$180,000+"
+            }
+          ]
+        }
+      },
+      {
+        "id": "node_13",
+        "position": {
+          "x": 1890,
+          "y": 12
+        },
+        "data": {
+          "type": "text",
+          "title": "Please provide links to your frontend projects",
+          "isFirstNode": false,
+          "options": [
+            {
+              "id": "opt1",
+              "text": "Option 1"
+            }
+          ],
+          "answerText": ""
+        }
+      },
+      {
+        "id": "node_14",
+        "position": {
+          "x": 1922,
+          "y": 260
+        },
+        "data": {
+          "type": "text",
+          "title": "Please provide links to your data science projects",
+          "isFirstNode": false,
+          "options": [
+            {
+              "id": "opt1",
+              "text": "Option 1"
+            }
+          ],
+          "answerText": ""
+        }
+      },
+      {
+        "id": "node_15",
+        "position": {
+          "x": 1910,
+          "y": 526
+        },
+        "data": {
+          "type": "text",
+          "title": "Please provide links to your backend projects",
+          "isFirstNode": false,
+          "options": [
+            {
+              "id": "opt1",
+              "text": "Option 1"
+            }
+          ],
+          "answerText": ""
+        }
+      },
+      {
+        "id": "node_16",
+        "position": {
+          "x": 1884,
+          "y": 838
+        },
+        "data": {
+          "type": "options",
+          "title": "Work Location Preference",
+          "isFirstNode": false,
+          "options": [
+            {
+              "id": "opt1",
+              "text": "Remote"
+            },
+            {
+              "id": "opt2",
+              "text": "Hybrid"
+            },
+            {
+              "id": "opt3",
+              "text": "On-site"
+            }
+          ]
+        }
+      },
+      {
+        "id": "node_17",
+        "position": {
+          "x": 2426,
+          "y": -54.39999999999975
+        },
+        "data": {
+          "type": "options",
+          "title": "Availability for Technical Interview",
+          "isFirstNode": false,
+          "options": [
+            {
+              "id": "opt1",
+              "text": "Within 1 week"
+            },
+            {
+              "id": "opt2",
+              "text": "Within 2 weeks"
+            },
+            {
+              "id": "opt3",
+              "text": "After 2 weeks"
+            }
+          ]
+        }
+      },
+      {
+        "id": "node_18",
+        "position": {
+          "x": 2426,
+          "y": 272
+        },
+        "data": {
+          "type": "options",
+          "title": "Availability for Technical Interview",
+          "isFirstNode": false,
+          "options": [
+            {
+              "id": "opt1",
+              "text": "Within 1 week"
+            },
+            {
+              "id": "opt2",
+              "text": "Within 2 weeks"
+            },
+            {
+              "id": "opt3",
+              "text": "After 2 weeks"
+            }
+          ]
+        }
+      },
+      {
+        "id": "node_19",
+        "position": {
+          "x": 2428,
+          "y": 594
+        },
+        "data": {
+          "type": "options",
+          "title": "Availability for Technical Interview",
+          "isFirstNode": false,
+          "options": [
+            {
+              "id": "opt1",
+              "text": "Within 1 week"
+            },
+            {
+              "id": "opt2",
+              "text": "Within 2 weeks"
+            },
+            {
+              "id": "opt3",
+              "text": "After 2 weeks"
+            }
+          ]
+        }
+      },
+      {
+        "id": "node_20",
+        "position": {
+          "x": 2430,
+          "y": 916
+        },
+        "data": {
+          "type": "options",
+          "title": "Availability for Leadership Interview",
+          "isFirstNode": false,
+          "options": [
+            {
+              "id": "opt1",
+              "text": "Within 1 week"
+            },
+            {
+              "id": "opt2",
+              "text": "Within 2 weeks"
+            },
+            {
+              "id": "opt3",
+              "text": "After 2 weeks"
+            }
+          ]
+        }
+      },
+      {
+        "id": "node_21",
+        "position": {
+          "x": 2950,
+          "y": -46.80000000000007
+        },
+        "data": {
+          "type": "end",
+          "title": "Junior Frontend Application Complete",
+          "isFirstNode": false,
+          "options": [
+            {
+              "id": "opt1",
+              "text": "Option 1"
+            }
+          ],
+          "endText": "Thank you for applying to our Junior Frontend Developer position! We'll review your application and contact you within 5 business days regarding next steps."
+        }
+      },
+      {
+        "id": "node_22",
+        "position": {
+          "x": 2938,
+          "y": 280
+        },
+        "data": {
+          "type": "end",
+          "title": "Data Science Application Complete",
+          "isFirstNode": false,
+          "options": [
+            {
+              "id": "opt1",
+              "text": "Option 1"
+            }
+          ],
+          "endText": "Thank you for applying to our Data Science position! Your skills are impressive, and we'll be in touch within 3 business days to schedule your technical assessment."
+        }
+      },
+      {
+        "id": "node_23",
+        "position": {
+          "x": 3006,
+          "y": 642
+        },
+        "data": {
+          "type": "end",
+          "title": "Backend Developer Application Complete",
+          "isFirstNode": false,
+          "options": [
+            {
+              "id": "opt1",
+              "text": "Option 1"
+            }
+          ],
+          "endText": "Thank you for applying to our Backend Developer position! Our team will review your application and contact you shortly for the next steps in our interview process."
+        }
+      },
+      {
+        "id": "node_24",
+        "position": {
+          "x": 3036,
+          "y": 990
+        },
+        "data": {
+          "type": "end",
+          "title": "Senior Engineering Application Complete",
+          "isFirstNode": false,
+          "options": [
+            {
+              "id": "opt1",
+              "text": "Option 1"
+            }
+          ],
+          "endText": "Thank you for applying to our Senior Engineering position! Your experience is impressive. Our CTO will personally review your application and contact you within 48 hours."
+        }
+      }
+    ],
+    "edges": [
+      {
+        "source": "node_1",
+        "sourceHandle": "opt1",
+        "target": "node_2"
+      },
+      {
+        "source": "node_1",
+        "sourceHandle": "opt2",
+        "target": "node_3"
+      },
+      {
+        "source": "node_1",
+        "sourceHandle": "opt3",
+        "target": "node_4"
+      },
+      {
+        "source": "node_2",
+        "sourceHandle": "opt1",
+        "target": "node_5"
+      },
+      {
+        "source": "node_2",
+        "sourceHandle": "opt2",
+        "target": "node_6"
+      },
+      {
+        "source": "node_4",
+        "sourceHandle": "text-output",
+        "target": "node_8"
+      },
+      {
+        "source": "node_5",
+        "sourceHandle": "text-output",
+        "target": "node_9"
+      },
+      {
+        "source": "node_6",
+        "sourceHandle": "text-output",
+        "target": "node_10"
+      },
+      {
+        "source": "node_7",
+        "sourceHandle": "text-output",
+        "target": "node_11"
+      },
+      {
+        "source": "node_8",
+        "sourceHandle": "opt2",
+        "target": "node_12"
+      },
+      {
+        "source": "node_9",
+        "sourceHandle": "opt3",
+        "target": "node_13"
+      },
+      {
+        "source": "node_10",
+        "sourceHandle": "opt3",
+        "target": "node_14"
+      },
+      {
+        "source": "node_11",
+        "sourceHandle": "opt3",
+        "target": "node_15"
+      },
+      {
+        "source": "node_12",
+        "sourceHandle": "opt2",
+        "target": "node_16"
+      },
+      {
+        "source": "node_13",
+        "sourceHandle": "text-output",
+        "target": "node_17"
+      },
+      {
+        "source": "node_14",
+        "sourceHandle": "text-output",
+        "target": "node_18"
+      },
+      {
+        "source": "node_15",
+        "sourceHandle": "text-output",
+        "target": "node_19"
+      },
+      {
+        "source": "node_16",
+        "sourceHandle": "opt1",
+        "target": "node_20"
+      },
+      {
+        "source": "node_17",
+        "sourceHandle": "opt1",
+        "target": "node_21"
+      },
+      {
+        "source": "node_18",
+        "sourceHandle": "opt1",
+        "target": "node_22"
+      },
+      {
+        "source": "node_19",
+        "sourceHandle": "opt1",
+        "target": "node_23"
+      },
+      {
+        "source": "node_20",
+        "sourceHandle": "opt1",
+        "target": "node_24"
+      },
+      {
+        "source": "node_3",
+        "sourceHandle": "opt2",
+        "target": "node_7"
+      }
+    ]
+  }
