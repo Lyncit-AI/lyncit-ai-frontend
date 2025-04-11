@@ -53,3 +53,12 @@ code {
   width: 12px !important;
 
 }
+
+input[type='radio'] {
+  accent-color: #825C9A;
+}
+
+input:focus {
+  border-color: #825C9A !important;
+  outline: none;
+}

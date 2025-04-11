@@ -4,7 +4,8 @@ import { RadioGroup, RadioGroupItem } from "./ui/radio-group";
 import { Label } from "./ui/label";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
-import { Plus, X, Edit } from "lucide-react";
+import { Plus, X } from "lucide-react";
+import Edit from "../../assets/icons/edit"
 
 export function QuestionNode({ data, isConnectable, id }) {
   const [options, setOptions] = useState(data.options || []);
@@ -17,6 +18,8 @@ export function QuestionNode({ data, isConnectable, id }) {
   );
   const [answerText, setAnswerText] = useState(data.answerText || "");
   const [endText, setEndText] = useState(data.endText || "");
+  
+  const isViewOnly = data.isViewOnly === true;
 
   useEffect(() => {
     setOptions(data.options || []);
@@ -27,7 +30,7 @@ export function QuestionNode({ data, isConnectable, id }) {
   }, [data]);
 
   const updateNodeData = (newData) => {
-    if (data.updateNodeData) {
+    if (data.updateNodeData && !isViewOnly) {
       data.updateNodeData(id, newData);
     }
   };
@@ -45,7 +48,7 @@ export function QuestionNode({ data, isConnectable, id }) {
       setEditedOptions([...editedOptions, newOption.trim()]);
       setNewOption("");
       setShowInput(false);
-      
+
       updateNodeData({ options: updatedOptions });
     }
   };
@@ -54,7 +57,7 @@ export function QuestionNode({ data, isConnectable, id }) {
     const updatedOptions = options.filter((option) => option.id !== id);
     setOptions(updatedOptions);
     setEditedOptions(updatedOptions.map((option) => option.text));
-    
+
     updateNodeData({ options: updatedOptions });
   };
 
@@ -72,20 +75,20 @@ export function QuestionNode({ data, isConnectable, id }) {
       text: editedOptions[index]
     }));
     setOptions(updatedOptions);
-    
-    let updates = { 
+
+    let updates = {
       title: updatedTitle,
       options: updatedOptions
     };
-    
+
     if (data.type === "text") {
       updates.answerText = answerText;
     } else if (data.type === "end") {
       updates.endText = endText;
     }
-    
+
     updateNodeData(updates);
-    
+
     setIsEditing(false);
   };
 
@@ -103,7 +106,7 @@ export function QuestionNode({ data, isConnectable, id }) {
         <Handle
           type="target"
           position={Position.Left}
-          isConnectable={isConnectable}
+          isConnectable={!isViewOnly && isConnectable}
           style={{
             top: "50%",
             left: "-6px"
@@ -115,6 +118,7 @@ export function QuestionNode({ data, isConnectable, id }) {
           onChange={handleEndTextChange}
           placeholder="Enter your final message here..."
           className="w-full h-32 rounded-md p-2 bg-[#614573] text-white resize-none focus:outline-none focus:ring-1 focus:ring-white"
+          disabled={isViewOnly}
         />
       </div>
     );
@@ -126,7 +130,7 @@ export function QuestionNode({ data, isConnectable, id }) {
         <Handle
           type="target"
           position={Position.Left}
-          isConnectable={isConnectable}
+          isConnectable={!isViewOnly && isConnectable}
           style={{
             top: "35%",
             left: "-6px"
@@ -134,8 +138,17 @@ export function QuestionNode({ data, isConnectable, id }) {
         />
       )}
 
+      {!isViewOnly && (
+        <button
+          onClick={() => setIsEditing(true)}
+          className="group mb-5 w-full flex justify-end"
+        >
+          <Edit className="group-hover:text-[#825C9A] text-[#BFBFBF]"/>
+        </button>
+      )}
+
       <div className="flex items-center justify-between mb-2">
-        {isEditing ? (
+        {isEditing && !isViewOnly ? (
           <Input
             value={editedTitle}
             onChange={(e) => setEditedTitle(e.target.value)}
@@ -145,12 +158,6 @@ export function QuestionNode({ data, isConnectable, id }) {
         ) : (
           <h3 className="font-medium text-gray-900 text-base">{editedTitle}</h3>
         )}
-        <button
-          onClick={() => setIsEditing(true)}
-          className="text-gray-500 hover:text-gray-700"
-        >
-          <Edit className="h-4 w-4" />
-        </button>
       </div>
 
       <div className="border-b border-gray-300 mb-4"></div>
@@ -161,15 +168,16 @@ export function QuestionNode({ data, isConnectable, id }) {
             {options.map((option, index) => (
               <div
                 key={option.id}
-                className="relative flex items-center justify-between bg-white p-2 rounded-full border border-gray-300"
+                className="relative flex items-center justify-between bg-white p-3 rounded-full border border-gray-300"
               >
                 <div className="flex items-center space-x-2">
                   <RadioGroupItem
                     value={option.id}
                     id={option.id}
                     className="border-gray-400"
+                    disabled={isViewOnly}
                   />
-                  {isEditing ? (
+                  {isEditing && !isViewOnly ? (
                     <Input
                       value={editedOptions[index]}
                       onChange={(e) =>
@@ -183,14 +191,17 @@ export function QuestionNode({ data, isConnectable, id }) {
                     </Label>
                   )}
                 </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => removeOption(option.id)}
-                  disabled={!isEditing && options.length <= 1}
-                >
-                  <X className="h-4 w-4 text-gray-500" />
-                </Button>
+                {/* Only show remove button in edit mode */}
+                {isEditing && !isViewOnly && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeOption(option.id)}
+                    disabled={options.length <= 1}
+                  >
+                    <X className="h-4 w-4 text-gray-500" />
+                  </Button>
+                )}
                 <Handle
                   type="source"
                   position={Position.Right}
@@ -199,13 +210,13 @@ export function QuestionNode({ data, isConnectable, id }) {
                     top: "50%",
                     right: "-6px"
                   }}
-                  isConnectable={isConnectable}
+                  isConnectable={!isViewOnly && isConnectable}
                 />
               </div>
             ))}
           </RadioGroup>
 
-          {showInput ? (
+          {!isViewOnly && (showInput ? (
             <div className="flex items-center space-x-2 p-2 border rounded-full bg-white">
               <Input
                 value={newOption}
@@ -231,12 +242,11 @@ export function QuestionNode({ data, isConnectable, id }) {
           ) : (
             <button
               onClick={() => setShowInput(true)}
-              className="w-full text-gray-600 hover:text-gray-800 flex items-center gap-2 p-2 border rounded-full bg-white shadow-sm"
-              disabled={!isEditing}
+              className="w-full text-gray-600 group text-sm hover:text-gray-800 hover:border-[#825C9A] flex items-center gap-2 p-3 border border-gray-300 rounded-full bg-white shadow-sm"
             >
-              Add Option <Plus className="h-6 w-6" />
+              Add Option <Plus className="h-5 w-5 group-hover:text-[#825C9A]" />
             </button>
-          )}
+          ))}
         </div>
       ) : data.type === "text" ? (
         <div className="space-y-3">
@@ -245,7 +255,7 @@ export function QuestionNode({ data, isConnectable, id }) {
             onChange={(e) => setAnswerText(e.target.value)}
             placeholder="Enter your answer here..."
             className="w-full h-24 border border-gray-300 rounded-md p-2 text-gray-700"
-            disabled={!isEditing}
+            disabled={isViewOnly || !isEditing}
           />
 
           <Handle
@@ -256,12 +266,12 @@ export function QuestionNode({ data, isConnectable, id }) {
               top: "50%",
               right: "-6px"
             }}
-            isConnectable={isConnectable}
+            isConnectable={!isViewOnly && isConnectable}
           />
         </div>
       ) : null}
 
-      {isEditing && (
+      {isEditing && !isViewOnly && (
         <div className="mt-4">
           <Button
             onClick={saveEdit}
