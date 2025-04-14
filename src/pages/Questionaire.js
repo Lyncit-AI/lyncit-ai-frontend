@@ -101,7 +101,7 @@ function Questionaire() {
   const handleLaunch = () => {
     // Implement launch functionality here
     alert("Campaign launched successfully!");
-    navigate("/app");
+    navigate("/upload");
   };
 
   return (
@@ -182,6 +182,14 @@ function Questionaire() {
 
         {isViewMode ? (
           <div className="px-14 max-lg:px-8">
+            <div className="flex justify-center sm:hidden">
+              <button 
+                onClick={handleLaunch}
+                className="px-14 py-3 mb-6 text-sm font-medium text-white bg-[rgb(122,86,144,1)] rounded-full hover:bg-[rgb(122,86,144,0.9)]"
+              >
+                Launch
+              </button>
+            </div>
             <div className="h-[calc(90vh-4rem)] border rounded-[16px] overflow-hidden border-[#F1EAF6]">
               <ReactFlow
                 nodes={viewNodes}
@@ -194,14 +202,6 @@ function Questionaire() {
                 elementsSelectable={false}
               >
               </ReactFlow>
-            </div>
-            <div className="flex justify-center sm:hidden">
-              <button 
-                onClick={handleLaunch}
-                className="px-14 py-3 my-6 text-sm font-medium text-white bg-[rgb(122,86,144,1)] rounded-full hover:bg-[rgb(122,86,144,0.9)]"
-              >
-                Launch
-              </button>
             </div>
           </div>
         ) : (

@@ -1,13 +1,13 @@
-"use client";
-
 import * as Dialog from "@radix-ui/react-dialog";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { X } from "lucide-react";
+import axios from "axios";
 
 export default function JobPostingModal() {
   const navigate = useNavigate();
   const [jobUrl, setJobUrl] = useState("");
+  const [, setJobDescription] = useState("");
   const [step, setStep] = useState(1);
   const [selectedCategory, setSelectedCategory] = useState(
     "Qualifications & Certifications"
@@ -16,24 +16,17 @@ export default function JobPostingModal() {
   const [customKeyword, setCustomKeyword] = useState("");
   const [customKeywords, setCustomKeywords] = useState([]);
   const [showAllCategories, setShowAllCategories] = useState(false);
-
-  const handleAddCustom = () => {
-    if (customKeyword.trim() && !customKeywords.includes(customKeyword)) {
-      setCustomKeywords([...customKeywords, customKeyword.trim()]);
-      setCustomKeyword("");
-    }
-  };
-
-  const categories = {
+  const [isLoading, setIsLoading] = useState(false);
+  const [categories, setCategories] = useState({
     "Qualifications & Certifications": [
       "Work Authorization (Proof of eligibility in the U.S.)",
       "Experience (1+ year professional caregiver)",
-      "Transportation (Driver’s license, insurance, reliable vehicle)",
+      "Transportation (Driver's license, insurance, reliable vehicle)",
       "Availability (Open shifts, including weekends)"
     ],
     "Caregiving Skills": [
       "First Aid & CPR Certification",
-      "Alzheimer’s & Dementia Care",
+      "Alzheimer's & Dementia Care",
       "Medication Management",
       "Companionship & Emotional Support"
     ],
@@ -55,6 +48,143 @@ export default function JobPostingModal() {
       "Commitment to High-Quality Care",
       "Discretion & Confidentiality"
     ]
+  });
+
+  const handleAddCustom = () => {
+    if (customKeyword.trim() && !customKeywords.includes(customKeyword)) {
+      setCustomKeywords([...customKeywords, customKeyword.trim()]);
+      setCustomKeyword("");
+    }
+  };
+
+  const fetchKeywordsFromAI = async (jobDesc) => {
+    try {
+      setIsLoading(true);
+
+      const accessToken = localStorage.getItem("accessToken");
+
+      if (!accessToken) {
+        console.error("Access token not found in localStorage");
+        return null;
+      }
+
+      const prompt = `Generate relevant keywords for a job posting with the following description. Organize them into these categories: "Qualifications & Certifications", "Caregiving Skills", "Work Conditions", "Communication & Teamwork", and "Professionalism & Work Ethic". Return at least 4-5 keywords for each category. IMPORTANT: Return ONLY a JSON object with these categories as keys and arrays of keyword strings as values. Format example: {"Qualifications & Certifications": ["keyword1", "keyword2"], ...}. Here's the job description: ${jobDesc}`;
+
+      const encodedPrompt = encodeURIComponent(prompt);
+      const url = `https://lyncitapplications.xyz:8086/AI/ai_completion?message=${encodedPrompt}`;
+
+      const response = await axios({
+        method: "POST",
+        url: url,
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`
+        },
+        withCredentials: true
+      });
+
+      return parseAIResponse(response.data);
+    } catch (error) {
+      console.error("Error fetching keywords from AI:", error);
+      console.log("Falling back to mock keywords");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+
+  const parseAIResponse = (response) => {
+    if (!response) {
+      console.error("No response received");
+      return null;
+    }
+
+    try {
+      if (response.completion) {
+        const aiText = response.completion;
+        console.log("Raw AI response:", aiText);
+
+        let jsonText = aiText;
+
+        const startIndex = aiText.indexOf("{");
+        const endIndex = aiText.lastIndexOf("}") + 1;
+
+        if (startIndex >= 0 && endIndex > startIndex) {
+          jsonText = aiText.substring(startIndex, endIndex);
+        }
+
+        const parsedData = JSON.parse(jsonText);
+        console.log("Parsed data:", parsedData);
+
+        const requiredCategories = [
+          "Qualifications & Certifications",
+          "Caregiving Skills",
+          "Work Conditions",
+          "Communication & Teamwork",
+          "Professionalism & Work Ethic"
+        ];
+
+        const hasRequiredStructure = requiredCategories.some(
+          (category) =>
+            parsedData.hasOwnProperty(category) &&
+            Array.isArray(parsedData[category])
+        );
+
+        if (!hasRequiredStructure) {
+          console.warn("Parsed data missing required category structure");
+        }
+
+        return parsedData;
+      }
+      else if (typeof response === "object") {
+        const requiredCategories = [
+          "Qualifications & Certifications",
+          "Caregiving Skills",
+          "Work Conditions",
+          "Communication & Teamwork",
+          "Professionalism & Work Ethic"
+        ];
+
+        const hasRequiredStructure = requiredCategories.some(
+          (category) =>
+            response.hasOwnProperty(category) &&
+            Array.isArray(response[category])
+        );
+
+        if (hasRequiredStructure) {
+          return response;
+        }
+
+        console.error(
+          "Response format doesn't match expected structure:",
+          response
+        );
+      }
+
+      return null;
+    } catch (error) {
+      console.error("Error parsing AI response:", error);
+      console.log("Failed to parse response:", response);
+      return null;
+    }
+  };
+
+  const handleJobDescriptionInput = () => {
+    setJobDescription(jobUrl);
+  };
+
+  const handleNextStep = async () => {
+    handleJobDescriptionInput();
+
+    if (jobUrl.trim()) {
+      const aiCategories = await fetchKeywordsFromAI(jobUrl);
+      if (aiCategories) {
+        setCategories(aiCategories);
+      }
+    }
+
+    setStep(2);
   };
 
   const categoryKeys = Object.keys(categories);
@@ -72,7 +202,7 @@ export default function JobPostingModal() {
   };
 
   const handleSubmit = () => {
-    navigate("/question")
+    navigate("/question");
     console.log("Selected Keywords:", selectedKeywords);
   };
 
@@ -120,12 +250,12 @@ export default function JobPostingModal() {
             {step === 1 && (
               <>
                 <label className="block mt-8 text-sm text-[#0D0C22] font-medium">
-                  Paste the URL of your job link.
+                  Paste the Job Description
                 </label>
                 <textarea
                   value={jobUrl}
                   onChange={(e) => setJobUrl(e.target.value)}
-                  placeholder="http://app/userbraintrust.com/jobs/11450?utm/"
+                  placeholder="We are seeking a compassionate and reliable Healthcare Assistant to join our team. In this role...."
                   className="w-full h-20 mt-2 p-3 border rounded-lg resize-none"
                 />
                 <div className="text-sm text-[#637083] flex justify-between mt-1 max-sm:flex-col">
@@ -138,10 +268,11 @@ export default function JobPostingModal() {
                     Step 1 of 2
                   </span>
                   <button
-                    onClick={() => setStep(2)}
-                    className="bg-[#0D0C22] text-white text-sm font-semibold px-10 py-4 rounded-full"
+                    onClick={handleNextStep}
+                    disabled={!jobUrl.trim() || isLoading}
+                    className="bg-[#0D0C22] text-white text-sm font-semibold px-10 py-4 rounded-full disabled:opacity-50"
                   >
-                    Next
+                    {isLoading ? "Loading..." : "Next"}
                   </button>
                 </div>
               </>
@@ -327,7 +458,6 @@ export default function JobPostingModal() {
                 <div className="mt-6 space-y-2 sm:hidden overflow-y-scroll h-[240px]">
                   {Object.keys(categories).map((category) => (
                     <div key={category}>
-                      {/* Category Name */}
                       <span
                         className={`cursor-pointer py-2 font-medium ${
                           selectedCategory === category ? "" : "text-[#0D0C22]"

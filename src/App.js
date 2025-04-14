@@ -8,7 +8,9 @@ import RecruiterDashboard from './pages/RecruiterDashboard';
 import CandidateDashboard from './pages/CandidateDashboard';
 import CandidateQuestionnaire from './pages/CandidateQuestionnaire';
 import Questionaire from './pages/Questionaire';
-import ViewOnlyQuestionnaire from './pages/ViewOnlyQuestionnaire';
+import Upload from './pages/Upload';
+import Congratulation from './pages/Congratulation';
+// import ViewOnlyQuestionnaire from './pages/ViewOnlyQuestionnaire';
 import NotFound from './pages/NotFound';
 
 const App = () => {
@@ -21,6 +23,8 @@ const App = () => {
         <Route path="/forget" element={<ForgotPassword />} />
         <Route path="/app" element={<RecruiterDashboard />} />
         <Route path="/question" element={<Questionaire />} />
+        <Route path="/upload" element={<Upload />} />
+        <Route path="/congratulation" element={<Congratulation />} />
         {/* <Route path="/view-questionnaire" element={<ViewOnlyQuestionnaire />} /> */}
         <Route path="/candidate-dashboard" element={<CandidateDashboard />} />
         <Route path="/candidate/:campaignId" element={<CandidateQuestionnaire />} />

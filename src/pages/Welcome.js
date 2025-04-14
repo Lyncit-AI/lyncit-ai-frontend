@@ -246,7 +246,7 @@ export default function Welcome() {
               </label>
               <Input
                 type="email"
-                placeholder="Email ..."
+                placeholder="Name ..."
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className={emailError ? "border-danger" : ""}
