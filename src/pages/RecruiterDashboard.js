@@ -1,9 +1,12 @@
 import React from "react";
 import DashboardLayout from "../components/layouts/DashboardLayout";
+import { useNavigate } from "react-router-dom";
 import Logo from "../assets/logo/logo";
 import JobPostingModal from "../components/ui/JobPostingModal";
 
 const RecruiterDashboard = () => {
+  const navigate = useNavigate();
+
   const upcomingMeetings = [
     { name: "Josh Emanuel", time: "1:00 CST" },
     { name: "Laura", time: "10:00 CST" },
@@ -22,6 +25,10 @@ const RecruiterDashboard = () => {
       description: "Engaging with prospects at scale to find the right roles"
     }
   ];
+
+  const handleback = () => {
+    navigate("/campaign");
+  };
 
   return (
     <DashboardLayout>
@@ -88,7 +95,7 @@ const RecruiterDashboard = () => {
                 </div>
                 <div>
                   <div className="flex justify-center">
-                    <button className="flex justify-center items-center gap-2 mx-9 max-xl:mx-6 w-full my-6 py-4 rounded-full text-sm border border-[#EAEAEA]">
+                    <button onClick={handleback} className="flex justify-center items-center gap-2 mx-9 max-xl:mx-6 w-full my-6 py-4 rounded-full text-sm border border-[#EAEAEA]">
                       View Approved Campaigns
                       <svg
                         xmlns="http://www.w3.org/2000/svg"

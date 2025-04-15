@@ -10,6 +10,7 @@ import CandidateQuestionnaire from './pages/CandidateQuestionnaire';
 import Questionaire from './pages/Questionaire';
 import Upload from './pages/Upload';
 import Congratulation from './pages/Congratulation';
+import CampaignTable from './pages/CampaignTable';
 // import ViewOnlyQuestionnaire from './pages/ViewOnlyQuestionnaire';
 import NotFound from './pages/NotFound';
 
@@ -25,6 +26,7 @@ const App = () => {
         <Route path="/question" element={<Questionaire />} />
         <Route path="/upload" element={<Upload />} />
         <Route path="/congratulation" element={<Congratulation />} />
+        <Route path="/campaign" element={<CampaignTable />} />
         {/* <Route path="/view-questionnaire" element={<ViewOnlyQuestionnaire />} /> */}
         <Route path="/candidate-dashboard" element={<CandidateDashboard />} />
         <Route path="/candidate/:campaignId" element={<CandidateQuestionnaire />} />
