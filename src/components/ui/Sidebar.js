@@ -25,7 +25,7 @@ const Sidebar = ({ name, picture }) => {
   };
 
   return (
-    <div className="w-[90px] max-sm:hidden z-10">
+    <div className="w-[90px] max-sm:hidden z-0">
       <motion.div
         className="fixed top-0 left-0 h-screen px-4 bg-white shadow-md overflow-hidden flex flex-col justify-between"
         initial={{ minWidth: "90px" }}
