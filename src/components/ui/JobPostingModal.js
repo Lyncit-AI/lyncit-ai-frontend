@@ -4,60 +4,50 @@ import { useNavigate } from "react-router-dom";
 import { X } from "lucide-react";
 import axios from "axios";
 
+const dummyData = {
+  categories: ["skills", "availability", "preferences"],
+  keywords: [
+    { category: "skills", keyword: "home healthcare", selected: true },
+    { category: "skills", keyword: "childcare", selected: false },
+    { category: "skills", keyword: "disability care", selected: true },
+    { category: "skills", keyword: "first aid", selected: true },
+    { category: "skills", keyword: "medical training", selected: false },
+    { category: "availability", keyword: "full time", selected: false },
+    { category: "availability", keyword: "overnight care", selected: true },
+    {
+      category: "preferences",
+      keyword: "comfortable with pets",
+      selected: true
+    },
+    { category: "preferences", keyword: "non-smoker", selected: true }
+  ]
+};
+
 export default function JobPostingModal() {
   const navigate = useNavigate();
   const [jobUrl, setJobUrl] = useState("");
   const [, setJobDescription] = useState("");
   const [step, setStep] = useState(1);
-  const [selectedCategory, setSelectedCategory] = useState(
-    "Qualifications & Certifications"
-  );
-  const [selectedKeywords, setSelectedKeywords] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState("");
   const [customKeyword, setCustomKeyword] = useState("");
-  const [customKeywords, setCustomKeywords] = useState([]);
-  const [showAllCategories, setShowAllCategories] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [categories, setCategories] = useState({
-    "Qualifications & Certifications": [
-      "Work Authorization (Proof of eligibility in the U.S.)",
-      "Experience (1+ year professional caregiver)",
-      "Transportation (Driver's license, insurance, reliable vehicle)",
-      "Availability (Open shifts, including weekends)"
-    ],
-    "Caregiving Skills": [
-      "First Aid & CPR Certification",
-      "Alzheimer's & Dementia Care",
-      "Medication Management",
-      "Companionship & Emotional Support"
-    ],
-    "Work Conditions": [
-      "Flexible Shifts",
-      "Live-in Caregiver",
-      "Home Health Aide Work",
-      "Hospital Experience"
-    ],
-    "Communication & Teamwork": [
-      "Strong Verbal & Written Communication",
-      "Active Listening Skills",
-      "Collaborative Team Player",
-      "Ability to Follow Care Plans"
-    ],
-    "Professionalism & Work Ethic": [
-      "Punctuality & Reliability",
-      "Compassionate & Patient Approach",
-      "Commitment to High-Quality Care",
-      "Discretion & Confidentiality"
-    ]
-  });
+  const [categories, setCategories] = useState([]);
+  const [keywords, setKeywords] = useState([]);
 
   const handleAddCustom = () => {
-    if (customKeyword.trim() && !customKeywords.includes(customKeyword)) {
-      setCustomKeywords([...customKeywords, customKeyword.trim()]);
+    if (customKeyword.trim()) {
+      const newKeyword = {
+        category: "other",
+        keyword: customKeyword.trim(),
+        selected: true
+      };
+
+      setKeywords((prevKeywords) => [...prevKeywords, newKeyword]);
       setCustomKeyword("");
     }
   };
 
-  const fetchKeywordsFromAI = async (jobDesc) => {
+  const fetchCategoriesFromBackend = async (jobDesc) => {
     try {
       setIsLoading(true);
 
@@ -65,13 +55,10 @@ export default function JobPostingModal() {
 
       if (!accessToken) {
         console.error("Access token not found in localStorage");
-        return null;
+        throw new Error("Access token not found");
       }
 
-      const prompt = `Generate relevant keywords for a job posting with the following description. Organize them into these categories: "Qualifications & Certifications", "Caregiving Skills", "Work Conditions", "Communication & Teamwork", and "Professionalism & Work Ethic". Return at least 4-5 keywords for each category. IMPORTANT: Return ONLY a JSON object with these categories as keys and arrays of keyword strings as values. Format example: {"Qualifications & Certifications": ["keyword1", "keyword2"], ...}. Here's the job description: ${jobDesc}`;
-
-      const encodedPrompt = encodeURIComponent(prompt);
-      const url = `https://lyncitapplications.xyz:8086/AI/ai_completion?message=${encodedPrompt}`;
+      const url = `https://lyncitapplications.xyz:8086/AI/ai_keywords`;
 
       const response = await axios({
         method: "POST",
@@ -81,92 +68,26 @@ export default function JobPostingModal() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`
         },
+        params: { 
+          jobDescription: jobDesc,
+          categories: "skills,availability,preferences" 
+        },
         withCredentials: true
       });
 
-      return parseAIResponse(response.data);
+      const responseData = response.data;
+      
+      const uniqueCategories = [...new Set(responseData.map(item => item.category))];
+      
+      return { 
+        categories: uniqueCategories, 
+        keywords: responseData 
+      };
     } catch (error) {
-      console.error("Error fetching keywords from AI:", error);
-      console.log("Falling back to mock keywords");
+      console.error("Error fetching categories from backend:", error);
+      return dummyData;
     } finally {
       setIsLoading(false);
-    }
-  };
-
-
-  const parseAIResponse = (response) => {
-    if (!response) {
-      console.error("No response received");
-      return null;
-    }
-
-    try {
-      if (response.completion) {
-        const aiText = response.completion;
-        console.log("Raw AI response:", aiText);
-
-        let jsonText = aiText;
-
-        const startIndex = aiText.indexOf("{");
-        const endIndex = aiText.lastIndexOf("}") + 1;
-
-        if (startIndex >= 0 && endIndex > startIndex) {
-          jsonText = aiText.substring(startIndex, endIndex);
-        }
-
-        const parsedData = JSON.parse(jsonText);
-        console.log("Parsed data:", parsedData);
-
-        const requiredCategories = [
-          "Qualifications & Certifications",
-          "Caregiving Skills",
-          "Work Conditions",
-          "Communication & Teamwork",
-          "Professionalism & Work Ethic"
-        ];
-
-        const hasRequiredStructure = requiredCategories.some(
-          (category) =>
-            parsedData.hasOwnProperty(category) &&
-            Array.isArray(parsedData[category])
-        );
-
-        if (!hasRequiredStructure) {
-          console.warn("Parsed data missing required category structure");
-        }
-
-        return parsedData;
-      }
-      else if (typeof response === "object") {
-        const requiredCategories = [
-          "Qualifications & Certifications",
-          "Caregiving Skills",
-          "Work Conditions",
-          "Communication & Teamwork",
-          "Professionalism & Work Ethic"
-        ];
-
-        const hasRequiredStructure = requiredCategories.some(
-          (category) =>
-            response.hasOwnProperty(category) &&
-            Array.isArray(response[category])
-        );
-
-        if (hasRequiredStructure) {
-          return response;
-        }
-
-        console.error(
-          "Response format doesn't match expected structure:",
-          response
-        );
-      }
-
-      return null;
-    } catch (error) {
-      console.error("Error parsing AI response:", error);
-      console.log("Failed to parse response:", response);
-      return null;
     }
   };
 
@@ -178,32 +99,76 @@ export default function JobPostingModal() {
     handleJobDescriptionInput();
 
     if (jobUrl.trim()) {
-      const aiCategories = await fetchKeywordsFromAI(jobUrl);
-      if (aiCategories) {
-        setCategories(aiCategories);
+      const backendData = await fetchCategoriesFromBackend(jobUrl);
+      if (backendData) {
+        setCategories(backendData.categories);
+        setKeywords(backendData.keywords);
+        if (backendData.categories && backendData.categories.length > 0) {
+          setSelectedCategory(backendData.categories[0]);
+        }
       }
     }
 
     setStep(2);
   };
 
-  const categoryKeys = Object.keys(categories);
-  const visibleCategories = showAllCategories
-    ? categoryKeys
-    : categoryKeys.slice(0, 3);
-  const remainingCount = categoryKeys.length - 3;
-
   const toggleKeywordSelection = (keyword) => {
-    setSelectedKeywords((prev) =>
-      prev.includes(keyword)
-        ? prev.filter((item) => item !== keyword)
-        : [...prev, keyword]
+    setKeywords((prevKeywords) =>
+      prevKeywords.map((kw) =>
+        kw.keyword === keyword ? { ...kw, selected: !kw.selected } : kw
+      )
     );
   };
 
-  const handleSubmit = () => {
-    navigate("/question");
-    console.log("Selected Keywords:", selectedKeywords);
+  const handleSubmit = async () => {
+    try {
+      setIsLoading(true);
+      
+      const selectedKeywords = keywords
+        .filter(kw => kw.selected)
+        .map(kw => kw.keyword)
+        .join(',');
+        
+      const accessToken = localStorage.getItem("accessToken");
+  
+      if (!accessToken) {
+        console.error("Access token not found in localStorage");
+        throw new Error("Access token not found");
+      }
+  
+      const url = `https://lyncitapplications.xyz:8086/AI/ai_questionnaire`;
+  
+      console.log("Sending questionnaire request with:", {
+        jobDescription: jobUrl,
+        keywords: selectedKeywords
+      });
+  
+      const response = await axios({
+        method: "POST",
+        url: url,
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`
+        },
+        params: { 
+          jobDescription: jobUrl,
+          keywords: selectedKeywords
+        },
+        withCredentials: true
+      });
+  
+      console.log("Questionnaire API response:", response.data);
+      
+      localStorage.setItem('questionnaire', JSON.stringify(response.data));
+      
+      navigate("/question");
+    } catch (error) {
+      console.error("Error generating questionnaire:", error);
+      alert("Failed to generate questionnaire. Please try again. Error: " + (error.message || "Unknown error"));
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -232,7 +197,11 @@ export default function JobPostingModal() {
         <Dialog.Portal>
           <Dialog.Overlay className="fixed inset-0 bg-black/50" />
           <Dialog.Content
-            className={`fixed top-1/2 left-1/2 max-w-[857px] max-sm:w-[315px] ${step === 1 ? "lg:w-[615px] px-8" : "lg:w-[857px] px-24 max-md:px-12 max-sm:px-8"} bg-white py-12 rounded-[32px] shadow-lg -translate-x-1/2 -translate-y-1/2`}
+            className={`fixed top-1/2 left-1/2 max-w-[857px] max-sm:w-[315px] ${
+              step === 1
+                ? "lg:w-[615px] px-8"
+                : "lg:w-[857px] px-24 max-md:px-12 max-sm:px-8"
+            } bg-white py-12 rounded-[32px] shadow-lg -translate-x-1/2 -translate-y-1/2`}
           >
             <div className="flex justify-between items-center">
               <Dialog.Title className="text-xl font-semibold">
@@ -285,7 +254,7 @@ export default function JobPostingModal() {
                 </p>
                 <div className="flex mt-12 gap-4 border-b max-sm:hidden">
                   <div className="flex gap-4 overflow-x-scroll">
-                    {visibleCategories.map((category) => (
+                    {categories.map((category) => (
                       <span
                         key={category}
                         className={`cursor-pointer py-6 font-medium ${
@@ -298,91 +267,83 @@ export default function JobPostingModal() {
                         {category}
                       </span>
                     ))}
-
-                    {!showAllCategories && remainingCount > 0 && (
-                      <span
-                        className="cursor-pointer py-6 font-medium text-[#0D0C22]"
-                        onClick={() => setShowAllCategories(true)}
-                      >
-                        +{remainingCount} more option
-                        {remainingCount > 1 ? "s" : ""}
-                      </span>
-                    )}
-                  </div>
-                  <div
-                    key={"Add an option"}
-                    className={`cursor-pointer min-w-[170px] py-6 font-medium ${
-                      selectedCategory === "Add an option"
-                        ? "text-white border-b border-[#825C9A]"
-                        : "text-[#0D0C22]"
-                    }`}
-                    onClick={() => setSelectedCategory("Add an option")}
-                  >
-                    <button
-                      className={`flex justify-center gap-2 border border-[#825C9A] rounded-full py-1 px-3 ${
-                        selectedCategory === "Add an option"
-                          ? "text-white bg-[#825C9A] stroke-[#825C9A]"
-                          : "text-[#0D0C22] stroke-[#0D0C22]"
-                      }`}
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        width="24"
-                        height="24"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                      >
-                        <path
-                          d="M12 5V19M5 12H19"
-                          stroke="currentColor"
-                          stroke-linecap="round"
-                          stroke-linejoin="round"
-                        />
-                      </svg>
-                      Add an option
-                    </button>
-                  </div>
-                </div>
-
-                <div className="mt-6 space-y-2 max-sm:hidden">
-                  {categories[selectedCategory]?.map((keyword) => (
-                    <button
-                      key={keyword}
-                      className={`flex justify-between items-center gap-2 border border-[#BFBFBF] text-[#637083] text-sm font-semibold rounded-full px-3 py-2 ${selectedKeywords.includes(keyword) && "border-black"}`}
-                      onClick={() => toggleKeywordSelection(keyword)}
-                    >
-                      {keyword}
-                      <span>
-                        {selectedKeywords.includes(keyword) ? (
-                          "✔"
-                        ) : (
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="23"
-                            height="20"
-                            viewBox="0 0 23 20"
-                            fill="none"
-                          >
-                            <path
-                              d="M11.4993 4.16669V15.8334M4.79102 10H18.2077"
-                              stroke="#637083"
-                              stroke-width="1.66667"
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                            />
-                          </svg>
-                        )}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-                {selectedCategory === "Add an option" && (
-                  <div className="max-sm:hidden">
                     <div
-                      className={`flex gap-2 border rounded-[32px] overflow-hidden w-fit transition ${
-                        customKeyword ? "border-[#825C9A]" : "border-[#BFBFBF]"
+                      className={`cursor-pointer min-w-[170px] py-6 font-medium ${
+                        selectedCategory === "Add an option"
+                          ? "text-white border-b border-[#825C9A]"
+                          : "text-[#0D0C22]"
                       }`}
+                      onClick={() => setSelectedCategory("Add an option")}
                     >
+                      <button
+                        className={`flex justify-center gap-2 border border-[#825C9A] rounded-full py-1 px-3 ${
+                          selectedCategory === "Add an option"
+                            ? "text-white bg-[#825C9A] stroke-[#825C9A]"
+                            : "text-[#0D0C22] stroke-[#0D0C22]"
+                        }`}
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="24"
+                          height="24"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                        >
+                          <path
+                            d="M12 5V19M5 12H19"
+                            stroke="currentColor"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                        Add an option
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 space-y-2 max-sm:hidden sm:max-h-[250px] overflow-y-auto">
+                  {keywords
+                    .filter((kw) => kw.category === selectedCategory)
+                    .map((keywordData) => (
+                      <button
+                        key={keywordData.keyword}
+                        className={`flex justify-between items-center gap-2 border border-[#BFBFBF] text-[#637083] text-sm font-semibold rounded-full px-3 py-2 ${
+                          keywordData.selected ? "border-black" : ""
+                        }`}
+                        onClick={() =>
+                          toggleKeywordSelection(keywordData.keyword)
+                        }
+                      >
+                        {keywordData.keyword}
+                        <span>
+                          {keywordData.selected ? (
+                            "✔"
+                          ) : (
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="23"
+                              height="20"
+                              viewBox="0 0 23 20"
+                              fill="none"
+                            >
+                              <path
+                                d="M11.4993 4.16669V15.8334M4.79102 10H18.2077"
+                                stroke="#637083"
+                                strokeWidth="1.66667"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                            </svg>
+                          )}
+                        </span>
+                      </button>
+                    ))}
+                </div>
+
+                {selectedCategory === "Add an option" && (
+                  <div>
+                    <div className="flex gap-2 border rounded-[32px] overflow-hidden w-fit">
                       <input
                         type="text"
                         value={customKeyword}
@@ -418,170 +379,44 @@ export default function JobPostingModal() {
                       </button>
                     </div>
 
-                    {customKeywords.length > 0 && (
-                      <div className="mt-4 flex flex-col gap-2">
-                        {customKeywords.map((keyword, index) => (
-                          <button
-                            key={index}
-                            className={`flex justify-between items-center w-fit gap-2 border border-[#BFBFBF] text-[#637083] text-sm font-semibold rounded-full px-3 py-2 ${selectedKeywords.includes(keyword) && "border-black"}`}
-                            onClick={() => toggleKeywordSelection(keyword)}
-                          >
-                            {keyword}
-                            <span>
-                              {selectedKeywords.includes(keyword) ? (
-                                "✔"
-                              ) : (
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  width="23"
-                                  height="20"
-                                  viewBox="0 0 23 20"
-                                  fill="none"
-                                >
-                                  <path
-                                    d="M11.4993 4.16669V15.8334M4.79102 10H18.2077"
-                                    stroke="#637083"
-                                    stroke-width="1.66667"
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                  />
-                                </svg>
-                              )}
-                            </span>
-                          </button>
-                        ))}
-                      </div>
-                    )}
+                    {keywords
+                      .filter((kw) => kw.category === "other")
+                      .map((customKeywordData) => (
+                        <button
+                          key={customKeywordData.keyword}
+                          className={`flex justify-between items-center w-fit gap-2 border border-[#BFBFBF] text-[#637083] text-sm font-semibold rounded-full px-3 py-2 ${
+                            customKeywordData.selected ? "border-black" : ""
+                          }`}
+                          onClick={() =>
+                            toggleKeywordSelection(customKeywordData.keyword)
+                          }
+                        >
+                          {customKeywordData.keyword}
+                          <span>
+                            {customKeywordData.selected ? (
+                              "✔"
+                            ) : (
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="23"
+                                height="20"
+                                viewBox="0 0 23 20"
+                                fill="none"
+                              >
+                                <path
+                                  d="M11.4993 4.16669V15.8334M4.79102 10H18.2077"
+                                  stroke="#637083"
+                                  strokeWidth="1.66667"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                />
+                              </svg>
+                            )}
+                          </span>
+                        </button>
+                      ))}
                   </div>
                 )}
-
-                <div className="mt-6 space-y-2 sm:hidden overflow-y-scroll h-[240px]">
-                  {Object.keys(categories).map((category) => (
-                    <div key={category}>
-                      <span
-                        className={`cursor-pointer py-2 font-medium ${
-                          selectedCategory === category ? "" : "text-[#0D0C22]"
-                        }`}
-                        onClick={() => setSelectedCategory(category)}
-                      >
-                        {category}
-                      </span>
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        {categories[category].map((keyword) => (
-                          <button
-                            key={keyword}
-                            className={`flex justify-between items-center gap-2 border border-[#BFBFBF] text-[#637083] text-sm font-semibold rounded-full px-3 py-2 ${selectedKeywords.includes(keyword) && "border-black"}`}
-                            onClick={() => toggleKeywordSelection(keyword)}
-                          >
-                            {keyword}
-                            <span>
-                              {selectedKeywords.includes(keyword) ? (
-                                "✔"
-                              ) : (
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  width="23"
-                                  height="20"
-                                  viewBox="0 0 23 20"
-                                  fill="none"
-                                >
-                                  <path
-                                    d="M11.4993 4.16669V15.8334M4.79102 10H18.2077"
-                                    stroke="#637083"
-                                    strokeWidth="1.66667"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                  />
-                                </svg>
-                              )}
-                            </span>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                  <div>
-                    <span
-                      className={`cursor-pointer py-2 font-medium text-[#0D0C22]`}
-                    >
-                      Add an Option
-                    </span>
-
-                    {customKeywords.length > 0 && (
-                      <div className="mt-4 flex flex-col gap-2">
-                        {customKeywords.map((keyword, index) => (
-                          <button
-                            key={index}
-                            className={`flex justify-between items-center w-fit gap-2 border border-[#BFBFBF] text-[#637083] text-sm font-semibold rounded-full px-3 py-2 ${selectedKeywords.includes(keyword) && "border-black"}`}
-                            onClick={() => toggleKeywordSelection(keyword)}
-                          >
-                            {keyword}
-                            <span>
-                              {selectedKeywords.includes(keyword) ? (
-                                "✔"
-                              ) : (
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  width="23"
-                                  height="20"
-                                  viewBox="0 0 23 20"
-                                  fill="none"
-                                >
-                                  <path
-                                    d="M11.4993 4.16669V15.8334M4.79102 10H18.2077"
-                                    stroke="#637083"
-                                    stroke-width="1.66667"
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                  />
-                                </svg>
-                              )}
-                            </span>
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                    <div
-                      className={`flex gap-2 mt-2 border rounded-[32px] overflow-hidden w-fit transition ${
-                        customKeyword ? "border-[#825C9A]" : "border-[#BFBFBF]"
-                      }`}
-                    >
-                      <input
-                        type="text"
-                        value={customKeyword}
-                        onChange={(e) => setCustomKeyword(e.target.value)}
-                        onKeyDown={(e) =>
-                          e.key === "Enter" && handleAddCustom()
-                        }
-                        placeholder="Add a Keyword"
-                        className="pl-3 py-2 text-sm placeholder-[#637083] text-[#637083] font-semibold focus:outline-none"
-                        style={{
-                          width: `${Math.max(120, customKeyword.length * 10)}px`
-                        }}
-                      />
-                      <button
-                        onClick={handleAddCustom}
-                        className="text-white rounded-lg pr-3"
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="23"
-                          height="20"
-                          viewBox="0 0 23 20"
-                          fill="none"
-                        >
-                          <path
-                            d="M11.4993 4.16669V15.8334M4.79102 10H18.2077"
-                            stroke="#637083"
-                            strokeWidth="1.66667"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-                </div>
 
                 <div className="flex justify-end gap-4 items-center mt-8">
                   <span className="text-[#637083] text-sm font-semibold">
@@ -589,9 +424,10 @@ export default function JobPostingModal() {
                   </span>
                   <button
                     onClick={handleSubmit}
-                    className="bg-[#0D0C22] text-white text-sm font-semibold px-10 py-4 rounded-full"
+                    disabled={isLoading}
+                    className="bg-[#0D0C22] text-white text-sm font-semibold px-10 py-4 rounded-full disabled:opacity-50"
                   >
-                    Next
+                    {isLoading ? "Generating..." : "Next"}
                   </button>
                 </div>
               </>

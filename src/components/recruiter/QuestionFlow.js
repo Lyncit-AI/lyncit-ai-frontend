@@ -6,7 +6,7 @@ import ReactFlow, {
 } from "reactflow";
 import { useDrop } from "react-dnd";
 import { QuestionNode } from "./QuestionNode";
-import dummyData from "./Data/dummy.json"; // Import the dummy data
+import dummyData from "./Data/dummy.json"; 
 import "reactflow/dist/style.css";
 
 const nodeTypes = {
@@ -19,7 +19,7 @@ const edgeOptions = {
   animated: true,
 };
 
-export const QuestionFlow = forwardRef(({ onFlowChange, fileInputRef }, ref) => {
+export const QuestionFlow = forwardRef(({ onFlowChange, fileInputRef, initialAIData, preventDummyLoad = false }, ref) => {
   const dropRef = useRef(null);
   const reactFlowRef = useRef(null);
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
@@ -27,6 +27,8 @@ export const QuestionFlow = forwardRef(({ onFlowChange, fileInputRef }, ref) => 
   const [firstOptionsNodeId, setFirstOptionsNodeId] = useState(null);
   const [nodeIdCounter, setNodeIdCounter] = useState(0);
   const [isInitialized, setIsInitialized] = useState(false);
+  
+  console.log("Initial AI Data:", initialAIData);
 
   const updateNodeData = useCallback((nodeId, newData) => {
     setNodes((nds) =>
@@ -68,7 +70,6 @@ export const QuestionFlow = forwardRef(({ onFlowChange, fileInputRef }, ref) => 
     setTimeout(() => handleFlowChange(), 0);
   };
 
-  // Get the next node ID in sequence
   const getNextNodeId = useCallback(() => {
     const nextId = nodeIdCounter + 1;
     setNodeIdCounter(nextId);
@@ -108,19 +109,14 @@ export const QuestionFlow = forwardRef(({ onFlowChange, fileInputRef }, ref) => 
     drop: (item, monitor) => {
       if (!reactFlowRef.current) return;
       
-      // Get client offset where the item was dropped
       const clientOffset = monitor.getClientOffset();
-      
-      // Get ReactFlow container bounds
       const reactFlowBounds = reactFlowRef.current.getBoundingClientRect();
       
-      // Calculate position relative to the ReactFlow container
       const position = {
         x: clientOffset.x - reactFlowBounds.left,
         y: clientOffset.y - reactFlowBounds.top
       };
       
-      // Adjust based on viewport zoom and pan
       if (reactFlowRef.current.viewportRef) {
         const { zoom, x: panX, y: panY } = reactFlowRef.current.viewportRef.current.getViewport();
         position.x = (position.x - panX) / zoom;
@@ -177,7 +173,13 @@ export const QuestionFlow = forwardRef(({ onFlowChange, fileInputRef }, ref) => 
 
   const loadFlow = (data) => {
     try {
-      // Find the highest node number to continue the sequence
+      console.log("Loading flow data:", data);
+      
+      if (!data || !data.nodes || !Array.isArray(data.nodes)) {
+        console.error("Invalid flow data structure");
+        return false;
+      }
+
       let highestNodeNum = 0;
       data.nodes.forEach(node => {
         const nodeNumMatch = node.id.match(/node_(\d+)/);
@@ -196,23 +198,30 @@ export const QuestionFlow = forwardRef(({ onFlowChange, fileInputRef }, ref) => 
       }
       setFirstOptionsNodeId(firstOptionsId);
 
-      const restoredNodes = data.nodes.map(node => ({
-        id: node.id,
-        type: "questionNode",
-        position: node.position,
-        data: {
-          id: node.data.id || `question_${node.id.split('_')[1]}`,
-          type: node.data.type,
-          title: node.data.title,
-          options: node.data.options,
-          isFirstNode: node.data.isFirstNode || false,
-          answerText: node.data.answerText,
-          endText: node.data.endText,
-          updateNodeData: updateNodeData,
-        }
-      }));
+      const restoredNodes = data.nodes.map((node, index) => {
+        const position = node.position || {
+          x: 250 +200,
+          y: 100 + (index * 400)
+        };
+        
+        return {
+          id: node.id,
+          type: "questionNode",
+          position: position,
+          data: {
+            id: node.data.id || `question_${node.id.split('_')[1] || index}`,
+            type: node.data.type || "options",
+            title: node.data.title,
+            options: node.data.options || [{ id: "opt1", text: "Option 1" }],
+            isFirstNode: node.data.isFirstNode || (index === 0),
+            answerText: node.data.answerText || "",
+            endText: node.data.endText || "",
+            updateNodeData: updateNodeData,
+          }
+        };
+      });
 
-      const restoredEdges = data.edges.map((edge, index) => ({
+      const restoredEdges = (data.edges || []).map((edge, index) => ({
         id: edge.id || `edge_${index}`,
         source: edge.source,
         sourceHandle: edge.sourceHandle,
@@ -221,10 +230,18 @@ export const QuestionFlow = forwardRef(({ onFlowChange, fileInputRef }, ref) => 
         ...edgeOptions
       }));
       
-      setNodes(restoredNodes);
-      setEdges(restoredEdges);
+      console.log("Restored nodes:", restoredNodes);
+      console.log("Restored edges:", restoredEdges);
       
-      if (onFlowChange) onFlowChange({ nodes: restoredNodes, edges: restoredEdges });
+      setNodes([]);
+      setEdges([]);
+      
+      setTimeout(() => {
+        setNodes(restoredNodes);
+        setEdges(restoredEdges);
+        
+        if (onFlowChange) onFlowChange({ nodes: restoredNodes, edges: restoredEdges });
+      }, 50);
       
       return true;
     } catch (error) {
@@ -251,16 +268,54 @@ export const QuestionFlow = forwardRef(({ onFlowChange, fileInputRef }, ref) => 
     }
   };
 
-  // Load dummy data on first render
   useEffect(() => {
-    if (!isInitialized && nodes.length === 0 && dummyData) {
+    if (!isInitialized && nodes.length === 0) {
+      console.log("Initializing QuestionFlow...");
+      
+      if (initialAIData) {
+        console.log("Using initialAIData from props");
+        loadFlow(initialAIData);
+        setIsInitialized(true);
+        return;
+      }
+      
+      if (preventDummyLoad) {
+        console.log("Preventing dummy data load as requested by parent");
+        setIsInitialized(true);
+        return;
+      }
+      
+      const savedQuestionnaire = localStorage.getItem('questionnaire');
+      if (savedQuestionnaire) {
+        try {
+          console.log("Using questionnaire data from localStorage in QuestionFlow");
+          const parsedData = JSON.parse(savedQuestionnaire);
+          loadFlow(parsedData);
+          setIsInitialized(true);
+          return;
+        } catch (error) {
+          console.error("Error parsing localStorage data in QuestionFlow:", error);
+        }
+      }
+      
+      console.log("Falling back to dummy data");
       loadFlow(dummyData);
       setIsInitialized(true);
     }
-  }, [isInitialized, nodes.length]);
+  }, [isInitialized, nodes.length, initialAIData, preventDummyLoad]);
+
+  const initializeFlow = useCallback((flowData) => {
+    console.log("initializeFlow called with:", flowData);
+    if (flowData && flowData.nodes) {
+      setIsInitialized(false);
+      return loadFlow(flowData);
+    }
+    return false;
+  }, []);
 
   useImperativeHandle(ref, () => ({
     exportFlow,
+    initializeFlow
   }));
 
   React.useEffect(() => {
