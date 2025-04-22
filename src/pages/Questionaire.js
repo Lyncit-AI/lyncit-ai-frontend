@@ -20,6 +20,10 @@ const edgeOptions = {
   animated: true,
 };
 
+const convertAIResponseToFlow = (aiResponse) => {
+  return aiResponse;
+};
+
 function Questionaire() {
   const navigate = useNavigate();
   const [currentFlow, setCurrentFlow] = useState(null);
@@ -28,6 +32,8 @@ function Questionaire() {
   const [isViewMode, setIsViewMode] = useState(false);
   const [viewNodes, setViewNodes] = useNodesState([]);
   const [viewEdges, setViewEdges] = useEdgesState([]);
+  const [aiQuestionnaireData, setAiQuestionnaireData] = useState(null);
+  const [dataLoaded, setDataLoaded] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
@@ -35,7 +41,29 @@ function Questionaire() {
       navigate("/");
       return;
     }
-  }, [navigate]);
+
+    const savedQuestionnaire = localStorage.getItem('questionnaire');
+    if (savedQuestionnaire && !dataLoaded) {
+      try {
+        console.log("Loading questionnaire from localStorage in Questionaire component");
+        const parsedData = JSON.parse(savedQuestionnaire);
+        setAiQuestionnaireData(parsedData);
+        setCurrentFlow(parsedData);
+        setDataLoaded(true);
+      } catch (error) {
+        console.error("Error parsing questionnaire data:", error);
+      }
+    }
+  }, [navigate, dataLoaded]);
+
+  useEffect(() => {
+    if (aiQuestionnaireData && questionFlowRef.current && questionFlowRef.current.initializeFlow) {
+      console.log("Initializing flow with AI data in Questionaire component");
+      setTimeout(() => {
+        questionFlowRef.current.initializeFlow(aiQuestionnaireData);
+      }, 500);
+    }
+  }, [aiQuestionnaireData]);
 
   const handleFlowChange = (flowData) => {
     setCurrentFlow(flowData);
@@ -99,7 +127,6 @@ function Questionaire() {
   };
 
   const handleLaunch = () => {
-    // Implement launch functionality here
     alert("Campaign launched successfully!");
     navigate("/upload");
   };
@@ -223,6 +250,8 @@ function Questionaire() {
               ref={questionFlowRef}
               onFlowChange={handleFlowChange}
               fileInputRef={fileInputRef}
+              initialAIData={aiQuestionnaireData}
+              preventDummyLoad={dataLoaded}
             />
           </div>
         )}

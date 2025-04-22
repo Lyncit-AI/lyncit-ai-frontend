@@ -28,7 +28,7 @@ export default function JobPostingModal() {
   const [jobUrl, setJobUrl] = useState("");
   const [, setJobDescription] = useState("");
   const [step, setStep] = useState(1);
-  const [selectedCategory, setSelectedCategory] = useState("skills");
+  const [selectedCategory, setSelectedCategory] = useState("");
   const [customKeyword, setCustomKeyword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [categories, setCategories] = useState([]);
@@ -58,7 +58,7 @@ export default function JobPostingModal() {
         throw new Error("Access token not found");
       }
 
-      const url = `https://lyncitapplications.xyz:8086/position`;
+      const url = `https://lyncitapplications.xyz:8086/AI/ai_keywords`;
 
       const response = await axios({
         method: "POST",
@@ -68,15 +68,24 @@ export default function JobPostingModal() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`
         },
-        data: { description: jobDesc },
+        params: { 
+          jobDescription: jobDesc,
+          categories: "skills,availability,preferences" 
+        },
         withCredentials: true
       });
 
-      const { categories, keywords } = response.data;
-      return { categories, keywords };
+      const responseData = response.data;
+      
+      const uniqueCategories = [...new Set(responseData.map(item => item.category))];
+      
+      return { 
+        categories: uniqueCategories, 
+        keywords: responseData 
+      };
     } catch (error) {
       console.error("Error fetching categories from backend:", error);
-      return dummyData; // Return dummy data in case of error
+      return dummyData;
     } finally {
       setIsLoading(false);
     }
@@ -94,6 +103,9 @@ export default function JobPostingModal() {
       if (backendData) {
         setCategories(backendData.categories);
         setKeywords(backendData.keywords);
+        if (backendData.categories && backendData.categories.length > 0) {
+          setSelectedCategory(backendData.categories[0]);
+        }
       }
     }
 
@@ -108,19 +120,56 @@ export default function JobPostingModal() {
     );
   };
 
-  const handleSubmit = () => {
-    const payload = {
-      categories,
-      keywords
-    };
-
-    console.log("Payload being sent:", payload);
-    alert(JSON.stringify(payload, null, 2)); // For debugging purposes
-    navigate("/question");
+  const handleSubmit = async () => {
+    try {
+      setIsLoading(true);
+      
+      const selectedKeywords = keywords
+        .filter(kw => kw.selected)
+        .map(kw => kw.keyword)
+        .join(',');
+        
+      const accessToken = localStorage.getItem("accessToken");
+  
+      if (!accessToken) {
+        console.error("Access token not found in localStorage");
+        throw new Error("Access token not found");
+      }
+  
+      const url = `https://lyncitapplications.xyz:8086/AI/ai_questionnaire`;
+  
+      console.log("Sending questionnaire request with:", {
+        jobDescription: jobUrl,
+        keywords: selectedKeywords
+      });
+  
+      const response = await axios({
+        method: "POST",
+        url: url,
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`
+        },
+        params: { 
+          jobDescription: jobUrl,
+          keywords: selectedKeywords
+        },
+        withCredentials: true
+      });
+  
+      console.log("Questionnaire API response:", response.data);
+      
+      localStorage.setItem('questionnaire', JSON.stringify(response.data));
+      
+      navigate("/question");
+    } catch (error) {
+      console.error("Error generating questionnaire:", error);
+      alert("Failed to generate questionnaire. Please try again. Error: " + (error.message || "Unknown error"));
+    } finally {
+      setIsLoading(false);
+    }
   };
-
-  // const visibleCategories = categories.slice(0, 3);
-  // const remainingCount = categories.length - 3;
 
   return (
     <div className="flex justify-center items-center z-30">
@@ -243,8 +292,8 @@ export default function JobPostingModal() {
                           <path
                             d="M12 5V19M5 12H19"
                             stroke="currentColor"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
                           />
                         </svg>
                         Add an option
@@ -253,7 +302,7 @@ export default function JobPostingModal() {
                   </div>
                 </div>
 
-                <div className="mt-6 space-y-2 max-sm:hidden">
+                <div className="mt-6 space-y-2 max-sm:hidden sm:max-h-[250px] overflow-y-auto">
                   {keywords
                     .filter((kw) => kw.category === selectedCategory)
                     .map((keywordData) => (
@@ -281,9 +330,9 @@ export default function JobPostingModal() {
                               <path
                                 d="M11.4993 4.16669V15.8334M4.79102 10H18.2077"
                                 stroke="#637083"
-                                stroke-width="1.66667"
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
+                                strokeWidth="1.66667"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
                               />
                             </svg>
                           )}
@@ -357,9 +406,9 @@ export default function JobPostingModal() {
                                 <path
                                   d="M11.4993 4.16669V15.8334M4.79102 10H18.2077"
                                   stroke="#637083"
-                                  stroke-width="1.66667"
-                                  stroke-linecap="round"
-                                  stroke-linejoin="round"
+                                  strokeWidth="1.66667"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
                                 />
                               </svg>
                             )}
@@ -375,9 +424,10 @@ export default function JobPostingModal() {
                   </span>
                   <button
                     onClick={handleSubmit}
-                    className="bg-[#0D0C22] text-white text-sm font-semibold px-10 py-4 rounded-full"
+                    disabled={isLoading}
+                    className="bg-[#0D0C22] text-white text-sm font-semibold px-10 py-4 rounded-full disabled:opacity-50"
                   >
-                    Next
+                    {isLoading ? "Generating..." : "Next"}
                   </button>
                 </div>
               </>
