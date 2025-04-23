@@ -1,5 +1,5 @@
 import * as Dialog from "@radix-ui/react-dialog";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { X } from "lucide-react";
 import axios from "axios";
@@ -33,6 +33,32 @@ export default function JobPostingModal() {
   const [isLoading, setIsLoading] = useState(false);
   const [categories, setCategories] = useState([]);
   const [keywords, setKeywords] = useState([]);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  
+  useEffect(() => {
+    const openModalAtStep = localStorage.getItem('openModalAtStep');
+    if (openModalAtStep) {
+      setDialogOpen(true);
+      setStep(parseInt(openModalAtStep, 10));
+      localStorage.removeItem('openModalAtStep');
+      
+      const savedCategoriesData = localStorage.getItem('questionnaireCategories');
+      if (savedCategoriesData) {
+        try {
+          const parsedData = JSON.parse(savedCategoriesData);
+          setCategories(parsedData.categories || []);
+          setKeywords(parsedData.keywords || []);
+          setJobUrl(parsedData.jobDescription || "");
+          
+          if (parsedData.categories && parsedData.categories.length > 0) {
+            setSelectedCategory(parsedData.categories[0]);
+          }
+        } catch (error) {
+          console.error("Error parsing saved categories data:", error);
+        }
+      }
+    }
+  }, []);
 
   const handleAddCustom = () => {
     if (customKeyword.trim()) {
@@ -66,7 +92,8 @@ export default function JobPostingModal() {
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`
+          Authorization: `Bearer ${accessToken}`,
+          "Access-Control-Allow-Credentials": "true",
         },
         params: { 
           jobDescription: jobDesc,
@@ -124,6 +151,12 @@ export default function JobPostingModal() {
     try {
       setIsLoading(true);
       
+      localStorage.setItem('questionnaireCategories', JSON.stringify({
+        categories,
+        keywords,
+        jobDescription: jobUrl
+      }));
+      
       const selectedKeywords = keywords
         .filter(kw => kw.selected)
         .map(kw => kw.keyword)
@@ -149,7 +182,8 @@ export default function JobPostingModal() {
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken}`
+          Authorization: `Bearer ${accessToken}`,
+          "Access-Control-Allow-Credentials": "true",
         },
         params: { 
           jobDescription: jobUrl,
@@ -160,6 +194,7 @@ export default function JobPostingModal() {
   
       console.log("Questionnaire API response:", response.data);
       
+      localStorage.removeItem('questionnaire');
       localStorage.setItem('questionnaire', JSON.stringify(response.data));
       
       navigate("/question");
@@ -173,9 +208,12 @@ export default function JobPostingModal() {
 
   return (
     <div className="flex justify-center items-center z-30">
-      <Dialog.Root>
+      <Dialog.Root open={dialogOpen} onOpenChange={setDialogOpen}>
         <Dialog.Trigger asChild>
-          <button className="flex justify-center items-center rounded-b-[32px] gap-2 w-full bg-[#3d3d4e] text-white py-6 hover:bg-gray-700">
+          <button 
+            className="flex justify-center items-center rounded-b-[32px] gap-2 w-full bg-[#3d3d4e] text-white py-6 hover:bg-gray-700"
+            onClick={() => setDialogOpen(true)}
+          >
             Design a campaign
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -253,24 +291,24 @@ export default function JobPostingModal() {
                   Select keywords based on the job posting.
                 </p>
                 <div className="flex mt-12 gap-4 border-b max-sm:hidden">
-                  <div className="flex gap-4 overflow-x-scroll">
+                  <div className="flex gap-6 overflow-x-scroll">
                     {categories.map((category) => (
                       <span
                         key={category}
-                        className={`cursor-pointer py-6 font-medium ${
+                        className={`cursor-pointer py-6 ${
                           selectedCategory === category
-                            ? "text-[#825C9A] border-b border-[#825C9A]"
-                            : "text-[#0D0C22]"
+                            ? "text-[#825C9A] font-bold border-b border-[#825C9A]"
+                            : "text-[#0D0C22] font-medium "
                         }`}
                         onClick={() => setSelectedCategory(category)}
                       >
-                        {category}
+                        {category.charAt(0).toUpperCase() + category.slice(1)}
                       </span>
                     ))}
                     <div
                       className={`cursor-pointer min-w-[170px] py-6 font-medium ${
                         selectedCategory === "Add an option"
-                          ? "text-white border-b border-[#825C9A]"
+                          ? "text-white border-b font-semibold border-[#825C9A]"
                           : "text-[#0D0C22]"
                       }`}
                       onClick={() => setSelectedCategory("Add an option")}
@@ -302,14 +340,14 @@ export default function JobPostingModal() {
                   </div>
                 </div>
 
-                <div className="mt-6 space-y-2 max-sm:hidden sm:max-h-[250px] overflow-y-auto">
+                <div className="mt-6 space-y-3 max-sm:hidden sm:max-h-[250px] overflow-y-auto">
                   {keywords
                     .filter((kw) => kw.category === selectedCategory)
                     .map((keywordData) => (
                       <button
                         key={keywordData.keyword}
-                        className={`flex justify-between items-center gap-2 border border-[#BFBFBF] text-[#637083] text-sm font-semibold rounded-full px-3 py-2 ${
-                          keywordData.selected ? "border-black" : ""
+                        className={`flex justify-between items-center gap-2 border border-[#BFBFBF] text-[#637083] text-sm rounded-full px-3 py-2 ${
+                          keywordData.selected ? "border-black font-bold" : "font-semibold"
                         }`}
                         onClick={() =>
                           toggleKeywordSelection(keywordData.keyword)

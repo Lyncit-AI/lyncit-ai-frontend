@@ -20,10 +20,6 @@ const edgeOptions = {
   animated: true,
 };
 
-const convertAIResponseToFlow = (aiResponse) => {
-  return aiResponse;
-};
-
 function Questionaire() {
   const navigate = useNavigate();
   const [currentFlow, setCurrentFlow] = useState(null);
@@ -34,6 +30,7 @@ function Questionaire() {
   const [viewEdges, setViewEdges] = useEdgesState([]);
   const [aiQuestionnaireData, setAiQuestionnaireData] = useState(null);
   const [dataLoaded, setDataLoaded] = useState(false);
+  const [flowKey, setFlowKey] = useState(0);
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
@@ -63,7 +60,7 @@ function Questionaire() {
         questionFlowRef.current.initializeFlow(aiQuestionnaireData);
       }, 500);
     }
-  }, [aiQuestionnaireData]);
+  }, [aiQuestionnaireData, flowKey]);
 
   const handleFlowChange = (flowData) => {
     setCurrentFlow(flowData);
@@ -84,13 +81,27 @@ function Questionaire() {
   const handleback = () => {
     if (isViewMode) {
       setIsViewMode(false);
+
+      setTimeout(() => {
+        setFlowKey(prev => prev + 1);
+      }, 50);
     } else {
+      if (currentFlow) {
+        localStorage.setItem('questionnaire', JSON.stringify(currentFlow));
+      }
+      
+      localStorage.setItem('openModalAtStep', '2');
       navigate("/app");
     }
   };
 
   const handleFinalizeCampaign = () => {
     if (currentFlow) {
+      const finalizedFlow = JSON.parse(JSON.stringify(currentFlow));
+      localStorage.setItem('questionnaire', JSON.stringify(finalizedFlow));
+      
+      setAiQuestionnaireData(finalizedFlow);
+      
       const serializableNodes = currentFlow.nodes.map(node => ({
         id: node.id,
         type: node.type,
@@ -247,6 +258,7 @@ function Questionaire() {
               </button>
             </div>
             <QuestionFlow
+              key={flowKey}
               ref={questionFlowRef}
               onFlowChange={handleFlowChange}
               fileInputRef={fileInputRef}

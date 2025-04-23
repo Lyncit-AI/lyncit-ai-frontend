@@ -3,6 +3,7 @@ import ReactFlow, {
   addEdge,
   useNodesState,
   useEdgesState,
+  Controls,
 } from "reactflow";
 import { useDrop } from "react-dnd";
 import { QuestionNode } from "./QuestionNode";
@@ -346,6 +347,7 @@ export const QuestionFlow = forwardRef(({ onFlowChange, fileInputRef, initialAID
           proOptions={{ hideAttribution: true }}
           ref={reactFlowRef}
         >
+          <Controls/>
         </ReactFlow>
       </div>
     </div>
