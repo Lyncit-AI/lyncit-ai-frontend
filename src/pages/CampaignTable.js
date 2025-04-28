@@ -218,7 +218,7 @@ const campaigns = [
               Back
             </button>
   
-            <div className="relative max-w-[400px] -z-0">
+            <div className="relative z-0 max-w-[400px]">
               <input
                 type="text"
                 value={search}

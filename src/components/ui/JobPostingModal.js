@@ -243,9 +243,9 @@ export default function JobPostingModal() {
         </Dialog.Trigger>
 
         <Dialog.Portal>
-          <Dialog.Overlay className="fixed inset-0 bg-black/50" />
+          <Dialog.Overlay className="fixed inset-0 bg-black/50 z-20" />
           <Dialog.Content
-            className={`fixed top-1/2 left-1/2 max-w-[857px] max-sm:w-[315px] ${
+            className={`fixed top-1/2 left-1/2 max-w-[857px] max-sm:w-[315px] z-30 ${
               step === 1
                 ? "lg:w-[615px] px-8"
                 : "lg:w-[857px] px-24 max-md:px-12 max-sm:px-8"
