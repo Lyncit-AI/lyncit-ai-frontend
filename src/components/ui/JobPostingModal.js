@@ -34,22 +34,24 @@ export default function JobPostingModal() {
   const [categories, setCategories] = useState([]);
   const [keywords, setKeywords] = useState([]);
   const [dialogOpen, setDialogOpen] = useState(false);
-  
+
   useEffect(() => {
-    const openModalAtStep = localStorage.getItem('openModalAtStep');
+    const openModalAtStep = localStorage.getItem("openModalAtStep");
     if (openModalAtStep) {
       setDialogOpen(true);
       setStep(parseInt(openModalAtStep, 10));
-      localStorage.removeItem('openModalAtStep');
-      
-      const savedCategoriesData = localStorage.getItem('questionnaireCategories');
+      localStorage.removeItem("openModalAtStep");
+
+      const savedCategoriesData = localStorage.getItem(
+        "questionnaireCategories"
+      );
       if (savedCategoriesData) {
         try {
           const parsedData = JSON.parse(savedCategoriesData);
           setCategories(parsedData.categories || []);
           setKeywords(parsedData.keywords || []);
           setJobUrl(parsedData.jobDescription || "");
-          
+
           if (parsedData.categories && parsedData.categories.length > 0) {
             setSelectedCategory(parsedData.categories[0]);
           }
@@ -93,22 +95,24 @@ export default function JobPostingModal() {
           Accept: "application/json",
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,
-          "Access-Control-Allow-Credentials": "true",
+          "Access-Control-Allow-Credentials": "true"
         },
-        params: { 
+        params: {
           jobDescription: jobDesc,
-          categories: "skills,availability,preferences" 
+          categories: "skills,availability,preferences"
         },
         withCredentials: true
       });
 
       const responseData = response.data;
-      
-      const uniqueCategories = [...new Set(responseData.map(item => item.category))];
-      
-      return { 
-        categories: uniqueCategories, 
-        keywords: responseData 
+
+      const uniqueCategories = [
+        ...new Set(responseData.map((item) => item.category))
+      ];
+
+      return {
+        categories: uniqueCategories,
+        keywords: responseData
       };
     } catch (error) {
       console.error("Error fetching categories from backend:", error);
@@ -150,32 +154,35 @@ export default function JobPostingModal() {
   const handleSubmit = async () => {
     try {
       setIsLoading(true);
-      
-      localStorage.setItem('questionnaireCategories', JSON.stringify({
-        categories,
-        keywords,
-        jobDescription: jobUrl
-      }));
-      
+
+      localStorage.setItem(
+        "questionnaireCategories",
+        JSON.stringify({
+          categories,
+          keywords,
+          jobDescription: jobUrl
+        })
+      );
+
       const selectedKeywords = keywords
-        .filter(kw => kw.selected)
-        .map(kw => kw.keyword)
-        .join(',');
-        
+        .filter((kw) => kw.selected)
+        .map((kw) => kw.keyword)
+        .join(",");
+
       const accessToken = localStorage.getItem("accessToken");
-  
+
       if (!accessToken) {
         console.error("Access token not found in localStorage");
         throw new Error("Access token not found");
       }
-  
+
       const url = `https://lyncitapplications.xyz:8086/AI/ai_questionnaire`;
-  
+
       console.log("Sending questionnaire request with:", {
         jobDescription: jobUrl,
         keywords: selectedKeywords
       });
-  
+
       const response = await axios({
         method: "POST",
         url: url,
@@ -183,24 +190,27 @@ export default function JobPostingModal() {
           Accept: "application/json",
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,
-          "Access-Control-Allow-Credentials": "true",
+          "Access-Control-Allow-Credentials": "true"
         },
-        params: { 
+        params: {
           jobDescription: jobUrl,
           keywords: selectedKeywords
         },
         withCredentials: true
       });
-  
+
       console.log("Questionnaire API response:", response.data);
-      
-      localStorage.removeItem('questionnaire');
-      localStorage.setItem('questionnaire', JSON.stringify(response.data));
-      
+
+      localStorage.removeItem("questionnaire");
+      localStorage.setItem("questionnaire", JSON.stringify(response.data));
+
       navigate("/question");
     } catch (error) {
       console.error("Error generating questionnaire:", error);
-      alert("Failed to generate questionnaire. Please try again. Error: " + (error.message || "Unknown error"));
+      alert(
+        "Failed to generate questionnaire. Please try again. Error: " +
+          (error.message || "Unknown error")
+      );
     } finally {
       setIsLoading(false);
     }
@@ -210,7 +220,7 @@ export default function JobPostingModal() {
     <div className="flex justify-center items-center z-30">
       <Dialog.Root open={dialogOpen} onOpenChange={setDialogOpen}>
         <Dialog.Trigger asChild>
-          <button 
+          <button
             className="flex justify-center items-center rounded-b-[32px] gap-2 w-full bg-[#3d3d4e] text-white py-6 hover:bg-gray-700"
             onClick={() => setDialogOpen(true)}
           >
@@ -263,7 +273,7 @@ export default function JobPostingModal() {
                   value={jobUrl}
                   onChange={(e) => setJobUrl(e.target.value)}
                   placeholder="We are seeking a compassionate and reliable Healthcare Assistant to join our team. In this role...."
-                  className="w-full h-20 mt-2 p-3 border rounded-lg resize-none"
+                  className="w-full h-20 mt-2 p-3 border rounded-lg"
                 />
                 <div className="text-sm text-[#637083] flex justify-between mt-1 max-sm:flex-col">
                   <span>Required</span>
@@ -288,9 +298,11 @@ export default function JobPostingModal() {
             {step === 2 && (
               <>
                 <p className="text-[#637083] mt-4">
-                  Select keywords based on the job posting.
+                Keywords based on the job posting to create the screening questions
                 </p>
-                <div className="flex mt-12 gap-4 border-b max-sm:hidden">
+
+                {/* Desktop View - Categories and Keywords */}
+                <div className="flex mt-12 gap-4 border-b sm:flex hidden">
                   <div className="flex gap-6 overflow-x-scroll">
                     {categories.map((category) => (
                       <span
@@ -340,23 +352,42 @@ export default function JobPostingModal() {
                   </div>
                 </div>
 
-                <div className="mt-6 space-y-3 max-sm:hidden sm:max-h-[250px] overflow-y-auto">
+                <div className="mt-6 space-y-3 sm:block hidden sm:max-h-[250px] overflow-y-auto">
                   {keywords
                     .filter((kw) => kw.category === selectedCategory)
                     .map((keywordData) => (
                       <button
                         key={keywordData.keyword}
                         className={`flex justify-between items-center gap-2 border border-[#BFBFBF] text-[#637083] text-sm rounded-full px-3 py-2 ${
-                          keywordData.selected ? "border-black font-bold" : "font-semibold"
+                          keywordData.selected
+                            ? "bg-black text-white font-bold"
+                            : "font-semibold"
                         }`}
                         onClick={() =>
                           toggleKeywordSelection(keywordData.keyword)
                         }
                       >
                         {keywordData.keyword}
-                        <span>
+                        <span className="text-white">
                           {keywordData.selected ? (
-                            "✔"
+                            <>
+                              <svg
+                                className="text-white"
+                                width="10"
+                                height="10"
+                                viewBox="0 0 13 13"
+                                fill="none"
+                                xmlns="http://www.w3.org/2000/svg"
+                              >
+                                <path
+                                  d="M11.9844 1.01562L1.01562 11.9844M1.01562 1.01562L11.9844 11.9844"
+                                  stroke="white"
+                                  stroke-width="1.5"
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                />
+                              </svg>
+                            </>
                           ) : (
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
@@ -379,8 +410,157 @@ export default function JobPostingModal() {
                     ))}
                 </div>
 
+                {/* Mobile View - Categories with Keywords */}
+                <div className="mt-6 flex flex-col space-y-6 sm:hidden max-h-[350px] overflow-y-auto">
+                  {categories.map((category) => (
+                    <div key={category} className="space-y-3">
+                      <h3 className="font-bold text-[#0D0C22] text-base">
+                        {category.charAt(0).toUpperCase() + category.slice(1)}
+                      </h3>
+                      <div className="flex flex-wrap gap-2">
+                        {keywords
+                          .filter((kw) => kw.category === category)
+                          .map((keywordData) => (
+                            <button
+                              key={keywordData.keyword}
+                              className={`flex justify-between items-center gap-1 border border-[#BFBFBF] text-[#637083] text-sm rounded-full px-3 py-2 ${
+                                keywordData.selected
+                                  ? "border-black font-bold"
+                                  : "font-semibold"
+                              }`}
+                              onClick={() =>
+                                toggleKeywordSelection(keywordData.keyword)
+                              }
+                            >
+                              {keywordData.keyword}
+                              <span>
+                                {keywordData.selected ? (
+                                  "✔"
+                                ) : (
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="23"
+                                    height="20"
+                                    viewBox="0 0 23 20"
+                                    fill="none"
+                                  >
+                                    <path
+                                      d="M11.4993 4.16669V15.8334M4.79102 10H18.2077"
+                                      stroke="#637083"
+                                      strokeWidth="1.66667"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                    />
+                                  </svg>
+                                )}
+                              </span>
+                            </button>
+                          ))}
+                      </div>
+                    </div>
+                  ))}
+
+                  {/* Custom Keywords Section for Mobile */}
+                  <div className="pt-4 border-t">
+                    <h3 className="font-bold text-[#825C9A] text-base mb-3">
+                      Add an option
+                    </h3>
+                    <div className="flex flex-col gap-3">
+                      <div className="flex gap-2 border rounded-[32px] overflow-hidden w-full">
+                        <input
+                          type="text"
+                          value={customKeyword}
+                          onChange={(e) => setCustomKeyword(e.target.value)}
+                          onKeyDown={(e) =>
+                            e.key === "Enter" && handleAddCustom()
+                          }
+                          placeholder="Add a Keyword"
+                          className="pl-3 py-2 text-sm placeholder-[#637083] text-[#637083] font-semibold focus:outline-none flex-grow"
+                        />
+                        <button onClick={handleAddCustom} className="pr-3">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="23"
+                            height="20"
+                            viewBox="0 0 23 20"
+                            fill="none"
+                          >
+                            <path
+                              d="M11.4993 4.16669V15.8334M4.79102 10H18.2077"
+                              stroke="#637083"
+                              strokeWidth="1.66667"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+
+                      <div className="flex flex-wrap gap-2">
+                        {keywords
+                          .filter((kw) => kw.category === "other")
+                          .map((customKeywordData) => (
+                            <button
+                              key={customKeywordData.keyword}
+                              className={`flex justify-between items-center gap-2 border border-[#BFBFBF] text-[#637083] text-sm rounded-full px-3 py-2 ${
+                                customKeywordData.selected
+                                  ? "border-black font-bold"
+                                  : "font-semibold"
+                              }`}
+                              onClick={() =>
+                                toggleKeywordSelection(
+                                  customKeywordData.keyword
+                                )
+                              }
+                            >
+                              {customKeywordData.keyword}
+                              <span>
+                                {customKeywordData.selected ? (
+                                  <>
+                                    <svg
+                                      width="13"
+                                      className="text-white"
+                                      height="13"
+                                      viewBox="0 0 13 13"
+                                      fill="none"
+                                      xmlns="http://www.w3.org/2000/svg"
+                                    >
+                                      <path
+                                        d="M11.9844 1.01562L1.01562 11.9844M1.01562 1.01562L11.9844 11.9844"
+                                        stroke="#637083"
+                                        stroke-width="1.5"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                      />
+                                    </svg>
+                                  </>
+                                ) : (
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="23"
+                                    height="20"
+                                    viewBox="0 0 23 20"
+                                    fill="none"
+                                  >
+                                    <path
+                                      d="M11.4993 4.16669V15.8334M4.79102 10H18.2077"
+                                      stroke="#637083"
+                                      strokeWidth="1.66667"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                    />
+                                  </svg>
+                                )}
+                              </span>
+                            </button>
+                          ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 {selectedCategory === "Add an option" && (
-                  <div>
+                  <div className="sm:block hidden">
                     <div className="flex gap-2 border rounded-[32px] overflow-hidden w-fit">
                       <input
                         type="text"
@@ -417,42 +597,60 @@ export default function JobPostingModal() {
                       </button>
                     </div>
 
-                    {keywords
-                      .filter((kw) => kw.category === "other")
-                      .map((customKeywordData) => (
-                        <button
-                          key={customKeywordData.keyword}
-                          className={`flex justify-between items-center w-fit gap-2 border border-[#BFBFBF] text-[#637083] text-sm font-semibold rounded-full px-3 py-2 ${
-                            customKeywordData.selected ? "border-black" : ""
-                          }`}
-                          onClick={() =>
-                            toggleKeywordSelection(customKeywordData.keyword)
-                          }
-                        >
-                          {customKeywordData.keyword}
-                          <span>
-                            {customKeywordData.selected ? (
-                              "✔"
-                            ) : (
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="23"
-                                height="20"
-                                viewBox="0 0 23 20"
-                                fill="none"
-                              >
-                                <path
-                                  d="M11.4993 4.16669V15.8334M4.79102 10H18.2077"
-                                  stroke="#637083"
-                                  strokeWidth="1.66667"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                />
-                              </svg>
-                            )}
-                          </span>
-                        </button>
-                      ))}
+                    <div className="flex flex-col gap-2 mt-3">
+                      {keywords
+                        .filter((kw) => kw.category === "other")
+                        .map((customKeywordData) => (
+                          <button
+                            key={customKeywordData.keyword}
+                            className={`flex justify-between items-center w-fit gap-2 border border-[#BFBFBF] text-[#637083] text-sm font-semibold rounded-full px-3 py-2 ${
+                              customKeywordData.selected ? "bg-black text-white" : ""
+                            }`}
+                            onClick={() =>
+                              toggleKeywordSelection(customKeywordData.keyword)
+                            }
+                          >
+                            {customKeywordData.keyword}
+                            <span>
+                              {customKeywordData.selected ? (
+                                <>
+                                  <svg
+                                    width="10"
+                                    height="10"
+                                    viewBox="0 0 13 13"
+                                    fill="none"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  >
+                                    <path
+                                      d="M11.9844 1.01562L1.01562 11.9844M1.01562 1.01562L11.9844 11.9844"
+                                      stroke="white"
+                                      stroke-width="1.5"
+                                      stroke-linecap="round"
+                                      stroke-linejoin="round"
+                                    />
+                                  </svg>
+                                </>
+                              ) : (
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="23"
+                                  height="20"
+                                  viewBox="0 0 23 20"
+                                  fill="none"
+                                >
+                                  <path
+                                    d="M11.4993 4.16669V15.8334M4.79102 10H18.2077"
+                                    stroke="#637083"
+                                    strokeWidth="1.66667"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  />
+                                </svg>
+                              )}
+                            </span>
+                          </button>
+                        ))}
+                    </div>
                   </div>
                 )}
 

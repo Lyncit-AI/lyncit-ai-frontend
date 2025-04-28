@@ -139,7 +139,7 @@ function Questionaire() {
 
   const handleLaunch = () => {
     alert("Campaign launched successfully!");
-    navigate("/upload");
+    navigate("/campaign");
   };
 
   return (
