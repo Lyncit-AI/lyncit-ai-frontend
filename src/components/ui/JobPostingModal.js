@@ -267,6 +267,15 @@ export default function JobPostingModal() {
             {step === 1 && (
               <>
                 <label className="block mt-8 text-sm text-[#0D0C22] font-medium">
+                 Campaign Name
+                </label>
+                <input
+                  // value={jobUrl}
+                  // onChange={(e) => setJobUrl(e.target.value)}
+                  placeholder="Enter a campaign Name"
+                  className="w-full h-10 mt-2 p-3 border rounded-lg"
+                />
+                <label className="block mt-8 text-sm text-[#0D0C22] font-medium">
                   Paste the Job Description
                 </label>
                 <textarea
