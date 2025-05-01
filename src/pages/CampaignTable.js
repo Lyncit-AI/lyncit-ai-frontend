@@ -314,7 +314,7 @@ const campaigns = [
                       <td className="p-6">
                         <button
                           type="button"
-                          // onClick={() => handleViewClick(campaign.id)}
+                          onClick={() => handleViewClick(campaign.id)}
                           className="text-xs flex gap-2 items-center"
                         >
                           View
