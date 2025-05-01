@@ -157,7 +157,7 @@ const Upload = () => {
   };
 
   const handleback = () => {
-    navigate("/question");
+    navigate("/campaign");
   };
 
   const renderFilePreview = () => {
