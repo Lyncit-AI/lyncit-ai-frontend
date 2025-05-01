@@ -50,22 +50,29 @@ const Upload = () => {
         throw new Error(errorData.message || 'Upload failed');
       }
 
-      // Test download immediately after successful upload
-      const { guid } = await response.json();
+      // Get both guid and saved_as from response
+      const { guid, saved_as } = await response.json();
       
-      // Download test
-      const downloadResponse = await fetch(`https://lyncitapplications.xyz:8086/files/downloadfile/${guid}`, {
+      // Use saved_as (full filename) for download
+      const downloadResponse = await fetch(`https://lyncitapplications.xyz:8086/files/downloadfile/${saved_as}`, {
         credentials: 'include',
       });
 
       if (downloadResponse.ok) {
-        const downloadedData = await downloadResponse.json();
-        console.log('Downloaded file content:', downloadedData);
+        const blob = await downloadResponse.blob();
+        // Create download URL
+        const url = window.URL.createObjectURL(blob);
+        
+        setUploadedFile(prev => ({ 
+          ...prev, 
+          guid,
+          downloadUrl: url,
+          fileName: saved_as 
+        }));
       } else {
         console.error('Download failed');
       }
 
-      setUploadedFile(prev => ({ ...prev, guid }));
       return { guid };
     } catch (error) {
       console.error('File upload/download error:', error.message);
@@ -123,6 +130,7 @@ const Upload = () => {
           // Upload file to backend
           await handleFileUpload(file);
         } catch (error) {
+          console.error('File input error:', error.message);
           setUploadedFile("");
           setFileError(true);
         }
@@ -293,7 +301,7 @@ const Upload = () => {
             accept=".xlsx,.xls,.doc,.docx,.csv,.json"
           />
         </div>
-        {uploadedFile && (
+        {/* {uploadedFile && (
           <div className="flex gap-2 p-3 my-8">
             <p className="text-sm text-[#D32F2F]">
               Five people in the DNC list have been Removed.
@@ -313,6 +321,17 @@ const Upload = () => {
                 strokeLinejoin="round"
               />
             </svg>
+          </div>
+        )} */}
+        {uploadedFile?.downloadUrl && (
+          <div className="mt-4">
+            <a 
+              href={uploadedFile.downloadUrl}
+              download={uploadedFile.fileName}
+              className="text-blue-600 hover:underline"
+            >
+              Download uploaded file
+            </a>
           </div>
         )}
         <div className="mt-8 max-w-[615px] flex justify-end">
