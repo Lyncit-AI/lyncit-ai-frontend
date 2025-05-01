@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { X } from "lucide-react";
 import axios from "axios";
+import React from 'react';
 
 const dummyData = {
   categories: ["skills", "availability", "preferences"],
@@ -34,6 +35,7 @@ export default function JobPostingModal() {
   const [categories, setCategories] = useState([]);
   const [keywords, setKeywords] = useState([]);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [campaignName, setCampaignName] = useState("");
 
   useEffect(() => {
     const openModalAtStep = localStorage.getItem("openModalAtStep");
@@ -160,7 +162,8 @@ export default function JobPostingModal() {
         JSON.stringify({
           categories,
           keywords,
-          jobDescription: jobUrl
+          jobDescription: jobUrl,
+          campaignName: campaignName
         })
       );
 
@@ -270,8 +273,8 @@ export default function JobPostingModal() {
                  Campaign Name
                 </label>
                 <input
-                  // value={jobUrl}
-                  // onChange={(e) => setJobUrl(e.target.value)}
+                  value={campaignName}
+                  onChange={(e) => setCampaignName(e.target.value)}
                   placeholder="Enter a campaign Name"
                   className="w-full h-10 mt-2 p-3 border rounded-lg"
                 />
@@ -295,7 +298,7 @@ export default function JobPostingModal() {
                   </span>
                   <button
                     onClick={handleNextStep}
-                    disabled={!jobUrl.trim() || isLoading}
+                    disabled={!jobUrl.trim() || !campaignName.trim() || isLoading}
                     className="bg-[#0D0C22] text-white text-sm font-semibold px-10 py-4 rounded-full disabled:opacity-50"
                   >
                     {isLoading ? "Loading..." : "Next"}

@@ -9,6 +9,7 @@ import { ArrowLeft } from "lucide-react";
 import Logo from "../assets/icons/keylogo";
 import ReactFlow, { useNodesState, useEdgesState } from "reactflow";
 import "reactflow/dist/style.css";
+import axios from "axios";
 
 const nodeTypes = {
   questionNode: QuestionNode,
@@ -43,6 +44,7 @@ function Questionaire() {
   const [aiQuestionnaireData, setAiQuestionnaireData] = useState(null);
   const [dataLoaded, setDataLoaded] = useState(false);
   const [flowKey, setFlowKey] = useState(0);
+  const [campaignName, setCampaignName] = useState("");
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
@@ -73,6 +75,14 @@ function Questionaire() {
       }, 500);
     }
   }, [aiQuestionnaireData, flowKey]);
+
+  useEffect(() => {
+    const savedData = localStorage.getItem("questionnaireCategories");
+    if (savedData) {
+      const parsedData = JSON.parse(savedData);
+      setCampaignName(parsedData.campaignName);
+    }
+  }, []);
 
   const handleFlowChange = (flowData) => {
     setCurrentFlow(flowData);
@@ -150,7 +160,6 @@ function Questionaire() {
   };
 
   const handleLaunch = () => {
-    alert("Campaign launched successfully!");
     navigate("/campaign");
   };
 
@@ -163,9 +172,14 @@ function Questionaire() {
             <div>
               <Logo />
             </div>
-            <h1 className="text-lg font-semibold text-black">
-              {isViewMode ? "Campaign Preview" : "Campaign Dashboard"}
-            </h1>
+            <div className="flex flex-col items-center">
+              <h1 className="text-lg font-semibold text-black">
+                {campaignName ? `${campaignName} - ` : ""}{isViewMode ? "Campaign Preview" : "Campaign Dashboard"}
+              </h1>
+              {/* {campaignName && (
+                <span className="text-sm text-gray-600 mt-1">{campaignName}</span>
+              )} */}
+            </div>
             <span className="text-xs text-gray-500">Powered By Lyncit AI</span>
           </div>
 
