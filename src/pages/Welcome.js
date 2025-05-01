@@ -80,7 +80,13 @@ export default function Welcome() {
         name: userData.userName,
         email: userData.email,
         picture: null,
-        sub: userData.id
+        sub: userData.id,
+        roles: [
+          {
+            orgId: userData.orgId || "GUID",
+            departmentId: userData.departmentId || "GUID",
+          }
+        ]
       };
 
       localStorage.setItem("userInfo", JSON.stringify(userInfo));
