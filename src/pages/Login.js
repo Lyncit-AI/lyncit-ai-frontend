@@ -176,22 +176,6 @@ export default function Login() {
           </p>
         </div>
       </div>
-      Okay you must be busy but just wanna say I loved the audacity of sitting in Islamabad and ordering about percentage and insecurities for text. Yes we all are accountable to you Sir Haris Afzal. We are. Like you make us realise that we are roaming out with friends, get family problems serious enough that when you ask me or Hassan bahi we don’t even tell. 
-
-Brother for what favor are you asking percentage to Hassan bahi? Even I don’t. Percentage is given on basis of what value you are bringing to Appifyo. Have you ever came 1 second earlier or went 1 second late because of work? Secondly do you think you have been burdenize with hectic work and we all are chilling except you. The answer is NO. It’s other way around. By doing bare minimum and expecting that you will be paid 2lakh and we are just fucking around. The world does not work like that unfortunately. Percentage is given on basis of stress your colleague is reducing not increasing. I’d been fucking working for 16 hours in Stellar stack and was paid 2 lakh + monthly because I’ve solely handling the entire project including work communication and every other updates in my fucking waking hours despite family problems and friends stuff and bring 5+ lakh to the company for remaining fellows working on three projects and so was Shahbaz despite being abused if we get 1 second late and most often been working on weekends too.
-
-
-    No tell me have you ever worked on any weekend. No
- did you worked more than 1 hour dediciated in last month. No
- do you consider building a product serious enough. Answer is NO. Doing bare minimum and what is told only.
- Do you think the work you did for one project or two project is enough to be paid more than what you have been paid. Answer is No. If we exclude the James Delay it becomes barely 1 hour work. UI was developed by Zarrar when you were away for week.
- 
-
-
-
-
-
-
       <SignUpBanner Nurse={Nurse} />
     </div>
   );
