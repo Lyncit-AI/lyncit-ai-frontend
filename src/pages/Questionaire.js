@@ -15,10 +15,22 @@ const nodeTypes = {
 };
 
 const edgeOptions = {
-  style: { strokeDasharray: "5,5" },
-  type: "smoothstep",
+  style: { 
+    strokeDasharray: '5,5', 
+    stroke: '#A273C0',
+    strokeWidth: 2
+  },
+  type: 'smoothstep',
   animated: true,
 };
+
+
+const customStyles = `
+  .react-flow__edge-path {
+    stroke: #A273C0 !important;
+    stroke-width: 2 !important;
+  }
+`;
 
 function Questionaire() {
   const navigate = useNavigate();
@@ -144,6 +156,7 @@ function Questionaire() {
 
   return (
     <DndProvider backend={HTML5Backend}>
+      <style>{customStyles}</style>
       <div className="min-h-screen bg-white">
         <div className="px-14 max-lg:px-8 mb-8 max-sm:hidden">
           <div className="flex items-center justify-between pt-3">
@@ -234,6 +247,7 @@ function Questionaire() {
                 edges={viewEdges}
                 nodeTypes={nodeTypes}
                 defaultEdgeOptions={edgeOptions}
+                edgeOptions={edgeOptions}
                 proOptions={{ hideAttribution: true }}
                 nodesDraggable={false}
                 nodesConnectable={false}
