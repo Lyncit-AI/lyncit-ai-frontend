@@ -59,11 +59,12 @@ const Sidebar = ({ name, picture }) => {
           <nav className="w-full mt-6">
             {[
               { icon: User, label: "Community" },
-              { icon: Home, label: "Dashboard" },
+              { icon: Home, label: "Dashboard", onClick: () => navigate('/app') },
               { icon: MessageCircle, label: "Messages" }
-            ].map(({ icon: Icon, label }) => (
+            ].map(({ icon: Icon, label, onClick }) => (
               <div
                 key={label}
+                onClick={onClick}
                 className="flex items-center gap-2 px-3 py-4 cursor-pointer hover:bg-[#F1EAF6] rounded-lg"
               >
                 <Icon className="w-5 h-5 shrink-0" strokeWidth={1.5} />
