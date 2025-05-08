@@ -36,6 +36,7 @@ export default function JobPostingModal() {
   const [keywords, setKeywords] = useState([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [campaignName, setCampaignName] = useState("");
+  const [selectedPosition, setSelectedPosition] = useState("");
 
   useEffect(() => {
     const openModalAtStep = localStorage.getItem("openModalAtStep");
@@ -163,7 +164,8 @@ export default function JobPostingModal() {
           categories,
           keywords,
           jobDescription: jobUrl,
-          campaignName: campaignName
+          campaignName: campaignName,
+          selectedPosition: selectedPosition
         })
       );
 
@@ -269,23 +271,53 @@ export default function JobPostingModal() {
 
             {step === 1 && (
               <>
-                <label className="block mt-8 text-sm text-[#0D0C22] font-medium">
-                 Campaign Name
-                </label>
+                  <select
+                  value={selectedPosition}
+                  onChange={(e) => setSelectedPosition(e.target.value)}
+                  className="
+                    w-full
+                    h-10
+                    mt-6
+                    mb-4
+                    p-3
+                    border
+                    rounded-lg
+                    bg-white
+                    text-[12px]
+                    font-medium
+                    appearance-none
+                    focus:outline-none
+                    focus:border-gray-200
+                    transition
+                    duration-150
+                    ease-in-out
+                  "
+                  style={{
+                    background: `url("data:image/svg+xml,%3Csvg width='16' height='16' fill='none' stroke='%230D0C22' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' class='feather feather-chevron-down' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9l4 4 4-4'/%3E%3C/svg%3E") no-repeat right 1rem center/1.25rem 1.25rem, white`
+                  }}
+                >
+                  <option value="">Select a role</option>
+                  <option value="CNA">CNA (Certified Nurse Assistant)</option>
+                  <option value="PCA">PCA (Personal Care Aides)</option>
+                  <option value="PCAs">PCAs (Personal Care Assistant)</option>
+                  <option value="HHA">HHA (Home Health Aides)</option>
+
+                </select>
                 <input
                   value={campaignName}
                   onChange={(e) => setCampaignName(e.target.value)}
                   placeholder="Enter a campaign Name"
-                  className="w-full h-10 mt-2 p-3 border rounded-lg"
+                  className="w-full h-10 mt-2 mb-4 p-3 border rounded-lg text-[12px]"
                 />
-                <label className="block mt-8 text-sm text-[#0D0C22] font-medium">
+            
+                <label className="block mt-0 text-sm text-[#0D0C22] font-medium">
                   Paste the Job Description
                 </label>
                 <textarea
                   value={jobUrl}
                   onChange={(e) => setJobUrl(e.target.value)}
                   placeholder="We are seeking a compassionate and reliable Healthcare Assistant to join our team. In this role...."
-                  className="w-full h-20 mt-2 p-3 border rounded-lg"
+                  className="w-full h-20 mt-2 mb-4 p-3 border rounded-lg text-[12px]"
                 />
                 <div className="text-sm text-[#637083] flex justify-between mt-1 max-sm:flex-col">
                   <span>Required</span>
