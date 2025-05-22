@@ -119,7 +119,7 @@ export default function JobPostingModal() {
       };
     } catch (error) {
       console.error("Error fetching categories from backend:", error);
-      return dummyData;
+      return null;
     } finally {
       setIsLoading(false);
     }
@@ -140,10 +140,11 @@ export default function JobPostingModal() {
         if (backendData.categories && backendData.categories.length > 0) {
           setSelectedCategory(backendData.categories[0]);
         }
+        setStep(2);
+      } else {
+        alert("Failed to fetch keywords from backend. Please try again.");
       }
     }
-
-    setStep(2);
   };
 
   const toggleKeywordSelection = (keyword) => {
@@ -170,7 +171,7 @@ export default function JobPostingModal() {
       );
 
       const selectedKeywords = keywords
-        .filter((kw) => kw.selected === true)
+        .filter((kw) => kw.selected)
         .map((kw) => kw.keyword)
         .join(",");
 
