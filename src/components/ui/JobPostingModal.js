@@ -170,7 +170,7 @@ export default function JobPostingModal() {
       );
 
       const selectedKeywords = keywords
-        .filter((kw) => kw.selected)
+        .filter((kw) => kw.selected === true)
         .map((kw) => kw.keyword)
         .join(",");
 
