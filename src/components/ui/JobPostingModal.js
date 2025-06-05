@@ -113,9 +113,15 @@ export default function JobPostingModal() {
         ...new Set(responseData.map((item) => item.category))
       ];
 
+      // Add selected: true to all keywords
+      const keywordsWithSelection = responseData.map(keyword => ({
+        ...keyword,
+        selected: true
+      }));
+
       return {
         categories: uniqueCategories,
-        keywords: responseData
+        keywords: keywordsWithSelection
       };
     } catch (error) {
       console.error("Error fetching categories from backend:", error);
