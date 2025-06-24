@@ -200,11 +200,11 @@ export const QuestionFlow = forwardRef(({ onFlowChange, fileInputRef, initialAID
       }
       setFirstOptionsNodeId(firstOptionsId);
 
-      // Auto-position nodes with proper spacing
+      // Auto-position nodes with proper spacing (vertical layout)
       const autoPositionNodes = (nodes) => {
         const positionedNodes = [];
         const horizontalSpacing = 400; // Space between nodes horizontally
-        const verticalSpacing = 200; // Space between nodes vertically
+        const verticalSpacing = 350; // Increased space between levels vertically
         const startX = 100;
         const startY = 100;
 
@@ -258,18 +258,16 @@ export const QuestionFlow = forwardRef(({ onFlowChange, fileInputRef, initialAID
           nodeLevels.set(lastLevel, remainingNodes);
         }
 
-        // Position nodes level by level
+        // Position nodes level by level (vertical layout)
         nodeLevels.forEach((levelNodes, levelIndex) => {
-          const levelX = startX + (levelIndex * horizontalSpacing);
-          
+          const levelY = startY + (levelIndex * verticalSpacing);
           levelNodes.forEach((node, nodeIndex) => {
-            const nodeY = startY + (nodeIndex * verticalSpacing);
-            
+            const nodeX = startX + (nodeIndex * horizontalSpacing);
             positionedNodes.push({
               ...node,
               position: {
-                x: levelX,
-                y: nodeY
+                x: nodeX,
+                y: levelY
               }
             });
           });
