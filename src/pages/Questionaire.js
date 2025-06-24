@@ -159,8 +159,46 @@ function Questionaire() {
     }
   };
 
-  const handleLaunch = () => {
-    navigate("/campaign");
+  const handleLaunch = async () => {
+    const token = localStorage.getItem("accessToken");
+    // Collect other required fields from state or localStorage
+    const recruiterID = "GUID"; // Replace with actual value
+    const positionId = "GUID"; // Replace with actual value
+    const organization = "Your Organization"; // Replace with actual value
+    const sendDTTM = new Date().toISOString(); // Or your chosen datetime
+    const status = "Active";
+    const style = "SMS"; // Or "Email", etc.
+    const tags = ["tag1", "tag2"]; // Replace with actual tags
+
+    // Use the currentFlow for the questionnaire
+    const payload = {
+      name: campaignName,
+      organization,
+      positionId,
+      questionnaire: currentFlow, // Make sure currentFlow has the right structure
+      recruiterID,
+      sendDTTM,
+      status,
+      style,
+      tags
+    };
+
+    try {
+      await axios.post(
+        "https://lyncitapplications.xyz:8086/campaign/",
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
+          }
+        }
+      );
+      // Optionally navigate or show success
+      navigate("/campaign");
+    } catch (error) {
+      alert("Failed to launch campaign: " + error.message);
+    }
   };
 
   return (
