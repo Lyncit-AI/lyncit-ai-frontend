@@ -1,4 +1,5 @@
 import React, { useRef, useCallback, useState, forwardRef, useImperativeHandle, useEffect } from "react";
+import PropTypes from "prop-types";
 import ReactFlow, {
   addEdge,
   useNodesState,
@@ -199,16 +200,89 @@ export const QuestionFlow = forwardRef(({ onFlowChange, fileInputRef, initialAID
       }
       setFirstOptionsNodeId(firstOptionsId);
 
-      const restoredNodes = data.nodes.map((node, index) => {
-        const position = node.position || {
-          x: 250 +200,
-          y: 100 + (index * 400)
-        };
+      // Auto-position nodes with proper spacing
+      const autoPositionNodes = (nodes) => {
+        const positionedNodes = [];
+        const horizontalSpacing = 400; // Space between nodes horizontally
+        const verticalSpacing = 200; // Space between nodes vertically
+        const startX = 100;
+        const startY = 100;
+
+        // Group nodes by their level in the flow
+        const nodeLevels = new Map();
+        const visited = new Set();
         
+        // Find the first node (entry point)
+        const firstNode = nodes.find(node => node.data.isFirstNode);
+        if (firstNode) {
+          nodeLevels.set(0, [firstNode]);
+          visited.add(firstNode.id);
+        }
+
+        // Build level structure by following edges
+        const edges = data.edges || [];
+        let currentLevel = 0;
+        let currentLevelNodes = nodeLevels.get(currentLevel) || [];
+
+        while (currentLevelNodes.length > 0) {
+          const nextLevelNodes = [];
+          
+          for (const node of currentLevelNodes) {
+            // Find all nodes that this node connects to
+            const connectedNodes = edges
+              .filter(edge => edge.source === node.id)
+              .map(edge => nodes.find(n => n.id === edge.target))
+              .filter(n => n && !visited.has(n.id));
+
+            for (const connectedNode of connectedNodes) {
+              if (!visited.has(connectedNode.id)) {
+                nextLevelNodes.push(connectedNode);
+                visited.add(connectedNode.id);
+              }
+            }
+          }
+
+          if (nextLevelNodes.length > 0) {
+            currentLevel++;
+            nodeLevels.set(currentLevel, nextLevelNodes);
+            currentLevelNodes = nextLevelNodes;
+          } else {
+            break;
+          }
+        }
+
+        // Add any remaining unvisited nodes to the last level
+        const remainingNodes = nodes.filter(node => !visited.has(node.id));
+        if (remainingNodes.length > 0) {
+          const lastLevel = Math.max(...nodeLevels.keys()) + 1;
+          nodeLevels.set(lastLevel, remainingNodes);
+        }
+
+        // Position nodes level by level
+        nodeLevels.forEach((levelNodes, levelIndex) => {
+          const levelX = startX + (levelIndex * horizontalSpacing);
+          
+          levelNodes.forEach((node, nodeIndex) => {
+            const nodeY = startY + (nodeIndex * verticalSpacing);
+            
+            positionedNodes.push({
+              ...node,
+              position: {
+                x: levelX,
+                y: nodeY
+              }
+            });
+          });
+        });
+
+        return positionedNodes;
+      };
+
+      const restoredNodes = autoPositionNodes(data.nodes).map((node, index) => {
         return {
           id: node.id,
           type: "questionNode",
-          position: position,
+          position: node.position,
           data: {
             id: node.data.id || `question_${node.id.split('_')[1] || index}`,
             type: node.data.type || "options",
@@ -231,7 +305,7 @@ export const QuestionFlow = forwardRef(({ onFlowChange, fileInputRef, initialAID
         ...edgeOptions
       }));
       
-      console.log("Restored nodes:", restoredNodes);
+      console.log("Restored nodes with auto-positioning:", restoredNodes);
       console.log("Restored edges:", restoredEdges);
       
       setNodes([]);
@@ -353,3 +427,12 @@ export const QuestionFlow = forwardRef(({ onFlowChange, fileInputRef, initialAID
     </div>
   );
 });
+
+QuestionFlow.displayName = 'QuestionFlow';
+
+QuestionFlow.propTypes = {
+  onFlowChange: PropTypes.func,
+  fileInputRef: PropTypes.object,
+  initialAIData: PropTypes.object,
+  preventDummyLoad: PropTypes.bool
+};
