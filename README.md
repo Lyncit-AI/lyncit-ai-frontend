@@ -5,6 +5,7 @@ Lyncit AI is a powerful tool designed to help recruiters hire candidates efficie
 ## Features
 
 
+
 - **AI-Powered Question Generation**: Automatically generates interview questions based on job requirements.
 - **Dynamic Follow-Up Questions**: Adapts follow-up questions based on candidate responses.
 - **Efficient Hiring Process**: Saves time and effort for recruiters by automating the interview process.
