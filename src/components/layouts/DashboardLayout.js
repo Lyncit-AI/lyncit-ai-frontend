@@ -57,7 +57,7 @@ const DashboardLayout = ({ children }) => {
   };
 
   useEffect(() => {
-    const token = localStorage.getItem("accessToken");
+    const token = localStorage.getItem("accessToken"); 
     if (!token) {
       navigate("/");
       return;
