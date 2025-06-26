@@ -272,9 +272,12 @@ function Questionaire() {
         payload,
         {
           headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json"
-          }
+            "Access-Control-Allow-Credentials": "true"
+          },
+          withCredentials: true
         }
       );
       
