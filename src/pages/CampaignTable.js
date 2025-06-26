@@ -165,7 +165,7 @@ console.log(campaigns , "campaigns")
           .map((item, idx) => ({
             id: idx + 1,
             name: item.name,
-            recipients: 1, // static
+            recipients: 0, // static
             createdOn: item.created.timestamp, // Keep raw timestamp for calculations
             status: item.status, // static
             lastUpdated: item.created.timestamp // Use actual creation timestamp
