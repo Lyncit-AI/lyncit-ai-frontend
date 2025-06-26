@@ -33,6 +33,59 @@ const customStyles = `
   }
 `;
 
+function sanitizeQuestionnaire(flow) {
+  return {
+    nodes: flow.nodes.map(node => ({
+      id: node.id,
+      position: node.position,
+      data: {
+        isFirstNode: !!node.data?.isFirstNode,
+        options: Array.isArray(node.data?.options) ? node.data.options.map(opt => ({
+          id: opt.id,
+          text: opt.text
+        })) : [],
+        title: node.data?.title || "",
+        type: node.data?.type || "options",
+        answerText: node.data?.answerText || "",
+        endText: node.data?.endText || ""
+      }
+    })),
+    edges: flow.edges.map(edge => ({
+      source: edge.source,
+      sourceHandle: edge.sourceHandle || "text-output",
+      target: edge.target
+    }))
+  };
+}
+
+// Fix ResizeObserver loop error
+const resizeObserverErrorHandler = () => {
+  const debounce = (func, wait) => {
+    let timeout;
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout);
+        func(...args);
+      };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
+  };
+
+  const _ResizeObserver = window.ResizeObserver;
+  window.ResizeObserver = class ResizeObserver extends _ResizeObserver {
+    constructor(callback) {
+      callback = debounce(callback, 16);
+      super(callback);
+    }
+  };
+};
+
+// Apply the fix on component mount
+if (typeof window !== 'undefined') {
+  resizeObserverErrorHandler();
+}
+
 function Questionaire() {
   const navigate = useNavigate();
   const [currentFlow, setCurrentFlow] = useState(null);
@@ -45,6 +98,7 @@ function Questionaire() {
   const [dataLoaded, setDataLoaded] = useState(false);
   const [flowKey, setFlowKey] = useState(0);
   const [campaignName, setCampaignName] = useState("");
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
@@ -72,7 +126,7 @@ function Questionaire() {
       console.log("Initializing flow with AI data in Questionaire component");
       setTimeout(() => {
         questionFlowRef.current.initializeFlow(aiQuestionnaireData);
-      }, 500);
+      }, 1000);
     }
   }, [aiQuestionnaireData, flowKey]);
 
@@ -82,6 +136,22 @@ function Questionaire() {
       const parsedData = JSON.parse(savedData);
       setCampaignName(parsedData.campaignName);
     }
+  }, []);
+
+  // Handle ResizeObserver errors gracefully
+  useEffect(() => {
+    const handleResizeObserverError = (e) => {
+      if (e.message.includes('ResizeObserver loop')) {
+        e.stopImmediatePropagation();
+        return false;
+      }
+    };
+
+    window.addEventListener('error', handleResizeObserverError);
+    
+    return () => {
+      window.removeEventListener('error', handleResizeObserverError);
+    };
   }, []);
 
   const handleFlowChange = (flowData) => {
@@ -121,38 +191,19 @@ function Questionaire() {
     if (currentFlow) {
       const finalizedFlow = JSON.parse(JSON.stringify(currentFlow));
       localStorage.setItem('questionnaire', JSON.stringify(finalizedFlow));
-      
       setAiQuestionnaireData(finalizedFlow);
-      
-      const serializableNodes = currentFlow.nodes.map(node => ({
-        id: node.id,
-        type: node.type,
-        position: node.position,
+
+      // For preview, use the full node/edge objects, just add isViewOnly
+      setViewNodes(finalizedFlow.nodes.map(node => ({
+        ...node,
         data: {
-          id: node.data.id,
-          type: node.data.type,
-          title: node.data.title,
-          options: node.data.options,
-          isFirstNode: node.data.isFirstNode,
-          answerText: node.data.answerText,
-          endText: node.data.endText,
+          ...node.data,
           isViewOnly: true,
         }
-      }));
-      
-      const serializableEdges = currentFlow.edges.map(edge => ({
-        id: edge.id,
-        source: edge.source,
-        target: edge.target,
-        sourceHandle: edge.sourceHandle,
-        targetHandle: edge.targetHandle,
-        type: edge.type,
-        style: edge.style,
-        animated: edge.animated
-      }));
-      
-      setViewNodes(serializableNodes);
-      setViewEdges(serializableEdges);
+      })));
+      setViewEdges(finalizedFlow.edges.map(edge => ({
+        ...edge
+      })));
       setIsViewMode(true);
     } else {
       alert("Please create a questionnaire before finalizing.");
@@ -161,30 +212,62 @@ function Questionaire() {
 
   const handleLaunch = async () => {
     const token = localStorage.getItem("accessToken");
-    // Collect other required fields from state or localStorage
-    const recruiterID = "GUID"; // Replace with actual value
-    const positionId = "GUID"; // Replace with actual value
-    const organization = "Your Organization"; // Replace with actual value
-    const sendDTTM = new Date().toISOString(); // Or your chosen datetime
-    const status = "Active";
-    const style = "SMS"; // Or "Email", etc.
-    const tags = ["tag1", "tag2"]; // Replace with actual tags
+    
+    // Validate required data
+    if (!currentFlow || !currentFlow.nodes || currentFlow.nodes.length === 0) {
+      alert("Please create a questionnaire with at least one question before launching.");
+      return;
+    }
 
-    // Use the currentFlow for the questionnaire
+    if (!campaignName || campaignName.trim() === "") {
+      alert("Please enter a campaign name before launching.");
+      return;
+    }
+
+    // Get actual data from localStorage or state
+    const savedCategories = localStorage.getItem("questionnaireCategories");
+    let organization = "Your Organization";
+    let positionId = "GUID";
+    let recruiterID = "GUID";
+
+    if (savedCategories) {
+      try {
+        const parsedData = JSON.parse(savedCategories);
+        organization = parsedData.organization || organization;
+        positionId = parsedData.positionId || positionId;
+        recruiterID = parsedData.recruiterID || recruiterID;
+      } catch (error) {
+        console.error("Error parsing questionnaire categories:", error);
+      }
+    }
+
+    // Prepare the questionnaire data - match backend expected structure exactly
+    const cleanQuestionnaire = sanitizeQuestionnaire(currentFlow);
+
+    const hasInvalidNode = cleanQuestionnaire.nodes.some(n => !n.data);
+    const hasInvalidEdge = cleanQuestionnaire.edges.some(e => !e.sourceHandle);
+
+    if (hasInvalidNode || hasInvalidEdge) {
+      alert("Invalid questionnaire structure: All nodes must have data and all edges must have sourceHandle.");
+      return;
+    }
+
     const payload = {
-      name: campaignName,
-      organization,
-      positionId,
-      questionnaire: currentFlow, // Make sure currentFlow has the right structure
-      recruiterID,
-      sendDTTM,
-      status,
-      style,
-      tags
+      name: campaignName.trim(),
+      organization: organization.trim(),
+      positionId: positionId.trim(),
+      questionnaire: cleanQuestionnaire,
+      recruiterID: recruiterID,
+      sendDTTM: new Date().toISOString(),
+      status: "Active",
+      style: "SMS",
+      tags: ["tag1", "tag2"]
     };
 
+    console.log("Payload to backend:", JSON.stringify(payload, null, 2));
+
     try {
-      await axios.post(
+      const response = await axios.post(
         "https://lyncitapplications.xyz:8086/campaign/",
         payload,
         {
@@ -194,10 +277,36 @@ function Questionaire() {
           }
         }
       );
-      // Optionally navigate or show success
+      
+      console.log("Campaign launched successfully:", response.data);
+      alert("Campaign launched successfully!");
       navigate("/campaign");
     } catch (error) {
-      alert("Failed to launch campaign: " + error.message);
+      console.error("Launch campaign error:", error);
+      
+      if (error.response) {
+        // Server responded with error status
+        const status = error.response.status;
+        const data = error.response.data;
+        
+        if (status === 422) {
+          console.error("Validation errors:", data);
+          alert(`Validation error: ${data.message || 'Please check your questionnaire data and try again.'}`);
+        } else if (status === 401) {
+          alert("Authentication failed. Please log in again.");
+          navigate("/");
+        } else if (status === 400) {
+          alert(`Bad request: ${data.message || 'Please check your data and try again.'}`);
+        } else {
+          alert(`Server error (${status}): ${data.message || 'Please try again later.'}`);
+        }
+      } else if (error.request) {
+        // Network error
+        alert("Network error. Please check your connection and try again.");
+      } else {
+        // Other error
+        alert(`Error: ${error.message}`);
+      }
     }
   };
 
@@ -304,34 +413,105 @@ function Questionaire() {
                 nodesDraggable={false}
                 nodesConnectable={false}
                 elementsSelectable={false}
+                fitView
+                fitViewOptions={{ padding: 0.1 }}
+                onError={(error) => {
+                  console.warn('ReactFlow error:', error);
+                }}
               >
               </ReactFlow>
             </div>
           </div>
         ) : (
-          <div className="md:flex px-14 max-lg:px-8 max-md:flex-col">
-            <Sidebar
-              onExport={handleExport}
-              onImport={handleImport}
-              fileInputRef={fileInputRef}
-            />
-            <div className="flex justify-center sm:hidden">
-              <button 
-                onClick={handleFinalizeCampaign}
-                className="px-14 py-3 my-6 text-sm font-medium text-white bg-[rgb(122,86,144,1)] rounded-full hover:bg-[rgb(122,86,144,0.9)]"
-              >
-                Finalize the Campaign
-              </button>
+          <>
+            {/* Top Sidebar/Toolbar - Only on small screens */}
+            <div className="lg:hidden px-8 py-4 border-b border-gray-200">
+              <Sidebar
+                onExport={handleExport}
+                onImport={handleImport}
+                fileInputRef={fileInputRef}
+                sidebarOpen={sidebarOpen}
+                setSidebarOpen={setSidebarOpen}
+              />
             </div>
-            <QuestionFlow
-              key={flowKey}
-              ref={questionFlowRef}
-              onFlowChange={handleFlowChange}
-              fileInputRef={fileInputRef}
-              initialAIData={aiQuestionnaireData}
-              preventDummyLoad={dataLoaded}
-            />
-          </div>
+
+            {/* Desktop Layout - Side by side */}
+            <div className="hidden lg:flex w-full h-full relative">
+              {/* Sidebar */}
+              <div
+                className={`
+                  transition-all duration-300
+                  overflow-hidden
+                  ${sidebarOpen ? 'w-80 min-w-[20rem]' : 'w-0 min-w-0'}
+                  relative
+                `}
+              >
+                <Sidebar
+                  onExport={handleExport}
+                  onImport={handleImport}
+                  fileInputRef={fileInputRef}
+                  sidebarOpen={sidebarOpen}
+                  setSidebarOpen={setSidebarOpen}
+                />
+                {sidebarOpen && (
+                  <button
+                    className="absolute top-6 right-2 bg-white border rounded-full shadow p-1 z-20"
+                    onClick={() => setSidebarOpen(false)}
+                    aria-label="Collapse sidebar"
+                  >
+                    {/* Left chevron icon */}
+                    <svg width="20" height="20" fill="none">
+                      <path d="M13 5l-5 5 5 5" stroke="#333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </button>
+                )}
+              </div>
+              {/* Expand button */}
+              {!sidebarOpen && (
+                <button
+                  className="absolute left-4 top-24 z-30 bg-white border rounded-full shadow p-1"
+                  onClick={() => setSidebarOpen(true)}
+                  aria-label="Open sidebar"
+                >
+                  {/* Right chevron icon */}
+                  <svg width="20" height="20" fill="none">
+                    <path d="M7 5l5 5-5 5" stroke="#333" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
+              )}
+              {/* Canvas */}
+              <div className="flex-1 transition-all duration-300 ml-0">
+                <QuestionFlow
+                  key={flowKey}
+                  ref={questionFlowRef}
+                  onFlowChange={handleFlowChange}
+                  fileInputRef={fileInputRef}
+                  initialAIData={aiQuestionnaireData}
+                  preventDummyLoad={dataLoaded}
+                />
+              </div>
+            </div>
+
+            {/* Mobile Canvas */}
+            <div className="lg:hidden px-8 py-4">
+              <div className="flex justify-center mb-4">
+                <button 
+                  onClick={handleFinalizeCampaign}
+                  className="px-14 py-3 text-sm font-medium text-white bg-[rgb(122,86,144,1)] rounded-full hover:bg-[rgb(122,86,144,0.9)]"
+                >
+                  Finalize the Campaign
+                </button>
+              </div>
+              <QuestionFlow
+                key={flowKey}
+                ref={questionFlowRef}
+                onFlowChange={handleFlowChange}
+                fileInputRef={fileInputRef}
+                initialAIData={aiQuestionnaireData}
+                preventDummyLoad={dataLoaded}
+              />
+            </div>
+          </>
         )}
       </div>
     </DndProvider>

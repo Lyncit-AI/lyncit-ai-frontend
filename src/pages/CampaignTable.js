@@ -9,10 +9,11 @@ const CampaignTable = () => {
 
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(true);
   const itemsPerPage = 6;
 
   const [campaigns, setCampaigns] = useState([]);
-
+console.log(campaigns , "campaigns")
   const filteredCampaigns = useMemo(() => {
     return campaigns.filter((campaign) =>
       campaign.name.toLowerCase().includes(search.toLowerCase())
@@ -144,10 +145,11 @@ const CampaignTable = () => {
 
   useEffect(() => {
     const fetchCampaigns = async () => {
+      setLoading(true);
       try {
         const token = localStorage.getItem("accessToken"); // Or use your actual token
         const response = await axios.get(
-          "https://lyncitapplications.xyz:8086/campaign/?skip=0&limit=10",
+          "https://lyncitapplications.xyz:8086/campaign/?skip=0&limit=40",
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -156,6 +158,7 @@ const CampaignTable = () => {
           }
         );
         // Map API response to your table format, using only the name from API
+        console.log(response.data , "----")
         const apiCampaigns = response.data
           .slice() // make a shallow copy
           .reverse() // reverse the order
@@ -163,17 +166,95 @@ const CampaignTable = () => {
             id: idx + 1,
             name: item.name,
             recipients: 1, // static
-            createdOn: "Dec 8, 2024", // static
-            status: "Completed", // static
-            lastUpdated: "2 days ago" // static
+            createdOn: item.created.timestamp, // Keep raw timestamp for calculations
+            status: item.status, // static
+            lastUpdated: item.created.timestamp // Use actual creation timestamp
           }));
         setCampaigns(apiCampaigns);
-      } catch (error) {
-        console.error("Failed to fetch campaigns:", error);
+      } catch {
+        console.error("Failed to fetch campaigns:");
+      } finally {
+        setLoading(false);
       }
     };
     fetchCampaigns();
   }, []);
+
+  // Helper function to calculate days since creation
+  const calculateDaysSince = (timestamp) => {
+    if (!timestamp) return "Unknown";
+    
+    // Handle different timestamp formats
+    let createdDate;
+    try {
+      // Try parsing as ISO string first
+      createdDate = new Date(timestamp);
+      
+      // If it's invalid, try parsing as "YYYY-MM-DD HH:MM:SS" format
+      if (isNaN(createdDate.getTime())) {
+        // Convert "2025-06-26 11:13:41" to "2025-06-26T11:13:41"
+        const formattedTimestamp = timestamp.replace(' ', 'T');
+        createdDate = new Date(formattedTimestamp);
+      }
+      
+      // If still invalid, return unknown
+      if (isNaN(createdDate.getTime())) {
+        return "Unknown";
+      }
+    } catch {
+      return "Unknown";
+    }
+    
+    const currentDate = new Date();
+    const timeDifference = currentDate.getTime() - createdDate.getTime();
+    const daysDifference = Math.floor(timeDifference / (1000 * 3600 * 24));
+    
+    if (daysDifference === 0) return "Today";
+    if (daysDifference === 1) return "1 day ago";
+    if (daysDifference < 7) return `${daysDifference} days ago`;
+    if (daysDifference < 30) {
+      const weeks = Math.floor(daysDifference / 7);
+      return weeks === 1 ? "1 week ago" : `${weeks} weeks ago`;
+    }
+    if (daysDifference < 365) {
+      const months = Math.floor(daysDifference / 30);
+      return months === 1 ? "1 month ago" : `${months} months ago`;
+    }
+    
+    const years = Math.floor(daysDifference / 365);
+    return years === 1 ? "1 year ago" : `${years} years ago`;
+  };
+
+  // Helper function to format date as "Dec 8, 2024"
+  const formatCreatedDate = (timestamp) => {
+    if (!timestamp) return "Unknown";
+    
+    let createdDate;
+    try {
+      // Try parsing as ISO string first
+      createdDate = new Date(timestamp);
+      
+      // If it's invalid, try parsing as "YYYY-MM-DD HH:MM:SS" format
+      if (isNaN(createdDate.getTime())) {
+        // Convert "2025-06-26 11:13:41" to "2025-06-26T11:13:41"
+        const formattedTimestamp = timestamp.replace(' ', 'T');
+        createdDate = new Date(formattedTimestamp);
+      }
+      
+      // If still invalid, return unknown
+      if (isNaN(createdDate.getTime())) {
+        return "Unknown";
+      }
+    } catch {
+      return "Unknown";
+    }
+    
+    return createdDate.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
+  };
 
   return (
     <DashboardLayout>
@@ -223,7 +304,16 @@ const CampaignTable = () => {
               </tr>
             </thead>
             <tbody className="">
-              {paginatedCampaigns.length > 0 ? (
+              {loading ? (
+                <tr>
+                  <td colSpan={5} className="p-6 text-center">
+                    <div className="flex justify-center items-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#7A5690]"></div>
+                      <span className="ml-3 text-gray-500">Loading campaigns...</span>
+                    </div>
+                  </td>
+                </tr>
+              ) : paginatedCampaigns.length > 0 ? (
                 paginatedCampaigns.map((campaign) => (
                   <tr key={campaign.id} className="border-b border-[#EAEAEA]">
                     <td className="p-6">
@@ -256,7 +346,7 @@ const CampaignTable = () => {
                     </td>
                     <td className="p-6">
                       <div className="text-xs text-[#637083]">
-                        {campaign.createdOn}
+                        {formatCreatedDate(campaign.createdOn)}
                       </div>
                     </td>
                     <td className="p-6">
@@ -267,7 +357,7 @@ const CampaignTable = () => {
                         {campaign.status}
                       </div>
                       <div className="text-xs text-[#637083] pt-3">
-                        Last Updated {campaign.lastUpdated}
+                        Last Updated {calculateDaysSince(campaign.lastUpdated)}
                       </div>
                     </td>
                     <td className="p-6">
