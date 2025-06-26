@@ -5,6 +5,11 @@ import { X } from "lucide-react";
 import axios from "axios";
 import React from 'react';
 
+// Simple spinner component
+const Spinner = ({ size = "w-4 h-4" }) => (
+  <div className={`animate-spin rounded-full border-2 border-gray-300 border-t-white ${size}`}></div>
+);
+
 const dummyData = {
   categories: ["skills", "availability", "preferences"],
   keywords: [
@@ -340,7 +345,7 @@ export default function JobPostingModal() {
                     disabled={!jobUrl.trim() || !campaignName.trim() || isLoading}
                     className="bg-[#0D0C22] text-white text-sm font-semibold px-10 py-4 rounded-full disabled:opacity-50"
                   >
-                    {isLoading ? "Loading..." : "Next"}
+                    {isLoading ? <Spinner size="w-4 h-4" /> : "Next"}
                   </button>
                 </div>
               </>
@@ -714,7 +719,7 @@ export default function JobPostingModal() {
                     disabled={isLoading}
                     className="bg-[#0D0C22] text-white text-sm font-semibold px-10 py-4 rounded-full disabled:opacity-50"
                   >
-                    {isLoading ? "Generating..." : "Next"}
+                    {isLoading ? <Spinner size="w-4 h-4" /> : "Next"}
                   </button>
                 </div>
               </>
