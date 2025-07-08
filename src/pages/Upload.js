@@ -16,6 +16,8 @@ const Upload = () => {
   const [campaignLoading, setCampaignLoading] = useState(false);
   const [addCandidatesLoading, setAddCandidatesLoading] = useState(false);
   const [addCandidatesError, setAddCandidatesError] = useState("");
+  const [activateLoading, setActivateLoading] = useState(false);
+  const [activateError, setActivateError] = useState("");
 
   const isValidFileType = (file) => {
     const allowedTypes = [
@@ -187,10 +189,35 @@ const Upload = () => {
     }
   };
 
-  const handleModalDone = (modalData) => {
+  const handleModalDone = async (modalData) => {
     setIsModalOpen(false);
-    console.log("Modal data:", modalData);
-    navigate("/congratulation");
+    const params = new URLSearchParams(location.search);
+    const campaignId = params.get("id");
+    if (modalData.initiateNow && campaignId) {
+      setActivateLoading(true);
+      setActivateError("");
+      try {
+        const token = localStorage.getItem("accessToken");
+        await axios.post(
+          `https://lyncitapplications.xyz:8086/campaign/activate?campaign_id=${campaignId}`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              Accept: "application/json"
+            }
+          }
+        );
+        navigate("/congratulation");
+      } catch (error) {
+        setActivateError("Failed to activate campaign. Please try again.");
+        console.error("Activate campaign error:", error);
+      } finally {
+        setActivateLoading(false);
+      }
+    } else {
+      navigate("/congratulation");
+    }
   };
 
   const handleback = () => {
@@ -412,13 +439,13 @@ const Upload = () => {
           <button
             className="px-24 py-4 bg-black text-white font-semibold max-sm:w-full rounded-full"
             onClick={handleNext}
-            disabled={addCandidatesLoading}
+            disabled={addCandidatesLoading || activateLoading}
           >
-            {addCandidatesLoading ? "Processing..." : "Next"}
+            {(addCandidatesLoading || activateLoading) ? "Processing..." : "Next"}
           </button>
         </div>
-        {addCandidatesError && (
-          <div className="text-red-600 mt-2 text-sm">{addCandidatesError}</div>
+        {(addCandidatesError || activateError) && (
+          <div className="text-red-600 mt-2 text-sm">{addCandidatesError || activateError}</div>
         )}
       </div>
 
