@@ -1,15 +1,21 @@
-import React, { useState, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useCallback, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import DashboardLayout from "../components/layouts/DashboardLayout";
 import { ArrowLeft } from "lucide-react";
 import ScheduleModal from "../components/ui/ScheduleModal";
+import axios from "axios";
 
 const Upload = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [uploadedFile, setUploadedFile] = useState("");
   const [fileError, setFileError] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [campaignName, setCampaignName] = useState("");
+  const [campaignLoading, setCampaignLoading] = useState(false);
+  const [addCandidatesLoading, setAddCandidatesLoading] = useState(false);
+  const [addCandidatesError, setAddCandidatesError] = useState("");
 
   const isValidFileType = (file) => {
     const allowedTypes = [
@@ -146,8 +152,39 @@ const Upload = () => {
     e.stopPropagation();
   };
 
-  const handleNext = () => {
-    setIsModalOpen(true);
+  const handleNext = async () => {
+    setAddCandidatesError("");
+    const params = new URLSearchParams(location.search);
+    const campaignId = params.get("id");
+    const fileGuid = uploadedFile?.guid;
+    if (!campaignId || !fileGuid) {
+      setAddCandidatesError("Both campaign and file must be present before proceeding.");
+      return;
+    }
+    setAddCandidatesLoading(true);
+    try {
+      const token = localStorage.getItem("accessToken");
+      await axios.post(
+        "https://lyncitapplications.xyz:8086/campaign/addcandidates/fromfile",
+        {
+          campaign_id: campaignId,
+          file_id: fileGuid + ".csv"
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "application/json",
+            "Content-Type": "application/json"
+          }
+        }
+      );
+      setIsModalOpen(true);
+    } catch (error) {
+      setAddCandidatesError("Failed to add candidates from file. Please try again.");
+      console.error("Add candidates error:", error);
+    } finally {
+      setAddCandidatesLoading(false);
+    }
   };
 
   const handleModalDone = (modalData) => {
@@ -240,6 +277,40 @@ const Upload = () => {
     );
   };
 
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const campaignId = params.get("id");
+    if (!campaignId) return;
+    setCampaignLoading(true);
+    const fetchCampaigns = async () => {
+      try {
+        const token = localStorage.getItem("accessToken");
+        const response = await axios.get(
+          "https://lyncitapplications.xyz:8086/campaign/?skip=0&limit=40",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              Accept: "application/json"
+            }
+          }
+        );
+        const campaigns = response.data;
+        const found = campaigns.find(c => c.id === campaignId);
+        if (found) {
+          setCampaignName(found.name);
+        } else {
+          setCampaignName("");
+        }
+      } catch (error) {
+        setCampaignName("");
+        console.error("Failed to fetch campaigns:", error);
+      } finally {
+        setCampaignLoading(false);
+      }
+    };
+    fetchCampaigns();
+  }, [location.search]);
+
   return (
     <DashboardLayout>
       <div className="mb-8 flex items-cente py-8 px-8 gap-4">
@@ -253,10 +324,13 @@ const Upload = () => {
       </div>
       <div className="px-[82px] max-sm:px-8">
         <h2 className="text-2xl font-semibold mb-8 max-sm:hidden">
-          Campaign &nbsp; &nbsp;
-          <span className="text-base text-[#637083] font-normal">
-            http://app/userbraintrust.com/jobs/11450?utm/
-          </span>
+          {campaignLoading ? (
+            <>Campaign: <span className="text-base text-[#637083] font-normal">Loading campaign...</span></>
+          ) : campaignName ? (
+            <>Campaign: <span className="text-base text-[#637083] font-normal">{campaignName}</span></>
+          ) : (
+            <>Campaign <span className="text-base text-[#637083] font-normal">No campaign found</span></>
+          )}
         </h2>
 
         <div className="max-w-[615px] border border-[#EAEAEA] rounded-[32px] p-8 text-start">
@@ -338,10 +412,14 @@ const Upload = () => {
           <button
             className="px-24 py-4 bg-black text-white font-semibold max-sm:w-full rounded-full"
             onClick={handleNext}
+            disabled={addCandidatesLoading}
           >
-            Next
+            {addCandidatesLoading ? "Processing..." : "Next"}
           </button>
         </div>
+        {addCandidatesError && (
+          <div className="text-red-600 mt-2 text-sm">{addCandidatesError}</div>
+        )}
       </div>
 
       {isModalOpen && (

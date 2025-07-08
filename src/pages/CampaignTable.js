@@ -162,8 +162,8 @@ console.log(campaigns , "campaigns")
         const apiCampaigns = response.data
           .slice() // make a shallow copy
           .reverse() // reverse the order
-          .map((item, idx) => ({
-            id: idx + 1,
+          .map((item) => ({
+            id: item.id, // Use real id from API
             name: item.name,
             recipients: 0, // static
             createdOn: item.created.timestamp, // Keep raw timestamp for calculations
