@@ -165,7 +165,7 @@ console.log(campaigns , "campaigns")
           .map((item) => ({
             id: item.id, // Use real id from API
             name: item.name,
-            recipients: 0, // static
+            recipients: Array.isArray(item.candidates) ? item.candidates.length : 0, // Use candidates count
             createdOn: item.created.timestamp, // Keep raw timestamp for calculations
             status: item.status, // static
             lastUpdated: item.created.timestamp // Use actual creation timestamp
@@ -339,8 +339,7 @@ console.log(campaigns , "campaigns")
                           </svg>
                         </div>
                         <div className="text-xs text-[#637083]">
-                          {campaign.recipients} Recipient
-                          {campaign.recipients > 1 ? "s" : ""}
+                          {campaign.recipients} Candidate{campaign.recipients !== 1 ? "s" : ""}
                         </div>
                       </div>
                     </td>
