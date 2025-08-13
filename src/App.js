@@ -11,6 +11,7 @@ import Questionaire from './pages/Questionaire';
 import Upload from './pages/Upload';
 import Congratulation from './pages/Congratulation';
 import CampaignTable from './pages/CampaignTable';
+import Analytics from './pages/Analytics';
 // import ViewOnlyQuestionnaire from './pages/ViewOnlyQuestionnaire';
 import NotFound from './pages/NotFound';
 
@@ -27,6 +28,7 @@ const App = () => {
         <Route path="/upload" element={<Upload />} />
         <Route path="/congratulation" element={<Congratulation />} />
         <Route path="/campaign" element={<CampaignTable />} />
+        <Route path="/analytics" element={<Analytics />} />
         {/* <Route path="/view-questionnaire" element={<ViewOnlyQuestionnaire />} /> */}
         <Route path="/candidate-dashboard" element={<CandidateDashboard />} />
         <Route path="/candidate/:campaignId" element={<CandidateQuestionnaire />} />

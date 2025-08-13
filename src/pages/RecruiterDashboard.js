@@ -41,8 +41,7 @@ const RecruiterDashboard = () => {
             </h2>
           </div>
           <p className="">
-            Sed ut perspiciatis unde omnis iste natus error sit voluptatem
-            accusantium doloremque laudantium,
+              Find the Right Talent, First Time
           </p>
         </div>
         <div className="rounded-[32px] p-6 border border-[#EAEAEA] w-[40%] max-sm:w-full">

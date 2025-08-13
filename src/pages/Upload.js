@@ -180,7 +180,7 @@ const Upload = () => {
           }
         }
       );
-      setIsModalOpen(true);
+    setIsModalOpen(true);
     } catch (error) {
       setAddCandidatesError("Failed to add candidates from file. Please try again.");
       console.error("Add candidates error:", error);
@@ -216,7 +216,7 @@ const Upload = () => {
         setActivateLoading(false);
       }
     } else {
-      navigate("/congratulation");
+    navigate("/congratulation");
     }
   };
 

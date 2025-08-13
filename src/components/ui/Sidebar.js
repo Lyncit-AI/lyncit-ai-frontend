@@ -1,6 +1,8 @@
+import React from "react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import PropTypes from "prop-types";
 import {
   Home,
   MessageCircle,
@@ -95,6 +97,11 @@ const Sidebar = ({ name, picture }) => {
               <div
                 key={label}
                 className="flex items-center gap-4 px-3 py-4 cursor-pointer hover:bg-[#F1EAF6] rounded-lg"
+                onClick={() => {
+                  if (label === "Analytics") {
+                    navigate("/analytics");
+                  }
+                }}
               >
                 <Icon className="w-5 h-5 shrink-0" strokeWidth={1.5} />
                 <span
@@ -152,6 +159,11 @@ const Sidebar = ({ name, picture }) => {
       </motion.div>
     </div>
   );
+};
+
+Sidebar.propTypes = {
+  name: PropTypes.string,
+  picture: PropTypes.string
 };
 
 export default Sidebar;
