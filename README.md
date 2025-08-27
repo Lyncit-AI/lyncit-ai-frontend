@@ -11,6 +11,7 @@ Lyncit AI is a powerful tool designed to help recruiters hire candidates efficie
 - **Efficient Hiring Process**: Saves time and effort for recruiters by automating the interview process.
 
 
+
 ## Getting Started
 
 Follow these steps to set up and run Lyncit AI on your local machine.
