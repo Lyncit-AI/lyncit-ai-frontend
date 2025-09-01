@@ -149,7 +149,7 @@ console.log(campaigns , "campaigns")
       try {
         const token = localStorage.getItem("accessToken"); // Or use your actual token
         const response = await axios.get(
-          "https://lyncitapplications.xyz:8086/campaign/?skip=0&limit=40",
+          "https://lyncitapplications.xyz:8086/campaign/?skip=0&limit=200",
           {
             headers: {
               Authorization: `Bearer ${token}`,
