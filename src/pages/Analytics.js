@@ -31,6 +31,7 @@ const Analytics = () => {
         );
         
         // Map API response
+        console.log(response.data ,"=response")
         const apiCampaigns = response.data
           .slice() // make a shallow copy
           .reverse() // reverse the order

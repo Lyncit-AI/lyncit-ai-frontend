@@ -29,19 +29,20 @@ const AnalyticsDetail = () => {
         );
         
         // Map API response to our component data structure
+        console.log(response.data , "====response data")
         const apiData = response.data;
-        console.log(apiData , "[[")
         setCampaignData({
           id: apiData.id,
           name: apiData.name,
           effectiveness: 38, // Keep static for now as it's not in API
-          candidatesApplied: apiData.stats?.applicants || 0,
-          candidatesInvited: 80, // Keep static for now
+          candidatesApplied: apiData.stats?.responded || 0,
+          candidatesInvited: apiData.stats?.applicants, // Keep static for now
           totalCandidates: apiData.stats?.applicants || 0,
           responded: apiData.stats?.responded || 0,
           completed: apiData.stats?.completed || 0,
           highPriority: apiData.stats?.high || 0,
-          interviewScheduled: apiData.stats?.interview || 0
+          interviewScheduled: apiData.stats?.interview || 0,
+          candidates: apiData.candidates || [] // Add candidates array from API
         });
       } catch (error) {
         console.error("Failed to fetch campaign data:", error);
@@ -56,7 +57,8 @@ const AnalyticsDetail = () => {
           responded: 0,
           completed: 0,
           highPriority: 0,
-          interviewScheduled: 0
+          interviewScheduled: 0,
+          candidates: []
         });
       } finally {
         setLoading(false);
@@ -267,215 +269,72 @@ const AnalyticsDetail = () => {
                   <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">S.No</th>
                   <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Name</th>
                   <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Status</th>
-                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Lead Score</th>
+                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Score</th>
                   <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Classification</th>
                   <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Scheduled Meeting</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                <tr className="hover:bg-gray-50">
-                  <td className="px-6 py-4 text-sm text-gray-900">01</td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
-                        <span className="text-sm font-medium text-gray-700">J</span>
-                      </div>
-                      <div>
-                        <div className="text-sm font-medium text-gray-900">John</div>
-                        <div className="text-sm text-gray-500">Monaco</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                      Active
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">122235</td>
-                  <td className="px-6 py-4">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                      High Priority
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">10/12/2017 (03:00PM ET)</td>
-                </tr>
-                <tr className="hover:bg-gray-50">
-                  <td className="px-6 py-4 text-sm text-gray-900">02</td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
-                        <span className="text-sm font-medium text-gray-700">T</span>
-                      </div>
-                      <div>
-                        <div className="text-sm font-medium text-gray-900">Theresa</div>
-                        <div className="text-sm text-gray-500">Réunion</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                      Active
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">122235</td>
-                  <td className="px-6 py-4">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                      High Priority
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">10/12/2017 (03:00PM ET)</td>
-                </tr>
-                <tr className="hover:bg-gray-50">
-                  <td className="px-6 py-4 text-sm text-gray-900">03</td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
-                        <span className="text-sm font-medium text-gray-700">B</span>
-                      </div>
-                      <div>
-                        <div className="text-sm font-medium text-gray-900">Brooklyn</div>
-                        <div className="text-sm text-gray-500">Monaco</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                      Active
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">122235</td>
-                  <td className="px-6 py-4">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                      High Priority
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">10/12/2017 (03:00PM ET)</td>
-                </tr>
-                <tr className="hover:bg-gray-50">
-                  <td className="px-6 py-4 text-sm text-gray-900">04</td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
-                        <span className="text-sm font-medium text-gray-700">R</span>
-                      </div>
-                      <div>
-                        <div className="text-sm font-medium text-gray-900">Robert</div>
-                        <div className="text-sm text-gray-500">Afghanistan</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                      Active
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">122235</td>
-                  <td className="px-6 py-4">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                      High Priority
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <button className="inline-flex items-center gap-2 px-3 py-1 border border-green-300 text-green-700 rounded-lg text-sm hover:bg-green-50">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                      </svg>
-                      Send Reminder
-                    </button>
-                  </td>
-                </tr>
-                <tr className="hover:bg-gray-50">
-                  <td className="px-6 py-4 text-sm text-gray-900">05</td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
-                        <span className="text-sm font-medium text-gray-700">A</span>
-                      </div>
-                      <div>
-                        <div className="text-sm font-medium text-gray-900">Albert</div>
-                        <div className="text-sm text-gray-500">Réunion</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                      Active
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">122235</td>
-                  <td className="px-6 py-4">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                      High Priority
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <button className="inline-flex items-center gap-2 px-3 py-1 border border-green-300 text-green-700 rounded-lg text-sm hover:bg-green-50">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                      </svg>
-                      Send Reminder
-                    </button>
-                  </td>
-                </tr>
-                <tr className="hover:bg-gray-50">
-                  <td className="px-6 py-4 text-sm text-gray-900">06</td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
-                        <span className="text-sm font-medium text-gray-700">C</span>
-                      </div>
-                      <div>
-                        <div className="text-sm font-medium text-gray-900">Cameron</div>
-                        <div className="text-sm text-gray-500">Serbia</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                      Active
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">122235</td>
-                  <td className="px-6 py-4">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                      High Priority
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">10/12/2017 (03:00PM ET)</td>
-                </tr>
-                <tr className="hover:bg-gray-50">
-                  <td className="px-6 py-4 text-sm text-gray-900">07</td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
-                        <span className="text-sm font-medium text-gray-700">R</span>
-                      </div>
-                      <div>
-                        <div className="text-sm font-medium text-gray-900">Ralph</div>
-                        <div className="text-sm text-gray-500">Haiti</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                      Active
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">122235</td>
-                  <td className="px-6 py-4">
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                      High Priority
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <button className="inline-flex items-center gap-2 px-3 py-1 border border-green-300 text-green-700 rounded-lg text-sm hover:bg-green-50">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                      </svg>
-                      Send Reminder
-                    </button>
-                  </td>
-                </tr>
+                {campaignData.candidates && campaignData.candidates.length > 0 ? (
+                  campaignData.candidates.map((candidate, index) => {
+                    const firstName = candidate.candidate?.firstName || '';
+                    const lastName = candidate.candidate?.lastName || '';
+                    const fullName = `${firstName} ${lastName}`.trim();
+                    const initial = fullName.charAt(0).toUpperCase();
+                    const classification = candidate.class === 'high' ? 'High Priority' : 
+                                        candidate.class === 'low' ? 'Low Priority' : 'Medium Priority';
+                    const classificationColor = candidate.class === 'high' ? 'bg-red-100 text-red-800' :
+                                             candidate.class === 'low' ? 'bg-yellow-100 text-yellow-800' : 'bg-blue-100 text-blue-800';
+                    
+                    return (
+                      <tr key={candidate.candidateID} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 text-sm text-gray-900">{String(index + 1).padStart(2, '0')}</td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
+                              <span className="text-sm font-medium text-gray-700">{initial}</span>
+                            </div>
+                            <div>
+                              <div className="text-sm font-medium text-gray-900">{fullName || 'N/A'}</div>
+                              <div className="text-sm text-gray-500">Candidate ID: {candidate.candidateID.slice(0, 8)}...</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                            {candidate.status === 'new' ? 'Active' : candidate.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-900">{candidate.score || 0}</td>
+                        <td className="px-6 py-4">
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${classificationColor}`}>
+                            {classification}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          {candidate.interviewDttm ? (
+                            <span className="text-sm text-gray-900">
+                              {new Date(candidate.interviewDttm).toLocaleDateString()} ({new Date(candidate.interviewDttm).toLocaleTimeString()})
+                            </span>
+                          ) : (
+                            <button className="inline-flex items-center gap-2 px-3 py-1 border border-green-300 text-green-700 rounded-lg text-sm hover:bg-green-50">
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                              </svg>
+                              Send Reminder
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })
+                ) : (
+                  <tr>
+                    <td colSpan="6" className="px-6 py-8 text-center text-gray-500">
+                      No candidates found for this campaign.
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
