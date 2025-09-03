@@ -229,7 +229,7 @@ function Questionaire() {
     let organization = "Your Organization";
     let positionId = "GUID";
     let recruiterID = "GUID";
-    let keywords = [];
+    let questionnaireCategories = null;
 
     if (savedCategories) {
       try {
@@ -238,13 +238,30 @@ function Questionaire() {
         positionId = parsedData.positionId || positionId;
         recruiterID = parsedData.recruiterID || recruiterID;
         
-        // Extract keywords from the saved data
+        // Transform keywords into category-keywords format
+        const categoryKeywords = {};
         if (parsedData.keywords && Array.isArray(parsedData.keywords)) {
-          const selectedKeywords = parsedData.keywords
-            .filter(keyword => keyword.selected === true)
-            .map(keyword => keyword.keyword);
-          keywords = selectedKeywords.join(', ');
+          parsedData.keywords.forEach(keywordData => {
+            if (keywordData.selected) {
+              if (!categoryKeywords[keywordData.category]) {
+                categoryKeywords[keywordData.category] = [];
+              }
+              categoryKeywords[keywordData.category].push(keywordData.keyword);
+            }
+          });
         }
+        
+        console.log("Original parsedData.keywords:", parsedData.keywords);
+        console.log("Transformed categoryKeywords:", categoryKeywords);
+        
+        // Store the complete questionnaireCategories structure
+        questionnaireCategories = {
+          categories: parsedData.categories || [],
+          keywords: categoryKeywords, // Now in category-keywords format
+          jobDescription: parsedData.jobDescription || "",
+          campaignName: parsedData.campaignName || "",
+          selectedPosition: parsedData.selectedPosition || ""
+        };
       } catch (error) {
         console.error("Error parsing questionnaire categories:", error);
       }
@@ -261,18 +278,36 @@ function Questionaire() {
       return;
     }
 
+    // Convert category-keywords object to string format with categories for backend
+    let keywordsString = "";
+    if (questionnaireCategories?.keywords) {
+      const categoryKeywordStrings = [];
+      Object.entries(questionnaireCategories.keywords).forEach(([category, keywords]) => {
+        if (keywords && keywords.length > 0) {
+          categoryKeywordStrings.push(`${category}: ${keywords.join(', ')}`);
+        }
+      });
+      keywordsString = categoryKeywordStrings.join('; ');
+    }
+
     const payload = {
       name: campaignName.trim(),
       organization: organization.trim(),
       positionId: positionId.trim(),
       questionnaire: cleanQuestionnaire,
       recruiterID: recruiterID,
-      keywords: keywords,
+      keywords: keywordsString, // String format for backend
       sendDTTM: new Date().toISOString(),
       status: "Active",
       style: "SMS",
       tags: ["tag1", "tag2"]
     };
+
+    console.log("Final questionnaireCategories being sent:", questionnaireCategories);
+    console.log("Final payload being sent:", payload);
+    console.log("Payload keys:", Object.keys(payload));
+    console.log("questionnaireCategories type:", typeof payload.questionnaireCategories);
+    console.log("keywords type:", typeof payload.keywords);
 
     console.log("Payload to backend:", JSON.stringify(payload, null, 2));
 

@@ -14,6 +14,7 @@ const AnalyticsDetail = () => {
   const [loading, setLoading] = useState(true);
   const [selectedKeywords, setSelectedKeywords] = useState([]);
   const [filteredCandidates, setFilteredCandidates] = useState([]);
+  const [expandedCategories, setExpandedCategories] = useState({});
 
   useEffect(() => {
     const fetchCampaignData = async () => {
@@ -305,133 +306,188 @@ const AnalyticsDetail = () => {
           </div>
         </div>
 
-        {/* Debug Info */}
-
-
-        {/* Selected Keywords Section */}
-        {campaignData.keywords && (
+        {/* Selected Keywords Section - Top */}
+        {campaignData.keywords && selectedKeywords.length > 0 && (
           <div className="mt-8 mb-6">
             <h2 className="text-lg font-medium text-gray-900 mb-4">Selected Keywords:</h2>
             <div className="flex flex-wrap gap-2">
-              {campaignData.keywords.split(', ').map((keyword, index) => (
+              {selectedKeywords.map((keyword, index) => (
                 <div 
                   key={index}
-                  className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm cursor-pointer transition-colors ${
-                    selectedKeywords.includes(keyword) 
-                      ? 'bg-[#5A3A70] text-white ring-2 ring-[#7A5690]' 
-                      : 'bg-[#7A5690] text-white hover:bg-[#6A4A80]'
-                  }`}
-                  onClick={() => handleKeywordFilter(keyword)}
-                  title={`Filter by: ${keyword}`}
+                  className="flex items-center gap-2 bg-[#7A5690] text-white px-3 py-1 rounded-full text-sm"
                 >
                   <span>{keyword}</span>
                   <button 
                     className="text-white hover:text-gray-200 ml-1"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleKeywordRemove(keyword);
-                    }}
+                    onClick={() => handleKeywordRemove(keyword)}
                   >
                     ×
                   </button>
                 </div>
               ))}
             </div>
-            {/* {campaignData.keywords && (
-              <p className="text-sm text-gray-500 mt-2">
-                Click on keywords to filter candidates. These keywords were selected during campaign creation.
-                {selectedKeywords.length > 0 && (
-                  <span className="ml-2 text-[#7A5690] font-medium">
-                    Active filters: {selectedKeywords.join(', ')}
-                  </span>
-                )}
-              </p>
-            )} */}
+            {/* <p className="text-sm text-gray-500 mt-2">
+              Active filters: {selectedKeywords.join(', ')}
+            </p> */}
           </div>
         )}
 
-        {/* Data Table Section */}
-        <div className="bg-white rounded-[16px] mt-8 border border-[#EAEAEA] overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">S.No</th>
-                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Name</th>
-                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Status</th>
-                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Score</th>
-                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Classification</th>
-                  <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Scheduled Meeting</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {filteredCandidates && filteredCandidates.length > 0 ? (
-                  filteredCandidates.map((candidate, index) => {
-                    const firstName = candidate.candidate?.firstName || '';
-                    const lastName = candidate.candidate?.lastName || '';
-                    const fullName = `${firstName} ${lastName}`.trim();
-                    const initial = fullName.charAt(0).toUpperCase();
-                    const classification = candidate.class === 'high' ? 'High Priority' : 
-                                        candidate.class === 'low' ? 'Low Priority' : 'Medium Priority';
-                    const classificationColor = candidate.class === 'high' ? 'bg-red-100 text-red-800' :
-                                             candidate.class === 'low' ? 'bg-yellow-100 text-yellow-800' : 'bg-blue-100 text-blue-800';
+        {/* Keywords Accordion Sidebar and Data Table - Same Row */}
+        {campaignData.keywords && (
+          <div className="mt-8 mb-6">
+            <div className="flex gap-8">
+              {/* Left Side - Keywords Accordion */}
+              <div className="w-[223px] bg-white rounded-lg border border-gray-200 p-4">
+                <h2 className="text-lg font-medium text-gray-900 mb-4 pb-2 border-b border-gray-200">Preference</h2>
+                
+                {/* Parse keywords string and create accordion */}
+                {(() => {
+                  const parsedKeywords = {};
+                  if (campaignData.keywords) {
+                    campaignData.keywords.split('; ').forEach(categoryGroup => {
+                      const [category, keywords] = categoryGroup.split(': ');
+                      if (category && keywords) {
+                        parsedKeywords[category] = keywords.split(', ');
+                      }
+                    });
+                  }
+                  
+                  return Object.entries(parsedKeywords).map(([category, keywords], categoryIndex) => {
+                    const isExpanded = expandedCategories[category] || false;
                     
                     return (
-                      <tr key={candidate.candidateID} className="hover:bg-gray-50">
-                        <td className="px-6 py-4 text-sm text-gray-900">{String(index + 1).padStart(2, '0')}</td>
-                        <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
-                              <span className="text-sm font-medium text-gray-700">{initial}</span>
-                            </div>
-                            <div>
-                              <div className="text-sm font-medium text-gray-900">{fullName || 'N/A'}</div>
-                              <div className="text-sm text-gray-500">Candidate ID: {candidate.candidateID.slice(0, 8)}...</div>
-                            </div>
+                      <div key={categoryIndex} className="mb-4">
+                        <div 
+                          className="flex items-center justify-between cursor-pointer mb-2 p-2 hover:bg-gray-50 rounded"
+                          onClick={() => setExpandedCategories(prev => ({
+                            ...prev,
+                            [category]: !prev[category]
+                          }))}
+                        >
+                          <h3 className="font-medium text-gray-900 capitalize">
+                            {category.replace(/([A-Z])/g, ' $1').trim()}
+                          </h3>
+                          <svg 
+                            className={`w-4 h-4 text-gray-500 transition-transform ${isExpanded ? 'rotate-180' : ''}`} 
+                            fill="none" 
+                            stroke="currentColor" 
+                            viewBox="0 0 24 24"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 9l6 6 6-6" />
+                          </svg>
+                        </div>
+                        
+                        {/* Keywords are shown when expanded */}
+                        {isExpanded && (
+                          <div className="flex flex-wrap gap-2 pl-2">
+                            {keywords.map((keyword, keywordIndex) => (
+                              <button
+                                key={keywordIndex}
+                                className={`px-3 py-2 rounded-full text-xs transition-colors border ${
+                                  selectedKeywords.includes(keyword)
+                                    ? 'bg-[#7A5690] text-white border-[#7A5690]'
+                                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                                }`}
+                                onClick={() => handleKeywordFilter(keyword)}
+                              >
+                                {keyword}
+                              </button>
+                            ))}
                           </div>
-                        </td>
-                        <td className="px-6 py-4">
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                            {candidate.status === 'new' ? 'Active' : candidate.status}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 text-sm text-gray-900">{candidate.score || 0}</td>
-                        <td className="px-6 py-4">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${classificationColor}`}>
-                            {classification}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4">
-                          {candidate.interviewDttm ? (
-                            <span className="text-sm text-gray-900">
-                              {new Date(candidate.interviewDttm).toLocaleDateString()} ({new Date(candidate.interviewDttm).toLocaleTimeString()})
-                            </span>
-                          ) : (
-                            <button className="inline-flex items-center gap-2 px-3 py-1 border border-green-300 text-green-700 rounded-lg text-sm hover:bg-green-50">
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                              </svg>
-                              Send Reminder
-                            </button>
-                          )}
-                        </td>
-                      </tr>
+                        )}
+                      </div>
                     );
-                  })
-                ) : (
-                  <tr>
-                    <td colSpan="6" className="px-6 py-8 text-center text-gray-500">
-                      {selectedKeywords.length > 0 
-                        ? `No candidates match the selected keywords: ${selectedKeywords.join(', ')}`
-                        : 'No candidates found for this campaign.'
-                      }
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+                  });
+                })()}
+              </div>
+              
+              {/* Right Side - Data Table */}
+              <div className="flex-1">
+                <div className="bg-white rounded-[16px] border border-[#EAEAEA] overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">S.No</th>
+                          <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Name</th>
+                          <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Status</th>
+                          <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Score</th>
+                          <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Classification</th>
+                          <th className="px-6 py-4 text-left text-sm font-medium text-gray-900">Scheduled Meeting</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200">
+                        {filteredCandidates && filteredCandidates.length > 0 ? (
+                          filteredCandidates.map((candidate, index) => {
+                            const firstName = candidate.candidate?.firstName || '';
+                            const lastName = candidate.candidate?.lastName || '';
+                            const fullName = `${firstName} ${lastName}`.trim();
+                            const initial = fullName.charAt(0).toUpperCase();
+                            const classification = candidate.class === 'high' ? 'High Priority' : 
+                                                candidate.class === 'low' ? 'Low Priority' : 'Medium Priority';
+                            const classificationColor = candidate.class === 'high' ? 'bg-red-100 text-red-800' :
+                                                     candidate.class === 'low' ? 'bg-yellow-100 text-yellow-800' : 'bg-blue-100 text-blue-800';
+                            
+                            return (
+                              <tr key={candidate.candidateID} className="hover:bg-gray-50">
+                                <td className="px-6 py-4 text-sm text-gray-900">{String(index + 1).padStart(2, '0')}</td>
+                                <td className="px-6 py-4">
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
+                                      <span className="text-sm font-medium text-gray-700">{initial}</span>
+                                    </div>
+                                    <div>
+                                      <div className="text-sm font-medium text-gray-900">{fullName || 'N/A'}</div>
+                                      <div className="text-sm text-gray-500">Candidate ID: {candidate.candidateID.slice(0, 8)}...</div>
+                                    </div>
+                                  </div>
+                                </td>
+                                <td className="px-6 py-4">
+                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    {candidate.status === 'new' ? 'Active' : candidate.status}
+                                  </span>
+                                </td>
+                                <td className="px-6 py-4 text-sm text-gray-900">{candidate.score || 0}</td>
+                                <td className="px-6 py-4">
+                                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${classificationColor}`}>
+                                    {classification}
+                                  </span>
+                                </td>
+                                <td className="px-6 py-4">
+                                  {candidate.interviewDttm ? (
+                                    <span className="text-sm text-gray-900">
+                                      {new Date(candidate.interviewDttm).toLocaleDateString()} ({new Date(candidate.interviewDttm).toLocaleTimeString()})
+                                    </span>
+                                  ) : (
+                                    <button className="inline-flex items-center gap-2 px-3 py-1 border border-green-300 text-green-700 rounded-lg text-sm hover:bg-green-50">
+                                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                                      </svg>
+                                      Send Reminder
+                                    </button>
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          })
+                        ) : (
+                          <tr>
+                            <td colSpan="6" className="px-6 py-8 text-center text-gray-500">
+                              {selectedKeywords.length > 0 
+                                ? `No candidates match the selected keywords: ${selectedKeywords.join(', ')}`
+                                : 'No candidates found for this campaign.'
+                              }
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </DashboardLayout>
   );
