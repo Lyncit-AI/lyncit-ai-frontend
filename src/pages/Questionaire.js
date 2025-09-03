@@ -229,6 +229,7 @@ function Questionaire() {
     let organization = "Your Organization";
     let positionId = "GUID";
     let recruiterID = "GUID";
+    let keywords = [];
 
     if (savedCategories) {
       try {
@@ -236,6 +237,14 @@ function Questionaire() {
         organization = parsedData.organization || organization;
         positionId = parsedData.positionId || positionId;
         recruiterID = parsedData.recruiterID || recruiterID;
+        
+        // Extract keywords from the saved data
+        if (parsedData.keywords && Array.isArray(parsedData.keywords)) {
+          const selectedKeywords = parsedData.keywords
+            .filter(keyword => keyword.selected === true)
+            .map(keyword => keyword.keyword);
+          keywords = selectedKeywords.join(', ');
+        }
       } catch (error) {
         console.error("Error parsing questionnaire categories:", error);
       }
@@ -258,6 +267,7 @@ function Questionaire() {
       positionId: positionId.trim(),
       questionnaire: cleanQuestionnaire,
       recruiterID: recruiterID,
+      keywords: keywords,
       sendDTTM: new Date().toISOString(),
       status: "Active",
       style: "SMS",

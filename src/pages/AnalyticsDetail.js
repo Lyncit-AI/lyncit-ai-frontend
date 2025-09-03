@@ -12,6 +12,8 @@ const AnalyticsDetail = () => {
   const [progressValue, setProgressValue] = useState(0);
   const [campaignData, setCampaignData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [selectedKeywords, setSelectedKeywords] = useState([]);
+  const [filteredCandidates, setFilteredCandidates] = useState([]);
 
   useEffect(() => {
     const fetchCampaignData = async () => {
@@ -29,8 +31,10 @@ const AnalyticsDetail = () => {
         );
         
         // Map API response to our component data structure
-        console.log(response.data , "====response data")
         const apiData = response.data;
+        console.log(response.data, "====response data")
+        console.log("Keywords from API:", apiData.keywords, "Type:", typeof apiData.keywords)
+        
         setCampaignData({
           id: apiData.id,
           name: apiData.name,
@@ -42,7 +46,8 @@ const AnalyticsDetail = () => {
           completed: apiData.stats?.completed || 0,
           highPriority: apiData.stats?.high || 0,
           interviewScheduled: apiData.stats?.interview || 0,
-          candidates: apiData.candidates || [] // Add candidates array from API
+          candidates: apiData.candidates || [], // Add candidates array from API
+          keywords: apiData.keywords || null // Add keywords from API
         });
       } catch (error) {
         console.error("Failed to fetch campaign data:", error);
@@ -76,9 +81,72 @@ const AnalyticsDetail = () => {
       const timer = setTimeout(() => {
         setProgressValue(campaignData.effectiveness);
       }, 500);
+      
+      // Initialize filtered candidates with all candidates
+      setFilteredCandidates(campaignData.candidates || []);
+      
       return () => clearTimeout(timer);
     }
   }, [campaignData]);
+
+  // Handle keyword filtering
+  const handleKeywordFilter = (keyword) => {
+    if (selectedKeywords.includes(keyword)) {
+      // Remove keyword from filter
+      const newSelectedKeywords = selectedKeywords.filter(k => k !== keyword);
+      setSelectedKeywords(newSelectedKeywords);
+      
+      if (newSelectedKeywords.length === 0) {
+        // No filters active, show all candidates
+        setFilteredCandidates(campaignData.candidates || []);
+      } else {
+        // Filter by remaining keywords
+        const filtered = campaignData.candidates?.filter(candidate => 
+          newSelectedKeywords.some(selectedKeyword => 
+            candidate.keywords?.includes(selectedKeyword) || 
+            candidate.classification?.includes(selectedKeyword) ||
+            candidate.status?.includes(selectedKeyword)
+          )
+        ) || [];
+        setFilteredCandidates(filtered);
+      }
+    } else {
+      // Add keyword to filter
+      const newSelectedKeywords = [...selectedKeywords, keyword];
+      setSelectedKeywords(newSelectedKeywords);
+      
+      // Filter candidates by selected keywords
+      const filtered = campaignData.candidates?.filter(candidate => 
+        newSelectedKeywords.some(selectedKeyword => 
+          candidate.keywords?.includes(selectedKeyword) || 
+          candidate.classification?.includes(selectedKeyword) ||
+          candidate.status?.includes(selectedKeyword)
+        )
+      ) || [];
+      setFilteredCandidates(filtered);
+    }
+  };
+
+  // Handle keyword removal
+  const handleKeywordRemove = (keyword) => {
+    const newSelectedKeywords = selectedKeywords.filter(k => k !== keyword);
+    setSelectedKeywords(newSelectedKeywords);
+    
+    if (newSelectedKeywords.length === 0) {
+      // No filters active, show all candidates
+      setFilteredCandidates(campaignData.candidates || []);
+    } else {
+      // Filter by remaining keywords
+      const filtered = campaignData.candidates?.filter(candidate => 
+        newSelectedKeywords.some(selectedKeyword => 
+          candidate.keywords?.includes(selectedKeyword) || 
+          candidate.classification?.includes(selectedKeyword) ||
+          candidate.status?.includes(selectedKeyword)
+        )
+      ) || [];
+      setFilteredCandidates(filtered);
+    }
+  };
 
   if (loading) {
     return (
@@ -237,31 +305,53 @@ const AnalyticsDetail = () => {
           </div>
         </div>
 
+        {/* Debug Info */}
+
+
         {/* Selected Keywords Section */}
-        <div className="mt-8 mb-6">
-          <h2 className="text-lg font-medium text-gray-900 mb-4">Selected Keywords:</h2>
-          <div className="flex flex-wrap gap-2">
-            <div className="flex items-center gap-2 bg-[#7A5690] text-white px-3 py-1 rounded-full text-sm">
-              <span>Live In</span>
-              <button className="text-white hover:text-gray-200">×</button>
+        {campaignData.keywords && (
+          <div className="mt-8 mb-6">
+            <h2 className="text-lg font-medium text-gray-900 mb-4">Selected Keywords:</h2>
+            <div className="flex flex-wrap gap-2">
+              {campaignData.keywords.split(', ').map((keyword, index) => (
+                <div 
+                  key={index}
+                  className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm cursor-pointer transition-colors ${
+                    selectedKeywords.includes(keyword) 
+                      ? 'bg-[#5A3A70] text-white ring-2 ring-[#7A5690]' 
+                      : 'bg-[#7A5690] text-white hover:bg-[#6A4A80]'
+                  }`}
+                  onClick={() => handleKeywordFilter(keyword)}
+                  title={`Filter by: ${keyword}`}
+                >
+                  <span>{keyword}</span>
+                  <button 
+                    className="text-white hover:text-gray-200 ml-1"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleKeywordRemove(keyword);
+                    }}
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
             </div>
-            <div className="flex items-center gap-2 bg-[#7A5690] text-white px-3 py-1 rounded-full text-sm">
-              <span>Weekend Warrior</span>
-              <button className="text-white hover:text-gray-200">×</button>
-            </div>
-            <div className="flex items-center gap-2 bg-[#7A5690] text-white px-3 py-1 rounded-full text-sm">
-              <span>Overnight</span>
-              <button className="text-white hover:text-gray-200">×</button>
-            </div>
-            <div className="flex items-center gap-2 bg-[#7A5690] text-white px-3 py-1 rounded-full text-sm">
-              <span>Part Time</span>
-              <button className="text-white hover:text-gray-200">×</button>
-            </div>
+            {/* {campaignData.keywords && (
+              <p className="text-sm text-gray-500 mt-2">
+                Click on keywords to filter candidates. These keywords were selected during campaign creation.
+                {selectedKeywords.length > 0 && (
+                  <span className="ml-2 text-[#7A5690] font-medium">
+                    Active filters: {selectedKeywords.join(', ')}
+                  </span>
+                )}
+              </p>
+            )} */}
           </div>
-        </div>
+        )}
 
         {/* Data Table Section */}
-        <div className="bg-white rounded-[16px] border border-[#EAEAEA] overflow-hidden">
+        <div className="bg-white rounded-[16px] mt-8 border border-[#EAEAEA] overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50">
@@ -275,8 +365,8 @@ const AnalyticsDetail = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
-                {campaignData.candidates && campaignData.candidates.length > 0 ? (
-                  campaignData.candidates.map((candidate, index) => {
+                {filteredCandidates && filteredCandidates.length > 0 ? (
+                  filteredCandidates.map((candidate, index) => {
                     const firstName = candidate.candidate?.firstName || '';
                     const lastName = candidate.candidate?.lastName || '';
                     const fullName = `${firstName} ${lastName}`.trim();
@@ -331,7 +421,10 @@ const AnalyticsDetail = () => {
                 ) : (
                   <tr>
                     <td colSpan="6" className="px-6 py-8 text-center text-gray-500">
-                      No candidates found for this campaign.
+                      {selectedKeywords.length > 0 
+                        ? `No candidates match the selected keywords: ${selectedKeywords.join(', ')}`
+                        : 'No candidates found for this campaign.'
+                      }
                     </td>
                   </tr>
                 )}
