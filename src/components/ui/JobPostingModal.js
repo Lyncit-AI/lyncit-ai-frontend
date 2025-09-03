@@ -235,7 +235,15 @@ export default function JobPostingModal() {
 
   return (
     <div className="flex justify-center items-center z-30">
-      <Dialog.Root open={dialogOpen} onOpenChange={setDialogOpen}>
+      <Dialog.Root 
+        open={dialogOpen} 
+        onOpenChange={(open) => {
+          // Prevent closing the modal when loading
+          if (!isLoading) {
+            setDialogOpen(open);
+          }
+        }}
+      >
         <Dialog.Trigger asChild>
           <button
             className="flex justify-center items-center rounded-b-[32px] gap-2 w-full bg-[#3d3d4e] text-white py-6 hover:bg-gray-700"
@@ -275,7 +283,12 @@ export default function JobPostingModal() {
                   : "Suggested Keywords"}
               </Dialog.Title>
               <Dialog.Close asChild>
-                <button onClick={() => setStep(1)}>
+                <button 
+                  onClick={() => setStep(1)}
+                  disabled={isLoading}
+                  className={`${isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100'} p-1 rounded transition-colors`}
+                  title={isLoading ? "Please wait while generating questionnaire..." : "Close"}
+                >
                   <X className="w-5 h-5" />
                 </button>
               </Dialog.Close>
@@ -353,6 +366,16 @@ export default function JobPostingModal() {
 
             {step === 2 && (
               <>
+                {isLoading && (
+                  <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50 rounded-[32px]">
+                    <div className="bg-white p-6 rounded-lg shadow-lg text-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#825C9A] mx-auto mb-4"></div>
+                      <p className="text-[#0D0C22] font-medium">Generating Lyncit AI Questionnaire</p>
+                      <p className="text-[#637083] text-sm mt-2">Please wait, this process cannot be interrupted</p>
+                    </div>
+                  </div>
+                )}
+                
                 <p className="text-[#637083] mt-4">
                 Keywords based on the job posting to create the screening questions
                 </p>
@@ -710,17 +733,31 @@ export default function JobPostingModal() {
                   </div>
                 )}
 
-                <div className="flex justify-end gap-4 items-center mt-8">
-                  <span className="text-[#637083] text-sm font-semibold">
-                    Step 2 of 2
-                  </span>
+                <div className="flex justify-between items-center mt-8">
                   <button
-                    onClick={handleSubmit}
+                    onClick={() => setStep(1)}
                     disabled={isLoading}
-                    className="bg-[#0D0C22] text-white text-sm font-semibold px-10 py-4 rounded-full disabled:opacity-50"
+                    className={`text-[#637083] text-sm font-semibold px-4 py-2 rounded-lg transition-colors ${
+                      isLoading 
+                        ? 'opacity-50 cursor-not-allowed' 
+                        : 'hover:bg-gray-100'
+                    }`}
                   >
-                    {isLoading ? <Spinner size="w-4 h-4" /> : "Next"}
+                    ← Back
                   </button>
+                  
+                  <div className="flex items-center gap-4">
+                    <span className="text-[#637083] text-sm font-semibold">
+                      Step 2 of 2
+                    </span>
+                    <button
+                      onClick={handleSubmit}
+                      disabled={isLoading}
+                      className="bg-[#0D0C22] text-white text-sm font-semibold px-10 py-4 rounded-full disabled:opacity-50"
+                    >
+                      {isLoading ? <Spinner size="w-4 h-4" /> : "Next"}
+                    </button>
+                  </div>
                 </div>
               </>
             )}
