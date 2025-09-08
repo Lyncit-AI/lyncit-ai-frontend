@@ -125,7 +125,10 @@ const Analytics = () => {
                           <h3 className="font-medium text-gray-900">{campaign.name}</h3>
                         </td>
                         <td className="p-6">
-                          <button className={`px-4 py-2 rounded-lg text-sm font-medium ${getButtonStyle(campaign.type)}`}>
+                          <button 
+                            onClick={() => navigate('/question')}
+                            className={`px-4 py-2 rounded-lg text-sm font-medium ${getButtonStyle(campaign.type)}`}
+                          >
                             {campaign.type}
                           </button>
                         </td>
@@ -206,7 +209,10 @@ const Analytics = () => {
                     
                     {/* Column 2: Hire/Rehire Button */}
                     <div className="w-24 flex justify-center mr-4">
-                      <button className={`w-20 px-4 py-2 rounded-lg text-sm font-medium ${getButtonStyle(campaign.type)}`}>
+                      <button 
+                        onClick={() => navigate('/question')}
+                        className={`w-20 px-4 py-2 rounded-lg text-sm font-medium ${getButtonStyle(campaign.type)}`}
+                      >
                         {campaign.type}
                       </button>
                     </div>
@@ -280,7 +286,10 @@ const Analytics = () => {
 
               {/* Action Buttons */}
               <div className="flex flex-col gap-2">
-                <button className="px-4 py-2 bg-[#7A5690] text-white rounded-lg text-sm font-medium hover:bg-[#6A4A80]">
+                <button 
+                  onClick={() => navigate('/question')}
+                  className="px-4 py-2 bg-[#7A5690] text-white rounded-lg text-sm font-medium hover:bg-[#6A4A80]"
+                >
                   Hire
                 </button>
                 <button className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-400">
