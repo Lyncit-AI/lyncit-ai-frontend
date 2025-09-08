@@ -302,7 +302,7 @@ const Analytics = () => {
             </div>
 
             <div className="mt-6">
-              <p className="text-greenn-500 text-sm font-medium">27% up from previous Month</p>
+              <p className="text-green-500 text-sm font-medium">27% up from previous Month</p>
             </div>
 
             <div className="mt-6 p-4 bg-gray-50 rounded-lg">
