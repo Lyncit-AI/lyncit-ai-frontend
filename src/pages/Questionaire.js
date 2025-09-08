@@ -365,7 +365,12 @@ function Questionaire() {
         <div className="px-14 max-lg:px-8 mb-8 max-sm:hidden">
           <div className="flex items-center justify-between pt-3">
             <div>
-              <Logo />
+              {/* <Logo /> */}
+              <img 
+                src="/complete-homecare.svg" 
+                alt="Complete Homecare Logo" 
+                className="h-12 w-auto"
+              />
             </div>
             <div className="flex flex-col items-center">
               <h1 className="text-lg font-semibold text-black">

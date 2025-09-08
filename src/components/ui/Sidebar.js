@@ -40,6 +40,16 @@ const Sidebar = ({ name, picture }) => {
         onMouseLeave={() => setExpanded(false)}
       >
         <div className="flex flex-col py-4">
+          {/* Logo */}
+          <div className="flex justify-center mb-6">
+            <img 
+              src="/complete-homecare.svg" 
+              alt="Complete Homecare Logo" 
+              className={`transition-all duration-300 ${expanded ? "h-10 w-auto" : "h-8 w-auto"}`}
+              style={{ imageRendering: 'crisp-edges' }}
+            />
+          </div>
+          
           <div
             className={`flex items-center gap-3 px-2 py-2 cursor-pointer rounded-lg ${
               expanded ? "border-gray-300 border" : "border-transparent border"
@@ -62,7 +72,7 @@ const Sidebar = ({ name, picture }) => {
             {[
               { icon: User, label: "Community" },
               { icon: Home, label: "Dashboard", onClick: () => navigate('/app') },
-              { icon: MessageCircle, label: "Messages" }
+              // { icon: MessageCircle, label: "Messages" }
             ].map(({ icon: Icon, label, onClick }) => (
               <div
                 key={label}
@@ -124,8 +134,8 @@ const Sidebar = ({ name, picture }) => {
           </div>
           <nav className="w-full mt-2">
             {[
-              { icon: Compass, label: "Discover" },
-              { icon: Briefcase, label: "Jobs" },
+              // { icon: Compass, label: "Discover" },
+              // { icon: Briefcase, label: "Jobs" },
               { icon: Folder, label: "Project & Invoices" },
               { icon: Wallet, label: "Wallet" }
             ].map(({ icon: Icon, label }) => (
