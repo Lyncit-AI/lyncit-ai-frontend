@@ -3,6 +3,8 @@ import DashboardLayout from "../components/layouts/DashboardLayout";
 import { useNavigate } from "react-router-dom";
 import Logo from "../assets/logo/logo";
 import JobPostingModal from "../components/ui/JobPostingModal";
+import ChooseHiringTypeModal from "../components/ui/ChooseHiringTypeModal"; 
+
 
 const RecruiterDashboard = () => {
   const navigate = useNavigate();
