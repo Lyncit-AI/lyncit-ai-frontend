@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import brain from "../../assets/icons/brain.jpg";
 import bolt from "../../assets/icons/bolt.svg";
-import JobPostingModal from "./JobPostingModal"; // ✅ make sure path is correct
+import JobPostingModal from "./JobPostingModal"; 
 
 const ChooseHiringTypeModal = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
