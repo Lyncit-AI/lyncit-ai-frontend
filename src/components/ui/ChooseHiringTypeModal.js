@@ -29,6 +29,8 @@ const ChooseHiringTypeModal = () => {
     }
   };
 
+
+  
   return (
     <>
       <div className="flex justify-center items-center z-30">
