@@ -14,23 +14,25 @@ const Spinner = ({ size = "w-4 h-4" }) => (
   ></div>
 );
 
-const dummyData = {
-  categories: ["skills", "availability", "preferences"],
-  keywords: [
-    { category: "skills", keyword: "home healthcare", selected: true },
-    { category: "skills", keyword: "childcare", selected: false },
-    { category: "skills", keyword: "disability care", selected: true },
-    { category: "skills", keyword: "first aid", selected: true },
-    { category: "skills", keyword: "medical training", selected: false },
-    { category: "availability", keyword: "full time", selected: false },
-    { category: "availability", keyword: "overnight care", selected: true },
-    {
-      category: "preferences",
-      keyword: "comfortable with pets",
-      selected: true,
-    },
-    { category: "preferences", keyword: "non-smoker", selected: true },
+// --- NEW: role options by hiring type ---
+const ROLE_OPTIONS = {
+  specialized: [
+    "Registered Nurse",
+    "Marketing Manager",
+    "HR specialist",
+    "Lab Technician",
   ],
+  commodity: [
+    "Home Health Aide",
+    "Certified Nursing Assistant",
+    "Restaurant worker",
+  ],
+};
+
+// --- NEW: map hiringType -> complexity ---
+const COMPLEXITY_BY_TYPE = {
+  specialized: "high",
+  commodity: "low",
 };
 
 export default function JobPostingModal() {
@@ -38,7 +40,10 @@ export default function JobPostingModal() {
   const [jobUrl, setJobUrl] = useState("");
   const [, setJobDescription] = useState("");
   const [stepCount, setStepCount] = useState(1);
+
+  // --- CHANGED: replace selectedCategory init with safe default later
   const [selectedCategory, setSelectedCategory] = useState("");
+
   const [customKeyword, setCustomKeyword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [categories, setCategories] = useState([]);
@@ -46,11 +51,22 @@ export default function JobPostingModal() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [campaignName, setCampaignName] = useState("");
   const [selectedPosition, setSelectedPosition] = useState("");
-  const [step, setStep] = useState("choose");
+
+  // --- CHANGED: unify modal flow with hiringType + single "form" step ---
+  const [step, setStep] = useState("choose"); // "choose" | "form"
+  const [hiringType, setHiringType] = useState(""); // "" | "specialized" | "commodity"
 
   const closeDialog = () => {
     setDialogOpen(false);
     setStep("choose");
+    setHiringType("");
+    setStepCount(1);
+    setSelectedPosition("");
+    setJobUrl("");
+    setCampaignName("");
+    setCategories([]);
+    setKeywords([]);
+    setSelectedCategory("");
   };
 
   useEffect(() => {
@@ -60,15 +76,18 @@ export default function JobPostingModal() {
       setStepCount(parseInt(openModalAtStep, 10));
       localStorage.removeItem("openModalAtStep");
 
-      const savedCategoriesData = localStorage.getItem(
-        "questionnaireCategories"
-      );
+      const savedCategoriesData = localStorage.getItem("questionnaireCategories");
       if (savedCategoriesData) {
         try {
           const parsedData = JSON.parse(savedCategoriesData);
           setCategories(parsedData.categories || []);
           setKeywords(parsedData.keywords || []);
           setJobUrl(parsedData.jobDescription || "");
+          setCampaignName(parsedData.campaignName || "");
+          setSelectedPosition(parsedData.selectedPosition || "");
+          // if resuming, default to specialized form unless specified
+          setHiringType(parsedData.hiringType || "specialized");
+          setStep("form");
 
           if (parsedData.categories && parsedData.categories.length > 0) {
             setSelectedCategory(parsedData.categories[0]);
@@ -80,6 +99,14 @@ export default function JobPostingModal() {
     }
   }, []);
 
+  // --- NEW: centralized click handler for hiring type ---
+  const handleSelectHiringType = (type) => {
+    setHiringType(type); // "specialized" or "commodity"
+    setStep("form");
+    setStepCount(1);
+    setSelectedPosition("");
+  };
+
   const handleAddCustom = () => {
     if (customKeyword.trim()) {
       const newKeyword = {
@@ -87,18 +114,16 @@ export default function JobPostingModal() {
         keyword: customKeyword.trim(),
         selected: true,
       };
-
-      setKeywords((prevKeywords) => [...prevKeywords, newKeyword]);
+      setKeywords((prev) => [...prev, newKeyword]);
       setCustomKeyword("");
     }
   };
 
-  const fetchCategoriesFromBackend = async (jobDesc) => {
+  // --- CHANGED: accept complexity and forward to backend ---
+  const fetchCategoriesFromBackend = async (jobDesc, complexity) => {
     try {
       setIsLoading(true);
-
       const accessToken = localStorage.getItem("accessToken");
-
       if (!accessToken) {
         console.error("Access token not found in localStorage");
         throw new Error("Access token not found");
@@ -108,7 +133,7 @@ export default function JobPostingModal() {
 
       const response = await axios({
         method: "POST",
-        url: url,
+        url,
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json",
@@ -118,21 +143,14 @@ export default function JobPostingModal() {
         params: {
           jobDescription: jobDesc,
           categories: "skills,availability,preferences",
+          complexity, 
         },
-        withCredentials: true,
+        // withCredentials: true,
       });
 
       const responseData = response.data;
-
-      const uniqueCategories = [
-        ...new Set(responseData.map((item) => item.category)),
-      ];
-
-      // Add selected: true to all keywords
-      const keywordsWithSelection = responseData.map((keyword) => ({
-        ...keyword,
-        selected: true,
-      }));
+      const uniqueCategories = [...new Set(responseData.map((item) => item.category))];
+      const keywordsWithSelection = responseData.map((k) => ({ ...k, selected: true }));
 
       return {
         categories: uniqueCategories,
@@ -152,15 +170,16 @@ export default function JobPostingModal() {
 
   const handleNextStep = async () => {
     handleJobDescriptionInput();
+    const complexity = COMPLEXITY_BY_TYPE[hiringType] || "low";
+
+    console.log("Fetching categories with complexity:", complexity);
 
     if (jobUrl.trim()) {
-      const backendData = await fetchCategoriesFromBackend(jobUrl);
+      const backendData = await fetchCategoriesFromBackend(jobUrl, complexity);
       if (backendData) {
         setCategories(backendData.categories);
         setKeywords(backendData.keywords);
-        if (backendData.categories && backendData.categories.length > 0) {
-          setSelectedCategory(backendData.categories[0]);
-        }
+        setSelectedCategory(backendData.categories?.[0] || "");
         setStepCount(2);
       } else {
         alert("Failed to fetch keywords from backend. Please try again.");
@@ -180,14 +199,18 @@ export default function JobPostingModal() {
     try {
       setIsLoading(true);
 
+      const complexity = COMPLEXITY_BY_TYPE[hiringType] || "low";
+
       localStorage.setItem(
         "questionnaireCategories",
         JSON.stringify({
           categories,
           keywords,
           jobDescription: jobUrl,
-          campaignName: campaignName,
-          selectedPosition: selectedPosition,
+          campaignName,
+          selectedPosition,
+          hiringType, // --- NEW (persist)
+          complexity, // --- NEW (persist)
         })
       );
 
@@ -197,7 +220,6 @@ export default function JobPostingModal() {
         .join(",");
 
       const accessToken = localStorage.getItem("accessToken");
-
       if (!accessToken) {
         console.error("Access token not found in localStorage");
         throw new Error("Access token not found");
@@ -208,11 +230,12 @@ export default function JobPostingModal() {
       console.log("Sending questionnaire request with:", {
         jobDescription: jobUrl,
         keywords: selectedKeywords,
+        complexity,
       });
 
       const response = await axios({
         method: "POST",
-        url: url,
+        url,
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json",
@@ -222,8 +245,9 @@ export default function JobPostingModal() {
         params: {
           jobDescription: jobUrl,
           keywords: selectedKeywords,
+          complexity, 
         },
-        withCredentials: true,
+        // withCredentials: true,
       });
 
       console.log("Questionnaire API response:", response.data);
@@ -241,6 +265,19 @@ export default function JobPostingModal() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // --- NEW: derive role options for current hiringType ---
+  const roleOptions = hiringType ? ROLE_OPTIONS[hiringType] : [];
+
+  // --- NEW: dynamic titles based on hiringType ---
+  const titleByStep = () => {
+    if (step === "choose") return "Choose Hiring Type";
+    if (stepCount === 1)
+      return hiringType === "specialized"
+        ? "Use Lyncit AI to create job posting — Specialized"
+        : "Use Lyncit AI to create job posting — High Volume";
+    return "Suggested Keywords";
   };
 
   return (
@@ -270,25 +307,25 @@ export default function JobPostingModal() {
             <div className="flex justify-between items-start mb-6">
               <div>
                 <h1 className="text-[22px] font-semibold text-gray-900">
-                  {step === "choose"
-                    ? "Choose Hiring Type"
-                    : stepCount === 1
-                      ? "Use Lyncit AI to create job posting"
-                      : "Suggested Keywords"}
+                  {titleByStep()}
                 </h1>
               </div>
 
               <Dialog.Close asChild>
                 <button
                   onClick={() => {
-                    if (step === "specialized" && stepCount === 1) {
+                    if (step === "form" && stepCount === 1) {
                       setStepCount(1);
                     } else if (step === "choose") {
+                      closeDialog();
+                    } else {
                       closeDialog();
                     }
                   }}
                   disabled={isLoading}
-                  className={`${isLoading ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-100"} p-1 rounded transition-colors`}
+                  className={`${
+                    isLoading ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-100"
+                  } p-1 rounded transition-colors`}
                   title={
                     isLoading
                       ? "Please wait while generating questionnaire..."
@@ -306,102 +343,74 @@ export default function JobPostingModal() {
                 {/* Specialized */}
                 <div className="border border-gray-200 hover:border-gray-300 rounded-2xl p-6 flex flex-col justify-between transition-all">
                   <div className="flex items-start gap-3">
-                    <img
-                      src={brain}
-                      alt="brainIcon"
-                      className="w-10 h-10 mt-2"
-                    />
+                    <img src={brain} alt="brainIcon" className="w-10 h-10 mt-2" />
                     <h3 className="text-2xl font-medium text-gray-800 leading-snug">
                       Hire for a Specialized Role
                     </h3>
                   </div>
                   <div className="items-start gap-3">
                     <p className="text-[15px] text-gray-700 font-medium mt-5 leading-relaxed">
-                      Designed for skilled or certified positions requiring
-                      domain knowledge.
+                      Designed for skilled or certified positions requiring domain knowledge.
                     </p>
                     <p className="text-[15px] text-gray-700 font-medium mt-3 leading-relaxed">
-                      Lyncit AI will create detailed multi-step screening
-                      questions to assess expertise, experience depth, and fit.
+                      Lyncit AI will create detailed multi-step screening questions to assess expertise, experience depth, and fit.
                     </p>
                   </div>
                   <button
                     className="mt-6 bg-[#0D0C22] text-white font-medium rounded-xl text-lg py-2.5 w-full hover:bg-[#353536] transition-colors"
-                    onClick={() => setStep("specialized")}
+                    onClick={() => handleSelectHiringType("specialized")} // --- CHANGED
                   >
                     Select Specialized Role
                   </button>
                 </div>
 
-                {/* Commodity */}
+                {/* High Volume */}
                 <div className="border border-gray-200 hover:border-gray-300 rounded-2xl p-6 flex flex-col justify-between transition-all">
                   <div className="flex items-start gap-3">
                     <img src={bolt} alt="boltIcon" className="w-10 h-10 mt-2" />
                     <h3 className="text-2xl font-medium text-gray-800 leading-snug">
-                      Hire for high volume hiring
+                      Hire for High Volume Hiring
                     </h3>
                   </div>
                   <div className="items-start">
                     <p className="text-[15px] text-gray-700 font-medium mt-5 leading-relaxed">
-                      Ideal for high-volume positions where speed and
-                      suitability matter most.
+                      Ideal for high-volume positions where speed and suitability matter most.
                     </p>
                     <p className="text-[15px] text-gray-700 font-medium mt-5 leading-relaxed">
-                      Lyncit AI will generate concise screening questions to
-                      verify availability, reliability, and basic eligibility —
-                      so you can move fast.
+                      Lyncit AI will generate concise screening questions to verify availability, reliability, and basic eligibility — so you can move fast.
                     </p>
                   </div>
                   <button
                     className="mt-6 bg-[#0D0C22] text-white font-medium rounded-xl text-lg py-2.5 w-full hover:bg-[#353536] transition-colors"
-                    onClick={() => setStep("commodity")}
+                    onClick={() => handleSelectHiringType("commodity")} // --- CHANGED
                   >
-                    Select Commodity Role
+                    Select High Volume Role
                   </button>
                 </div>
               </div>
             )}
 
-            {/* STEP 2: specialized modal content */}
-            {step === "specialized" && (
+            {/* UNIFIED FORM for both hiring types */}
+            {step === "form" && (
               <div className="grid grid-cols-1 gap-5">
                 {stepCount === 1 && (
                   <>
                     <select
                       value={selectedPosition}
                       onChange={(e) => setSelectedPosition(e.target.value)}
-                      className="
-                    w-full
-                    h-10
-                    mt-6
-                    mb-4
-                    p-3
-                    border
-                    rounded-lg
-                    bg-white
-                    text-[12px]
-                    font-medium
-                    appearance-none
-                    focus:outline-none
-                    focus:border-gray-200
-                    transition
-                    duration-150
-                    ease-in-out
-                  "
+                      className="w-full h-10 mt-6 mb-4 p-3 border rounded-lg bg-white text-[12px] font-medium appearance-none focus:outline-none focus:border-gray-200 transition duration-150 ease-in-out"
                       style={{
                         background: `url("data:image/svg+xml,%3Csvg width='16' height='16' fill='none' stroke='%230D0C22' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' class='feather feather-chevron-down' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9l4 4 4-4'/%3E%3C/svg%3E") no-repeat right 1rem center/1.25rem 1.25rem, white`,
                       }}
                     >
                       <option value="">Select a role</option>
-                      <option value="CNA">
-                        CNA (Certified Nurse Assistant)
-                      </option>
-                      <option value="PCA">PCA (Personal Care Aides)</option>
-                      <option value="PCAs">
-                        PCAs (Personal Care Assistant)
-                      </option>
-                      <option value="HHA">HHA (Home Health Aides)</option>
+                      {roleOptions.map((r) => (
+                        <option key={r} value={r}>
+                          {r}
+                        </option>
+                      ))}
                     </select>
+
                     <input
                       value={campaignName}
                       onChange={(e) => setCampaignName(e.target.value)}
@@ -429,9 +438,7 @@ export default function JobPostingModal() {
                       </span>
                       <button
                         onClick={handleNextStep}
-                        disabled={
-                          !jobUrl.trim() || !campaignName.trim() || isLoading
-                        }
+                        disabled={!jobUrl.trim() || !campaignName.trim() || !selectedPosition || isLoading}
                         className="bg-[#0D0C22] text-white text-sm font-semibold px-10 py-4 rounded-full disabled:opacity-50"
                       >
                         {isLoading ? <Spinner size="w-4 h-4" /> : "Next"}
@@ -457,8 +464,7 @@ export default function JobPostingModal() {
                     )}
 
                     <p className="text-[#637083] mt-4">
-                      Keywords based on the job posting to create the screening
-                      questions
+                      Keywords based on the job posting to create the screening questions
                     </p>
 
                     {/* Desktop View - Categories and Keywords */}
@@ -474,8 +480,7 @@ export default function JobPostingModal() {
                             }`}
                             onClick={() => setSelectedCategory(category)}
                           >
-                            {category.charAt(0).toUpperCase() +
-                              category.slice(1)}
+                            {category.charAt(0).toUpperCase() + category.slice(1)}
                           </span>
                         ))}
                         <div
@@ -493,19 +498,9 @@ export default function JobPostingModal() {
                                 : "text-[#0D0C22] stroke-[#0D0C22]"
                             }`}
                           >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="24"
-                              height="24"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                            >
-                              <path
-                                d="M12 5V19M5 12H19"
-                                stroke="currentColor"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
+                            {/* plus icon */}
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none">
+                              <path d="M12 5V19M5 12H19" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
                             </svg>
                             Add an option
                           </button>
@@ -520,43 +515,24 @@ export default function JobPostingModal() {
                           <button
                             key={keywordData.keyword}
                             className={`flex justify-between items-center gap-2 border border-[#BFBFBF] text-[#637083] text-sm rounded-full px-3 py-2 ${
-                              keywordData.selected
-                                ? "bg-black text-white font-bold"
-                                : "font-semibold"
+                              keywordData.selected ? "bg-black text-white font-bold" : "font-semibold"
                             }`}
-                            onClick={() =>
-                              toggleKeywordSelection(keywordData.keyword)
-                            }
+                            onClick={() => toggleKeywordSelection(keywordData.keyword)}
                           >
                             {keywordData.keyword}
                             <span className="text-white">
                               {keywordData.selected ? (
-                                <>
-                                  <svg
-                                    className="text-white"
-                                    width="10"
-                                    height="10"
-                                    viewBox="0 0 13 13"
-                                    fill="none"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                  >
-                                    <path
-                                      d="M11.9844 1.01562L1.01562 11.9844M1.01562 1.01562L11.9844 11.9844"
-                                      stroke="white"
-                                      stroke-width="1.5"
-                                      stroke-linecap="round"
-                                      stroke-linejoin="round"
-                                    />
-                                  </svg>
-                                </>
+                                <svg className="text-white" width="10" height="10" viewBox="0 0 13 13" fill="none">
+                                  <path
+                                    d="M11.9844 1.01562L1.01562 11.9844M1.01562 1.01562L11.9844 11.9844"
+                                    stroke="white"
+                                    strokeWidth="1.5"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  />
+                                </svg>
                               ) : (
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  width="23"
-                                  height="20"
-                                  viewBox="0 0 23 20"
-                                  fill="none"
-                                >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="23" height="20" viewBox="0 0 23 20" fill="none">
                                   <path
                                     d="M11.4993 4.16669V15.8334M4.79102 10H18.2077"
                                     stroke="#637083"
@@ -571,13 +547,12 @@ export default function JobPostingModal() {
                         ))}
                     </div>
 
-                    {/* Mobile View - Categories with Keywords */}
+                    {/* Mobile View */}
                     <div className="mt-6 flex flex-col space-y-6 sm:hidden max-h-[350px] overflow-y-auto">
                       {categories.map((category) => (
                         <div key={category} className="space-y-3">
                           <h3 className="font-bold text-[#0D0C22] text-base">
-                            {category.charAt(0).toUpperCase() +
-                              category.slice(1)}
+                            {category.charAt(0).toUpperCase() + category.slice(1)}
                           </h3>
                           <div className="flex flex-wrap gap-2">
                             {keywords
@@ -586,26 +561,16 @@ export default function JobPostingModal() {
                                 <button
                                   key={keywordData.keyword}
                                   className={`flex justify-between items-center gap-1 border border-[#BFBFBF] text-[#637083] text-sm rounded-full px-3 py-2 ${
-                                    keywordData.selected
-                                      ? "border-black font-bold"
-                                      : "font-semibold"
+                                    keywordData.selected ? "border-black font-bold" : "font-semibold"
                                   }`}
-                                  onClick={() =>
-                                    toggleKeywordSelection(keywordData.keyword)
-                                  }
+                                  onClick={() => toggleKeywordSelection(keywordData.keyword)}
                                 >
                                   {keywordData.keyword}
                                   <span>
                                     {keywordData.selected ? (
                                       "✔"
                                     ) : (
-                                      <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        width="23"
-                                        height="20"
-                                        viewBox="0 0 23 20"
-                                        fill="none"
-                                      >
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="23" height="20" viewBox="0 0 23 20" fill="none">
                                         <path
                                           d="M11.4993 4.16669V15.8334M4.79102 10H18.2077"
                                           stroke="#637083"
@@ -624,29 +589,19 @@ export default function JobPostingModal() {
 
                       {/* Custom Keywords Section for Mobile */}
                       <div className="pt-4 border-t">
-                        <h3 className="font-bold text-[#825C9A] text-base mb-3">
-                          Add an option
-                        </h3>
+                        <h3 className="font-bold text-[#825C9A] text-base mb-3">Add an option</h3>
                         <div className="flex flex-col gap-3">
                           <div className="flex gap-2 border rounded-[32px] overflow-hidden w-full">
                             <input
                               type="text"
                               value={customKeyword}
                               onChange={(e) => setCustomKeyword(e.target.value)}
-                              onKeyDown={(e) =>
-                                e.key === "Enter" && handleAddCustom()
-                              }
+                              onKeyDown={(e) => e.key === "Enter" && handleAddCustom()}
                               placeholder="Add a Keyword"
                               className="pl-3 py-2 text-sm placeholder-[#637083] text-[#637083] font-semibold focus:outline-none flex-grow"
                             />
                             <button onClick={handleAddCustom} className="pr-3">
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                width="23"
-                                height="20"
-                                viewBox="0 0 23 20"
-                                fill="none"
-                              >
+                              <svg xmlns="http://www.w3.org/2000/svg" width="23" height="20" viewBox="0 0 23 20" fill="none">
                                 <path
                                   d="M11.4993 4.16669V15.8334M4.79102 10H18.2077"
                                   stroke="#637083"
@@ -665,55 +620,12 @@ export default function JobPostingModal() {
                                 <button
                                   key={customKeywordData.keyword}
                                   className={`flex justify-between items-center gap-2 border border-[#BFBFBF] text-[#637083] text-sm rounded-full px-3 py-2 ${
-                                    customKeywordData.selected
-                                      ? "border-black font-bold"
-                                      : "font-semibold"
+                                    customKeywordData.selected ? "border-black font-bold" : "font-semibold"
                                   }`}
-                                  onClick={() =>
-                                    toggleKeywordSelection(
-                                      customKeywordData.keyword
-                                    )
-                                  }
+                                  onClick={() => toggleKeywordSelection(customKeywordData.keyword)}
                                 >
                                   {customKeywordData.keyword}
-                                  <span>
-                                    {customKeywordData.selected ? (
-                                      <>
-                                        <svg
-                                          width="13"
-                                          className="text-white"
-                                          height="13"
-                                          viewBox="0 0 13 13"
-                                          fill="none"
-                                          xmlns="http://www.w3.org/2000/svg"
-                                        >
-                                          <path
-                                            d="M11.9844 1.01562L1.01562 11.9844M1.01562 1.01562L11.9844 11.9844"
-                                            stroke="#637083"
-                                            stroke-width="1.5"
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                          />
-                                        </svg>
-                                      </>
-                                    ) : (
-                                      <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        width="23"
-                                        height="20"
-                                        viewBox="0 0 23 20"
-                                        fill="none"
-                                      >
-                                        <path
-                                          d="M11.4993 4.16669V15.8334M4.79102 10H18.2077"
-                                          stroke="#637083"
-                                          strokeWidth="1.66667"
-                                          strokeLinecap="round"
-                                          strokeLinejoin="round"
-                                        />
-                                      </svg>
-                                    )}
-                                  </span>
+                                  <span>{customKeywordData.selected ? "✖" : "+"}</span>
                                 </button>
                               ))}
                           </div>
@@ -728,26 +640,13 @@ export default function JobPostingModal() {
                             type="text"
                             value={customKeyword}
                             onChange={(e) => setCustomKeyword(e.target.value)}
-                            onKeyDown={(e) =>
-                              e.key === "Enter" && handleAddCustom()
-                            }
+                            onKeyDown={(e) => e.key === "Enter" && handleAddCustom()}
                             placeholder="Add a Keyword"
                             className="pl-3 py-2 text-sm placeholder-[#637083] text-[#637083] font-semibold focus:outline-none"
-                            style={{
-                              width: `${Math.max(120, customKeyword.length * 10)}px`,
-                            }}
+                            style={{ width: `${Math.max(120, customKeyword.length * 10)}px` }}
                           />
-                          <button
-                            onClick={handleAddCustom}
-                            className="text-white rounded-lg pr-3"
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              width="23"
-                              height="20"
-                              viewBox="0 0 23 20"
-                              fill="none"
-                            >
+                          <button onClick={handleAddCustom} className="text-white rounded-lg pr-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="23" height="20" viewBox="0 0 23 20" fill="none">
                               <path
                                 d="M11.4993 4.16669V15.8334M4.79102 10H18.2077"
                                 stroke="#637083"
@@ -766,54 +665,12 @@ export default function JobPostingModal() {
                               <button
                                 key={customKeywordData.keyword}
                                 className={`flex justify-between items-center w-fit gap-2 border border-[#BFBFBF] text-[#637083] text-sm font-semibold rounded-full px-3 py-2 ${
-                                  customKeywordData.selected
-                                    ? "bg-black text-white"
-                                    : ""
+                                  customKeywordData.selected ? "bg-black text-white" : ""
                                 }`}
-                                onClick={() =>
-                                  toggleKeywordSelection(
-                                    customKeywordData.keyword
-                                  )
-                                }
+                                onClick={() => toggleKeywordSelection(customKeywordData.keyword)}
                               >
                                 {customKeywordData.keyword}
-                                <span>
-                                  {customKeywordData.selected ? (
-                                    <>
-                                      <svg
-                                        width="10"
-                                        height="10"
-                                        viewBox="0 0 13 13"
-                                        fill="none"
-                                        xmlns="http://www.w3.org/2000/svg"
-                                      >
-                                        <path
-                                          d="M11.9844 1.01562L1.01562 11.9844M1.01562 1.01562L11.9844 11.9844"
-                                          stroke="white"
-                                          stroke-width="1.5"
-                                          stroke-linecap="round"
-                                          stroke-linejoin="round"
-                                        />
-                                      </svg>
-                                    </>
-                                  ) : (
-                                    <svg
-                                      xmlns="http://www.w3.org/2000/svg"
-                                      width="23"
-                                      height="20"
-                                      viewBox="0 0 23 20"
-                                      fill="none"
-                                    >
-                                      <path
-                                        d="M11.4993 4.16669V15.8334M4.79102 10H18.2077"
-                                        stroke="#637083"
-                                        strokeWidth="1.66667"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                      />
-                                    </svg>
-                                  )}
-                                </span>
+                                <span>{customKeywordData.selected ? "✖" : "+"}</span>
                               </button>
                             ))}
                         </div>
@@ -825,18 +682,14 @@ export default function JobPostingModal() {
                         onClick={() => setStepCount(1)}
                         disabled={isLoading}
                         className={`text-[#637083] text-sm font-semibold px-4 py-2 rounded-lg transition-colors ${
-                          isLoading
-                            ? "opacity-50 cursor-not-allowed"
-                            : "hover:bg-gray-100"
+                          isLoading ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-100"
                         }`}
                       >
                         ← Back
                       </button>
 
                       <div className="flex items-center gap-4">
-                        <span className="text-[#637083] text-sm font-semibold">
-                          Step 2 of 2
-                        </span>
+                        <span className="text-[#637083] text-sm font-semibold">Step 2 of 2</span>
                         <button
                           onClick={handleSubmit}
                           disabled={isLoading}
@@ -848,16 +701,6 @@ export default function JobPostingModal() {
                     </div>
                   </>
                 )}
-              </div>
-            )}
-
-            {/* STEP 2: commodity modal content */}
-            {step === "commodity" && (
-              <div className="grid grid-cols-1 gap-5">
-                {/* your alternate second modal content */}
-                <div className="rounded-xl border p-4">
-                  Second modal (Commodity) content…
-                </div>
               </div>
             )}
           </Dialog.Content>
