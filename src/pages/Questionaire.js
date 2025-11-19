@@ -212,7 +212,7 @@ function Questionaire() {
 
   const handleLaunch = async () => {
     const token = localStorage.getItem("accessToken");
-    
+    console.log("token:", token);
     // Validate required data
     if (!currentFlow || !currentFlow.nodes || currentFlow.nodes.length === 0) {
       alert("Please create a questionnaire with at least one question before launching.");
@@ -320,9 +320,9 @@ function Questionaire() {
             Accept: "application/json",
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
-            "Access-Control-Allow-Credentials": "true"
+            // "Access-Control-Allow-Credentials": "true"
           },
-          withCredentials: true
+          // withCredentials: true
         }
       );
       
