@@ -1,7 +1,7 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { X } from "lucide-react";
+import { X, Award, Zap } from "lucide-react";
 import axios from "axios";
 import React from "react";
 import brain from "../../assets/icons/brain.jpg";
@@ -76,7 +76,9 @@ export default function JobPostingModal() {
       setStepCount(parseInt(openModalAtStep, 10));
       localStorage.removeItem("openModalAtStep");
 
-      const savedCategoriesData = localStorage.getItem("questionnaireCategories");
+      const savedCategoriesData = localStorage.getItem(
+        "questionnaireCategories"
+      );
       if (savedCategoriesData) {
         try {
           const parsedData = JSON.parse(savedCategoriesData);
@@ -143,14 +145,19 @@ export default function JobPostingModal() {
         params: {
           jobDescription: jobDesc,
           categories: "skills,availability,preferences",
-          complexity, 
+          complexity,
         },
         // withCredentials: true,
       });
 
       const responseData = response.data;
-      const uniqueCategories = [...new Set(responseData.map((item) => item.category))];
-      const keywordsWithSelection = responseData.map((k) => ({ ...k, selected: true }));
+      const uniqueCategories = [
+        ...new Set(responseData.map((item) => item.category)),
+      ];
+      const keywordsWithSelection = responseData.map((k) => ({
+        ...k,
+        selected: true,
+      }));
 
       return {
         categories: uniqueCategories,
@@ -245,7 +252,7 @@ export default function JobPostingModal() {
         params: {
           jobDescription: jobUrl,
           keywords: selectedKeywords,
-          complexity, 
+          complexity,
         },
         // withCredentials: true,
       });
@@ -306,7 +313,7 @@ export default function JobPostingModal() {
           <Dialog.Content className="fixed top-1/2 left-1/2 w-[90vw] max-w-[720px] -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-white shadow-2xl z-50 p-8">
             <div className="flex justify-between items-start mb-6">
               <div>
-                <h1 className="text-[22px] font-semibold text-gray-900">
+                <h1 className="text-[26px] font-bold text-gray-900">
                   {titleByStep()}
                 </h1>
               </div>
@@ -324,7 +331,9 @@ export default function JobPostingModal() {
                   }}
                   disabled={isLoading}
                   className={`${
-                    isLoading ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-100"
+                    isLoading
+                      ? "opacity-50 cursor-not-allowed"
+                      : "hover:bg-gray-100"
                   } p-1 rounded transition-colors`}
                   title={
                     isLoading
@@ -341,19 +350,22 @@ export default function JobPostingModal() {
             {step === "choose" && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 {/* Specialized */}
-                <div className="border border-gray-200 hover:border-gray-300 rounded-2xl p-6 flex flex-col justify-between transition-all">
-                  <div className="flex items-start gap-3">
-                    <img src={brain} alt="brainIcon" className="w-10 h-10 mt-2" />
-                    <h3 className="text-2xl font-medium text-gray-800 leading-snug">
+                <div className="bg-white border border-[#E5E5E5] rounded-xl p-6 transition-all duration-200 cursor-pointer hover:shadow-md">
+                  <div className="flex flex-col items-start gap-3">
+                    <Award
+                      size={22}
+                      strokeWidth={1.5}
+                      className="text-[#1A1A1A]"
+                    />
+                    <h3 className="text-2xl font-bold text-gray-800 leading-snug">
                       Hire for a Specialized Role
                     </h3>
                   </div>
                   <div className="items-start gap-3">
-                    <p className="text-[15px] text-gray-700 font-medium mt-5 leading-relaxed">
-                      Designed for skilled or certified positions requiring domain knowledge.
-                    </p>
-                    <p className="text-[15px] text-gray-700 font-medium mt-3 leading-relaxed">
-                      Lyncit AI will create detailed multi-step screening questions to assess expertise, experience depth, and fit.
+                    <p className="text-1xl text-[#4A4A4A] font-medium mt-5 leading-relaxed">
+                      Designed for skilled or certified positions requiring
+                      domain knowledge. Lyncit AI will create detailed,
+                      multi-step questions to assess expertise and depth.
                     </p>
                   </div>
                   <button
@@ -365,24 +377,27 @@ export default function JobPostingModal() {
                 </div>
 
                 {/* High Volume */}
-                <div className="border border-gray-200 hover:border-gray-300 rounded-2xl p-6 flex flex-col justify-between transition-all">
-                  <div className="flex items-start gap-3">
-                    <img src={bolt} alt="boltIcon" className="w-10 h-10 mt-2" />
-                    <h3 className="text-2xl font-medium text-gray-800 leading-snug">
+                <div className="bg-white border border-[#E5E5E5] rounded-xl p-6 transition-all duration-200 cursor-pointer hover:shadow-md">
+                  <div className="flex flex-col items-start gap-3">
+                    <Zap
+                      size={22}
+                      strokeWidth={1.5}
+                      className="text-[#1A1A1A]"
+                    />
+                    <h3 className="text-2xl font-bold text-gray-800 leading-snug">
                       Hire for High Volume Hiring
                     </h3>
                   </div>
                   <div className="items-start">
-                    <p className="text-[15px] text-gray-700 font-medium mt-5 leading-relaxed">
-                      Ideal for high-volume positions where speed and suitability matter most.
-                    </p>
-                    <p className="text-[15px] text-gray-700 font-medium mt-5 leading-relaxed">
-                      Lyncit AI will generate concise screening questions to verify availability, reliability, and basic eligibility — so you can move fast.
+                    <p className="text-1xl text-[#4A4A4A] font-medium mt-5 leading-relaxed">
+                      Ideal for high-volume roles where speed and reliability
+                      matter. Lyncit AI will generate concise screening
+                      questions to quickly verify suitability.
                     </p>
                   </div>
                   <button
                     className="mt-6 bg-[#0D0C22] text-white font-medium rounded-xl text-lg py-2.5 w-full hover:bg-[#353536] transition-colors"
-                    onClick={() => handleSelectHiringType("commodity")} // --- CHANGED
+                    onClick={() => handleSelectHiringType("commodity")}
                   >
                     Select High Volume Role
                   </button>
@@ -438,7 +453,12 @@ export default function JobPostingModal() {
                       </span>
                       <button
                         onClick={handleNextStep}
-                        disabled={!jobUrl.trim() || !campaignName.trim() || !selectedPosition || isLoading}
+                        disabled={
+                          !jobUrl.trim() ||
+                          !campaignName.trim() ||
+                          !selectedPosition ||
+                          isLoading
+                        }
                         className="bg-[#0D0C22] text-white text-sm font-semibold px-10 py-4 rounded-full disabled:opacity-50"
                       >
                         {isLoading ? <Spinner size="w-4 h-4" /> : "Next"}
@@ -464,7 +484,8 @@ export default function JobPostingModal() {
                     )}
 
                     <p className="text-[#637083] mt-4">
-                      Keywords based on the job posting to create the screening questions
+                      Keywords based on the job posting to create the screening
+                      questions
                     </p>
 
                     {/* Desktop View - Categories and Keywords */}
@@ -480,7 +501,8 @@ export default function JobPostingModal() {
                             }`}
                             onClick={() => setSelectedCategory(category)}
                           >
-                            {category.charAt(0).toUpperCase() + category.slice(1)}
+                            {category.charAt(0).toUpperCase() +
+                              category.slice(1)}
                           </span>
                         ))}
                         <div
@@ -499,8 +521,18 @@ export default function JobPostingModal() {
                             }`}
                           >
                             {/* plus icon */}
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none">
-                              <path d="M12 5V19M5 12H19" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" />
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="24"
+                              height="24"
+                              fill="none"
+                            >
+                              <path
+                                d="M12 5V19M5 12H19"
+                                stroke="currentColor"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
                             </svg>
                             Add an option
                           </button>
@@ -515,14 +547,24 @@ export default function JobPostingModal() {
                           <button
                             key={keywordData.keyword}
                             className={`flex justify-between items-center gap-2 border border-[#BFBFBF] text-[#637083] text-sm rounded-full px-3 py-2 ${
-                              keywordData.selected ? "bg-black text-white font-bold" : "font-semibold"
+                              keywordData.selected
+                                ? "bg-black text-white font-bold"
+                                : "font-semibold"
                             }`}
-                            onClick={() => toggleKeywordSelection(keywordData.keyword)}
+                            onClick={() =>
+                              toggleKeywordSelection(keywordData.keyword)
+                            }
                           >
                             {keywordData.keyword}
                             <span className="text-white">
                               {keywordData.selected ? (
-                                <svg className="text-white" width="10" height="10" viewBox="0 0 13 13" fill="none">
+                                <svg
+                                  className="text-white"
+                                  width="10"
+                                  height="10"
+                                  viewBox="0 0 13 13"
+                                  fill="none"
+                                >
                                   <path
                                     d="M11.9844 1.01562L1.01562 11.9844M1.01562 1.01562L11.9844 11.9844"
                                     stroke="white"
@@ -532,7 +574,13 @@ export default function JobPostingModal() {
                                   />
                                 </svg>
                               ) : (
-                                <svg xmlns="http://www.w3.org/2000/svg" width="23" height="20" viewBox="0 0 23 20" fill="none">
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  width="23"
+                                  height="20"
+                                  viewBox="0 0 23 20"
+                                  fill="none"
+                                >
                                   <path
                                     d="M11.4993 4.16669V15.8334M4.79102 10H18.2077"
                                     stroke="#637083"
@@ -552,7 +600,8 @@ export default function JobPostingModal() {
                       {categories.map((category) => (
                         <div key={category} className="space-y-3">
                           <h3 className="font-bold text-[#0D0C22] text-base">
-                            {category.charAt(0).toUpperCase() + category.slice(1)}
+                            {category.charAt(0).toUpperCase() +
+                              category.slice(1)}
                           </h3>
                           <div className="flex flex-wrap gap-2">
                             {keywords
@@ -561,16 +610,26 @@ export default function JobPostingModal() {
                                 <button
                                   key={keywordData.keyword}
                                   className={`flex justify-between items-center gap-1 border border-[#BFBFBF] text-[#637083] text-sm rounded-full px-3 py-2 ${
-                                    keywordData.selected ? "border-black font-bold" : "font-semibold"
+                                    keywordData.selected
+                                      ? "border-black font-bold"
+                                      : "font-semibold"
                                   }`}
-                                  onClick={() => toggleKeywordSelection(keywordData.keyword)}
+                                  onClick={() =>
+                                    toggleKeywordSelection(keywordData.keyword)
+                                  }
                                 >
                                   {keywordData.keyword}
                                   <span>
                                     {keywordData.selected ? (
                                       "✔"
                                     ) : (
-                                      <svg xmlns="http://www.w3.org/2000/svg" width="23" height="20" viewBox="0 0 23 20" fill="none">
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        width="23"
+                                        height="20"
+                                        viewBox="0 0 23 20"
+                                        fill="none"
+                                      >
                                         <path
                                           d="M11.4993 4.16669V15.8334M4.79102 10H18.2077"
                                           stroke="#637083"
@@ -589,19 +648,29 @@ export default function JobPostingModal() {
 
                       {/* Custom Keywords Section for Mobile */}
                       <div className="pt-4 border-t">
-                        <h3 className="font-bold text-[#825C9A] text-base mb-3">Add an option</h3>
+                        <h3 className="font-bold text-[#825C9A] text-base mb-3">
+                          Add an option
+                        </h3>
                         <div className="flex flex-col gap-3">
                           <div className="flex gap-2 border rounded-[32px] overflow-hidden w-full">
                             <input
                               type="text"
                               value={customKeyword}
                               onChange={(e) => setCustomKeyword(e.target.value)}
-                              onKeyDown={(e) => e.key === "Enter" && handleAddCustom()}
+                              onKeyDown={(e) =>
+                                e.key === "Enter" && handleAddCustom()
+                              }
                               placeholder="Add a Keyword"
                               className="pl-3 py-2 text-sm placeholder-[#637083] text-[#637083] font-semibold focus:outline-none flex-grow"
                             />
                             <button onClick={handleAddCustom} className="pr-3">
-                              <svg xmlns="http://www.w3.org/2000/svg" width="23" height="20" viewBox="0 0 23 20" fill="none">
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="23"
+                                height="20"
+                                viewBox="0 0 23 20"
+                                fill="none"
+                              >
                                 <path
                                   d="M11.4993 4.16669V15.8334M4.79102 10H18.2077"
                                   stroke="#637083"
@@ -620,12 +689,20 @@ export default function JobPostingModal() {
                                 <button
                                   key={customKeywordData.keyword}
                                   className={`flex justify-between items-center gap-2 border border-[#BFBFBF] text-[#637083] text-sm rounded-full px-3 py-2 ${
-                                    customKeywordData.selected ? "border-black font-bold" : "font-semibold"
+                                    customKeywordData.selected
+                                      ? "border-black font-bold"
+                                      : "font-semibold"
                                   }`}
-                                  onClick={() => toggleKeywordSelection(customKeywordData.keyword)}
+                                  onClick={() =>
+                                    toggleKeywordSelection(
+                                      customKeywordData.keyword
+                                    )
+                                  }
                                 >
                                   {customKeywordData.keyword}
-                                  <span>{customKeywordData.selected ? "✖" : "+"}</span>
+                                  <span>
+                                    {customKeywordData.selected ? "✖" : "+"}
+                                  </span>
                                 </button>
                               ))}
                           </div>
@@ -640,13 +717,26 @@ export default function JobPostingModal() {
                             type="text"
                             value={customKeyword}
                             onChange={(e) => setCustomKeyword(e.target.value)}
-                            onKeyDown={(e) => e.key === "Enter" && handleAddCustom()}
+                            onKeyDown={(e) =>
+                              e.key === "Enter" && handleAddCustom()
+                            }
                             placeholder="Add a Keyword"
                             className="pl-3 py-2 text-sm placeholder-[#637083] text-[#637083] font-semibold focus:outline-none"
-                            style={{ width: `${Math.max(120, customKeyword.length * 10)}px` }}
+                            style={{
+                              width: `${Math.max(120, customKeyword.length * 10)}px`,
+                            }}
                           />
-                          <button onClick={handleAddCustom} className="text-white rounded-lg pr-3">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="23" height="20" viewBox="0 0 23 20" fill="none">
+                          <button
+                            onClick={handleAddCustom}
+                            className="text-white rounded-lg pr-3"
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="23"
+                              height="20"
+                              viewBox="0 0 23 20"
+                              fill="none"
+                            >
                               <path
                                 d="M11.4993 4.16669V15.8334M4.79102 10H18.2077"
                                 stroke="#637083"
@@ -665,12 +755,20 @@ export default function JobPostingModal() {
                               <button
                                 key={customKeywordData.keyword}
                                 className={`flex justify-between items-center w-fit gap-2 border border-[#BFBFBF] text-[#637083] text-sm font-semibold rounded-full px-3 py-2 ${
-                                  customKeywordData.selected ? "bg-black text-white" : ""
+                                  customKeywordData.selected
+                                    ? "bg-black text-white"
+                                    : ""
                                 }`}
-                                onClick={() => toggleKeywordSelection(customKeywordData.keyword)}
+                                onClick={() =>
+                                  toggleKeywordSelection(
+                                    customKeywordData.keyword
+                                  )
+                                }
                               >
                                 {customKeywordData.keyword}
-                                <span>{customKeywordData.selected ? "✖" : "+"}</span>
+                                <span>
+                                  {customKeywordData.selected ? "✖" : "+"}
+                                </span>
                               </button>
                             ))}
                         </div>
@@ -682,14 +780,18 @@ export default function JobPostingModal() {
                         onClick={() => setStepCount(1)}
                         disabled={isLoading}
                         className={`text-[#637083] text-sm font-semibold px-4 py-2 rounded-lg transition-colors ${
-                          isLoading ? "opacity-50 cursor-not-allowed" : "hover:bg-gray-100"
+                          isLoading
+                            ? "opacity-50 cursor-not-allowed"
+                            : "hover:bg-gray-100"
                         }`}
                       >
                         ← Back
                       </button>
 
                       <div className="flex items-center gap-4">
-                        <span className="text-[#637083] text-sm font-semibold">Step 2 of 2</span>
+                        <span className="text-[#637083] text-sm font-semibold">
+                          Step 2 of 2
+                        </span>
                         <button
                           onClick={handleSubmit}
                           disabled={isLoading}
